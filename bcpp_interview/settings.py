@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'bcpp_interview.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR.ancestor(1), 'db.sqlite3'),
     }
 }
 
@@ -138,6 +138,7 @@ STATIC_URL = '/static/'
 
 GIT_DIR = BASE_DIR.ancestor(1)
 KEY_PATH = os.path.join(BASE_DIR.ancestor(1), 'crypto_fields')
+SHOW_CRYPTO_FORM_DATA = True
 STUDY_OPEN_DATETIME = timezone.datetime(2016, 1, 18)
 LANGUAGES = (
     ('tn', 'Setswana'),
