@@ -11,9 +11,11 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+from unipath import Path
+from django.utils import timezone
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,6 +39,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crypto_fields',
+    'django_revision',
+    'simple_history',
+    'edc_base',
+    # 'edc_sync',
+    'edc_appointment',
+    'edc_configuration',
+    'edc_consent',
+    'edc_content_type_map',
+    'edc_meta_data',
+    'edc_registration',
+    'edc_visit_schedule',
+    'edc_visit_tracking',
+    'bcpp_interview',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -119,3 +135,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+GIT_DIR = BASE_DIR.ancestor(1)
+KEY_PATH = os.path.join(BASE_DIR.ancestor(1), 'crypto_fields')
+STUDY_OPEN_DATETIME = timezone.datetime(2016, 1, 18)
+LANGUAGES = (
+    ('tn', 'Setswana'),
+    ('en', 'English'),
+    ('kck', 'Ikalanga'),
+    ('hbs', 'Hambukushu'),
+)

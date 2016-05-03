@@ -1,0 +1,50 @@
+# python3
+Django
+pytz
+cffi
+ipython
+numpy
+sounddevice
+python-dateutil
+GitPython
+django_extensions==1.6.1
+pycrypto
+six
+Unipath
+django-simple-history
+
+-e /Users/erikvw/source/django-crypto-fields
+-e /Users/erikvw/source/edc-registration
+-e /Users/erikvw/source/django-revision
+-e /Users/erikvw/source/edc-base
+-e /Users/erikvw/source/edc-consent
+-e /Users/erikvw/source/edc-call-manager
+-e /Users/erikvw/source/edc-sync
+-e /Users/erikvw/source/edc-device
+-e /Users/erikvw/source/edc-meta-data
+-e /Users/erikvw/source/edc-content-type-map
+-e /Users/erikvw/source/edc-visit-schedule
+-e /Users/erikvw/source/edc-visit-tracking
+-e /Users/erikvw/source/edc-appointment
+-e /Users/erikvw/source/edc-configuration
+-e /Users/erikvw/source/edc-rule-groups
+-e /Users/erikvw/source/edc-export
+
+git+https://github.com/botswana-harvard/edc-constants@develop#egg=edc-constants
+
+# git+https://github.com/erikvw/django-crypto-fields@master#egg=django_crypto_fields
+# git+https://github.com/erikvw/django-revision@0.1.8#egg=django_revision
+# git+https://github.com/botswana-harvard/edc-base@develop#egg=edc_base
+# git+https://github.com/botswana-harvard/edc-consent@develop#egg=edc_consent
+# git+https://github.com/botswana-harvard/edc-call-manager@develop#egg=edc_call_manager
+# git+https://github.com/botswana-harvard/edc-sync@develop#egg=edc_sync
+# git+https://github.com/botswana-harvard/edc-device@develop#egg=edc_device
+# git+https://github.com/botswana-harvard/edc-meta-data@develop#egg=edc_meta_data
+# git+https://github.com/botswana-harvard/edc-registration@develop#egg=edc_registration
+# git+https://github.com/botswana-harvard/edc-content-type-map@develop#egg=edc_content_type_map
+# git+https://github.com/botswana-harvard/edc-visit-schedule@develop#egg=edc_visit_schedule
+# git+https://github.com/botswana-harvard/edc-appointment@develop#egg=edc_appointment
+# git+https://github.com/botswana-harvard/edc-configuration@develop#egg=edc_configuration
+# git+https://github.com/botswana-harvard/edc-visit-tracking@develop#egg=edc_visit_tracking
+# git+https://github.com/botswana-harvard/edc-rule-groups@develop#egg=edc_rule_groups
+# git+https://github.com/botswana-harvard/edc-export@develop#egg=edc_export
