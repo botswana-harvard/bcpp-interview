@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django_revision',
     'simple_history',
     'edc_base',
-    # 'edc_sync',
+    'edc_sync',
     'edc_appointment',
     'edc_configuration',
     'edc_consent',

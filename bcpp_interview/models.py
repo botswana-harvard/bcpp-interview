@@ -1,17 +1,17 @@
 from django.db import models
 from simple_history.models import HistoricalRecords as AuditTrail
 from edc_consent.models.fields.bw import IdentityFieldsMixin
-from edc_consent.models.fields import (ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin,
-                                       CitizenFieldsMixin)
-from edc_consent.models import BaseConsent
-# from edc_sync.models import SyncModelMixin
+from edc_consent.models.fields import (
+    ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
+from edc_consent.models import BaseConsent, ConsentManager
+from edc_sync.models import SyncModelMixin
 from edc_registration.models.registered_subject import RegisteredSubject
 from edc_consent.models import ObjectConsentManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 
 
-class SubjectConsent(BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin, PersonalFieldsMixin,
-                     CitizenFieldsMixin, VulnerabilityFieldsMixin, BaseUuidModel):
+class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
+                     PersonalFieldsMixin, CitizenFieldsMixin, VulnerabilityFieldsMixin, BaseUuidModel):
 
     MIN_AGE_OF_CONSENT = 16
     MAX_AGE_OF_CONSENT = 64
@@ -19,9 +19,11 @@ class SubjectConsent(BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin, Person
     GENDER_OF_CONSENT = ['M', 'F']
     SUBJECT_TYPES = ['subject']
 
-    # registered_subject = models.ForeignKey(RegisteredSubject)
+    registered_subject = models.ForeignKey(RegisteredSubject, null=True)
 
     history = AuditTrail()
+
+    consent = ConsentManager()
 
     objects = ObjectConsentManager()
 
