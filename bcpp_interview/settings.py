@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django_crypto_fields',
     'django_revision',
     'simple_history',
+    'edc_templates',
     'edc_base',
     'edc_sync',
     'edc_appointment',
@@ -146,3 +147,5 @@ LANGUAGES = (
     ('kck', 'Ikalanga'),
     ('hbs', 'Hambukushu'),
 )
+INSTITUTION = 'Botswana-Harvard AIDS Institute Partnership'
+PROTOCOL_REVISION = '0.1dev'
