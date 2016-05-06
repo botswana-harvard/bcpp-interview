@@ -2,10 +2,89 @@
 
 {% block main %}
 <!--  all below the top bar and above the footer -->
+
+<script src="{{ STATIC_URL }}js/moment-with-locales.js"></script>
+
+<script>
+function startRecording(e){
+	e.preventDefault();
+	$.ajax({
+		type:'GET',
+		url:"{% url 'record' %}",
+		data:{
+			action:"start_recording",
+		},
+		success:function(data){
+			$.each(data, function(idx, server_data){
+				// data from the server
+				$("#btn_record").attr("style", "background-color:#800000;color:white;");
+				//$("#btn_record").text("Recoding..");
+				$("#btn_record").html("<span class='glyphicon glyphicon-record'></span>Recording...");
+				$("#btn_record").attr("color", "white;");
+			}); 
+		}
+	});
+}
+
+function stopRecording(e){
+	e.preventDefault();
+	$.ajax({
+		type:'GET',
+		url:"{% url 'record' %}",
+		data:{
+			action:"stop_recording",
+		},
+		success:function(data){
+			$.each(data, function(idx, server_data){
+				//
+				$("#btn_record").attr("style", "background-color:white;");
+				$("#btn_record").html("<span class='glyphicon glyphicon-record'></span>Record");
+			}); 
+			
+		}
+	});
+}
+$(document).ready(function() {
+	$("#btn_record").click(function(e) {
+		startRecording(e);
+	});
+
+	$("#btn_stop").click(function(e) {
+		stopRecording(e);
+	});
+});
+
+ $(function () {
+    $("time[data-format]").each(function () {
+         var el = $(this);
+         var dt = moment(el.attr("datetime"));
+         el.text(dt.format(el.data("format")));
+     });
+ }); 
+</script>
 <p>
 <button style="background-color:transparent; border-color:transparent;" class="flaticon-microphone" onclick="window.location.href='{% url 'home' %}'" role="button"></button>
-</p>
+</p> 
+<div class="row">
 
+<div class="input-group img-rounded" style="width:300px; float:left; background-color:black;padding:5px 50px 5px">
+	<div class="input-group-btn" style="float:left; margin-left:10px;">								  
+        <button id="btn_record" type="button" class="btn btn-default btn-sm">
+          <span class="glyphicon glyphicon-record"></span> Record
+        </button>
+        <button id="btn_stop" type="button" class="btn btn-default btn-sm">
+          <span class="glyphicon glyphicon-stop"></span> Stop
+        </button>
+        <button id="btn_time" type="button" class="btn btn-default btn-sm">
+          <span class="glyphicon glyphicon-time"></span> 00:00:00
+        </button>
+	</div>
+</div>
+
+<div class="col-row-6">
+	<!-- <p><time id="recording_time" data-format="hh:mm:ss A">14:00:00</time></p> -->
+</div>
+</div>
 {{ ct }}
 
 {{ ids }}
