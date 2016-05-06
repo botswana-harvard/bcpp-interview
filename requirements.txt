@@ -12,7 +12,8 @@ pycrypto
 six
 Unipath
 django-simple-history
-
+django-crispy-forms
+django-braces
 -e /Users/erikvw/source/django-crypto-fields
 -e /Users/erikvw/source/edc-registration
 -e /Users/erikvw/source/django-revision

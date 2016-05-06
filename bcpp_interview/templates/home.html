@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block main %}
+<!--  all below the top bar and above the footer -->
+      <p></p>
+<div class="container marketing">
+
+      <!-- Three columns of text below the carousel -->
+      <div class="row">
+        <div class="col-lg-4">
+          <button style="background-color:transparent; border-color:transparent;" class="flaticon-microphone" onclick="window.location.href='{% url 'interview' %}'" role="button"></button>
+          <h2>Interview</h2>
+          <p>Consent subjects</p>
+          <p>Select a subject for a KI</p>
+          <p>Select a group of subjects for a FGD</p>
+        </div><!-- /.col-lg-4 -->
+        <div class="col-lg-4">
+          <button style="background-color:transparent; border-color:transparent;" class="flaticon-copy-documents" onclick="window.location.href='{% url 'transcribe' %}'" role="button"></button>
+          <h2>Transcribe</h2>
+          <p>Listen to a recorded interview and transcribe.</p>
+        </div><!-- /.col-lg-4 -->
+        <div class="col-lg-4">
+          <button style="background-color:transparent; border-color:transparent;" class="flaticon-translation" onclick="window.location.href='{% url 'translate' %}'" role="button"></button>
+          <h2>Translate</h2>
+          <p>Translate original transcribed interview text to English</p>
+        </div><!-- /.col-lg-4 -->
+      </div><!-- /.row -->
+
+
+</div><!-- /.container -->   
+
+{% endblock main %}
+      

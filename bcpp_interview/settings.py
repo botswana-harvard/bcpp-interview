@@ -42,8 +42,11 @@ INSTALLED_APPS = [
     'django_crypto_fields',
     'django_revision',
     'simple_history',
+    'crispy_forms',
     'edc_templates',
     'edc_base',
+    'edc_device',
+    'edc_identifier',
     'edc_sync',
     'edc_appointment',
     'edc_configuration',
@@ -137,6 +140,19 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = BASE_DIR.child('static')
+
+MEDIA_ROOT = BASE_DIR.child('media')
+
+# List of finder classes that know how to find static files in
+# various locations.
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+)
+
+
 GIT_DIR = BASE_DIR.ancestor(1)
 KEY_PATH = os.path.join(BASE_DIR.ancestor(1), 'crypto_fields')
 SHOW_CRYPTO_FORM_DATA = True
@@ -147,5 +163,11 @@ LANGUAGES = (
     ('kck', 'Ikalanga'),
     ('hbs', 'Hambukushu'),
 )
+
+PROJECT_TITLE = 'BCPP Interview'
 INSTITUTION = 'Botswana-Harvard AIDS Institute Partnership'
 PROTOCOL_REVISION = '0.1dev'
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+DEVICE_ID = '15'
+SERVER_DEVICE_ID_LIST = ['99']
+UPLOAD_FOLDER = os.path.join(MEDIA_ROOT, 'upload')

@@ -4,6 +4,11 @@ from django.contrib import admin
 from .models import SubjectConsent
 from .forms import SubjectConsentForm
 from edc_consent.admin import BaseConsentModelAdmin
+from bcpp_interview.models import SubjectGroup, Interview, GroupDiscussion, SubjectGroupItem
+from edc_base.modeladmin.admin.base_model_admin import BaseModelAdmin
+from edc_base.modeladmin.admin.base_tabular_inline import BaseTabularInline
+from edc_consent.actions import flag_as_verified_against_paper, unflag_as_verified_against_paper
+from bcpp_interview.actions import record
 
 
 @admin.register(SubjectConsent)
@@ -18,7 +23,7 @@ class SubjectConsentAdmin(BaseConsentModelAdmin):
         'user_created', 'user_modified']
     search_fields = ['id', 'subject_identifier', 'first_name', 'last_name', 'identity']
 
-    # actions = [flag_as_verified_against_paper, unflag_as_verified_against_paper]
+    actions = [flag_as_verified_against_paper, unflag_as_verified_against_paper]
 
     list_filter = [
         'gender',
@@ -81,3 +86,93 @@ class SubjectConsentAdmin(BaseConsentModelAdmin):
                 'consent_datetime',) + self.readonly_fields
         else:
             return ('subject_identifier', 'subject_identifier_as_pk',) + self.readonly_fields
+
+
+class SubjectGroupItemInline(BaseTabularInline):
+    model = SubjectGroupItem
+    extras = 0
+
+
+@admin.register(SubjectGroup)
+class SubjectGroupAdmin(BaseModelAdmin):
+
+    date_hierarchy = 'created'
+
+    fields = [
+        'group_name',
+        'size',
+        'category',
+        'community']
+
+    list_display = ['group_name', 'category', 'created', 'user_created', 'community']
+
+    search_fields = ['group_name', ]
+
+    list_filter = ['category', 'created', 'user_created', 'community']
+
+    inlines = [SubjectGroupItemInline]
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(SubjectGroupAdmin, self).get_readonly_fields(request, obj)
+        return list(readonly_fields) + ['group_name']
+
+
+class BaseInterviewAdmin(BaseModelAdmin):
+
+    date_hierarchy = 'interview_datetime'
+
+    list_filter = ['interviewed', 'category', 'interview_datetime', 'community', 'created', 'user_created', ]
+
+    actions = [record]
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(BaseInterviewAdmin, self).get_readonly_fields(request, obj)
+        return list(readonly_fields) + ['interview_name']
+
+
+@admin.register(Interview)
+class InterviewAdmin(BaseInterviewAdmin):
+
+    fields = [
+        'interview_name',
+        'interview_datetime',
+        'subject_consent',
+        'category',
+        'community',
+        'location',
+    ]
+
+    list_display = [
+        'interview_name',
+        'subject_consent',
+        'category',
+        'interviewed',
+        'created',
+        'user_created',
+        'community'
+    ]
+
+    search_fields = [
+        'interview_name',
+        'subject_consent__first_name',
+        'subject_consent__last_name',
+        'subject_consent__identity',
+    ]
+
+
+@admin.register(GroupDiscussion)
+class GroupDiscussionAdmin(BaseInterviewAdmin):
+
+    list_display = [
+        'subject_group',
+        'interviewed',
+        'created',
+        'user_created',
+    ]
+
+    search_fields = [
+        'subject_group__group_name',
+        'subject_group__subject_consent__first_name',
+        'subject_group__subject_consent__last_name',
+        'subject_group__subject_consent__identity',
+    ]
