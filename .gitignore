@@ -1,5 +1,6 @@
 db.sqlite3
 bcpp_interview/db.sqlite3
+media/
 .settings
 .project
 .pydevproject
