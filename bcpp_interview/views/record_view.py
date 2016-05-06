@@ -16,6 +16,7 @@ class RecordView(TemplateView):
             project_name=settings.PROJECT_TITLE,
             is_popup=True,
             name=kwargs.get('name'),
+            filename='{}.npz'.format(kwargs.get('name')),
         )
         return context
 

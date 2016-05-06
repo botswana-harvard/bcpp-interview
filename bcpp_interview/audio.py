@@ -1,65 +1,71 @@
-import sys
-import pyaudio
-import wave
-import math
-import struct
+import numpy as np
+import os
+import sounddevice as sd
 import time
 
+from django.conf import settings
 
-# sample using PyAudio
-# https://people.csail.mit.edu/hubert/pyaudio/#downloads
-# brew install portaudio 
-# pip install pyaudio
+
+class AudioError(Exception):
+    pass
+
 
 class Audio(object):
 
-    def __init__(self, filename, duration):
-        self.filename = filename or "output.wav"
+    def __init__(self, filename, block_duration=None):
+        self.filename = os.path.join(settings.UPLOAD_FOLDER, filename)
+        self.data = np.ndarray(0, dtype='float32')
+        self.status = 'ready'
+        self.time = 0
+        self.start_time = None
+        self.stop_time = None
+        self.device = 0
         self.chunk = 1024
-        self.format = pyaudio.paInt16
         self.channels = 2
-        self.rate = 44100
-        self.duration = 5
+        self.samplerate = sd.query_devices(self.device, 'input')['default_samplerate']
+        self.block_duration = block_duration or 3600
 
     def record(self):
-        p = pyaudio.PyAudio()
-        # Open stream using callback
-        stream = p.open(format=self.format,
-                        channels=2,
-                        rate=self.rate,
-                        frames_per_buffer=self.chunk,
-                        input=True,
-                        # output=True,
-                        stream_callback=self.callback)
+        if self.status == 'ready':
+            self.start_time = time.process_time()
+            self.data = sd.rec(
+                self.block_duration * self.samplerate,
+                channels=self.channels)
+            self.status = 'recording'
 
-        print("* recording")
+    def get_status(self):
+        if time.process_time() - self.start_time == self.block_duration:
+            self.stop()
+        return self.status
 
-        frames = []
+    def get_time(self):
+        if self.status == 'recording':
+            self.time = time.process_time() - self.start_time
+        return self.time
 
-        for i in range(0, int(self.rate / self.chunk * self.duration)):
-            data = stream.read(self.chunk)
-            frames.append(data)
+    def stop(self):
+        if self.status != 'recording':
+            print('Device is not recording. Current status is \'{}\''.format(self.status))
+        else:
+            sd.stop()
+            self.stop_time = time.process_time() - self.start_time
+            self.status = 'done'
 
-        print("* done recording")
+    def save(self):
+        if self.data.size > 0:
+            self.stop()
+            np.savez_compressed(self.filename, self.data)
+            self.reset()
 
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
+    def reset(self):
+        self.time = 0
+        self.data = np.ndarray(0, dtype='float32')
+        self.status = 'ready'
+        self.start_time = None
+        self.stop_time = None
 
-        wf = wave.open(self.filename, 'wb')
-        wf.setnchannels(self.channels)
-        wf.setsampwidth(p.get_sample_size(self.format))
-        wf.setframerate(self.rate)
-        wf.writeframes(b''.join(frames))
-        wf.close()
+    def play(self):
+        sd.play(self.data, self.samplerate)
 
-    def callback(self, in_data, frame_count, time_info, status):
-        levels = []
-        for _i in range(1024):
-            levels.append(struct.unpack('<h', in_data[_i:_i + 2])[0])
-        avg_chunk = sum(levels) / len(levels)
-        self.print_audio_level(avg_chunk, time_info['current_time'])
-        return (in_data, pyaudio.paContinue)
-
-    def print_audio_level(self, avg_chunk, current_time):
-        pass
+    def load(self):
+        self.data = np.load(self.filename).items()[0][1]
