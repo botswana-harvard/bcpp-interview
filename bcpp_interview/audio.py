@@ -12,20 +12,23 @@ class AudioError(Exception):
 
 class Audio(object):
 
-    def __init__(self, filename, block_duration=None):
-        self.filename = os.path.join(settings.UPLOAD_FOLDER, filename)
+    def __init__(self):
         self.data = np.ndarray(0, dtype='float32')
         self.status = 'ready'
         self.time = 0
-        self.start_time = None
-        self.stop_time = None
+        self.start_time = 0
+        self.stop_time = 0
+        self.block_duration = None
         self.device = 0
         self.chunk = 1024
         self.channels = 2
         self.samplerate = sd.query_devices(self.device, 'input')['default_samplerate']
-        self.block_duration = block_duration or 3600
 
-    def record(self):
+    def record(self, filename, block_duration=None):
+        self.filename = os.path.join(settings.UPLOAD_FOLDER, filename.split('/')[-1:][0])
+        if os.path.exists(self.filename):
+            raise AudioError('Path does not exist. Got {}'.format(self.filename))
+        self.block_duration = block_duration or 3600
         if self.status == 'ready':
             self.start_time = time.process_time()
             self.data = sd.rec(
@@ -34,8 +37,6 @@ class Audio(object):
             self.status = 'recording'
 
     def get_status(self):
-        if time.process_time() - self.start_time == self.block_duration:
-            self.stop()
         return self.status
 
     def get_time(self):
@@ -55,7 +56,7 @@ class Audio(object):
         if self.data.size > 0:
             self.stop()
             np.savez_compressed(self.filename, self.data)
-            self.reset()
+        self.reset()
 
     def reset(self):
         self.time = 0
@@ -63,9 +64,10 @@ class Audio(object):
         self.status = 'ready'
         self.start_time = None
         self.stop_time = None
+        self.filename = None
 
     def play(self):
         sd.play(self.data, self.samplerate)
 
-    def load(self):
-        self.data = np.load(self.filename).items()[0][1]
+    def load(self, filename):
+        self.data = np.load(filename).items()[0][1]

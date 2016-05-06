@@ -2,7 +2,7 @@
 
 {% block main %}
 <!--  all below the top bar and above the footer -->
-
+[{{ name }}][{{ filename }}]
 <script src="{{ STATIC_URL }}js/moment-with-locales.js"></script>
 
 <script>
@@ -10,7 +10,7 @@ function startRecording(e){
 	e.preventDefault();
 	$.ajax({
 		type:'GET',
-		url:"{% url 'record' %}",
+		url:"{% url 'record' name %}",
 		data:{
 			action:"start_recording",
 		},
@@ -30,7 +30,7 @@ function stopRecording(e){
 	e.preventDefault();
 	$.ajax({
 		type:'GET',
-		url:"{% url 'record' %}",
+		url:"{% url 'record' name %}",
 		data:{
 			action:"stop_recording",
 		},
@@ -85,7 +85,4 @@ $(document).ready(function() {
 	<!-- <p><time id="recording_time" data-format="hh:mm:ss A">14:00:00</time></p> -->
 </div>
 </div>
-{{ ct }}
-
-{{ ids }}
 {% endblock %}
