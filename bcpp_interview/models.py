@@ -1,19 +1,18 @@
-import os
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from simple_history.models import HistoricalRecords as AuditTrail
-from edc_consent.models.fields.bw import IdentityFieldsMixin
+
+from edc_base.model.models.base_uuid_model import BaseUuidModel
+from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
 from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
-from edc_consent.models import BaseConsent, ConsentManager
-from edc_sync.models import SyncModelMixin
+from edc_consent.models.fields.bw import IdentityFieldsMixin
 from edc_registration.models.registered_subject import RegisteredSubject
-from edc_consent.models import ObjectConsentManager
-from edc_base.model.models.base_uuid_model import BaseUuidModel
-from django.utils import timezone
+from edc_sync.models import SyncModelMixin
 
 from .identifier import GroupIdentifier, InterviewIdentifier
-from .managers import SubjectGroupItemManager, InterviewManager, SubjectGroupManager
+from .managers import SubjectGroupItemManager, InterviewManager, SubjectGroupManager, RecordingManager
 
 CATEGORIES = (
     ('not_linked', 'Not linked-to-care'),
@@ -135,32 +134,9 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
         max_length=100,
     )
 
-    start_datetime = models.DateTimeField(null=True, editable=False)
-
-    end_datetime = models.DateTimeField(null=True, editable=False)
-
     interviewed = models.BooleanField(default=False, editable=False)
 
-    sound_file = models.FileField(
-        upload_to=str(settings.UPLOAD_FOLDER),
-        null=True)
-
-    sound_filename = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True)
-
-    sound_filesize = models.FloatField(
-        null=True,
-        blank=True)
-
     objects = InterviewManager()
-
-    def save(self, *args, **kwargs):
-        if self.sound_file:
-            self.sound_filename = os.path.split(self.sound_file.name)[1]
-            self.sound_filesize = self.sound_file.size
-        super(BaseInterview, self).save(*args, **kwargs)
 
     def natural_key(self):
         return self.interview_name
@@ -191,3 +167,50 @@ class GroupDiscussion(BaseInterview):
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'interview_datetime'
+
+
+class BaseRecording(SyncModelMixin, BaseUuidModel):
+
+    start_datetime = models.DateTimeField(null=True, editable=False)
+
+    stop_datetime = models.DateTimeField(null=True, editable=False)
+
+    recording_time = models.FloatField(null=True, editable=False)
+
+    sound_file = models.FileField(
+        upload_to=str(settings.UPLOAD_FOLDER),
+        null=True)
+
+    sound_filename = models.CharField(
+        max_length=150,
+        unique=True)
+
+    sound_filesize = models.FloatField(
+        null=True,
+        blank=True)
+
+    objects = RecordingManager()
+
+    def natural_key(self):
+        return self.sound_filename
+
+    class Meta:
+        abstract = True
+
+
+class InterviewRecording(BaseRecording):
+
+    interview = models.ForeignKey(Interview)
+
+    class Meta:
+        app_label = 'bcpp_interview'
+        get_latest_by = 'start_datetime'
+
+
+class GroupDiscussionRecording(BaseRecording):
+
+    group_discussion = models.ForeignKey(GroupDiscussion)
+
+    class Meta:
+        app_label = 'bcpp_interview'
+        get_latest_by = 'start_datetime'

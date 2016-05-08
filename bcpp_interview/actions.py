@@ -7,5 +7,6 @@ def record(modeladmin, request, queryset):
         messages.warning(request, "Select only ONE interview or group discussion to record.")
         return None
     obj = queryset[0]
-    return HttpResponseRedirect("/record/{}/".format(obj.interview_name))
+    return HttpResponseRedirect("/record/{}/{}/{}/".format(
+        obj._meta.app_label, obj._meta.model_name, obj.pk))
 record.short_description = "Start Recording Interview"

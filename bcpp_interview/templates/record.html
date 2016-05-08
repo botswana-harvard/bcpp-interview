@@ -1,67 +1,17 @@
 {% extends "base.html" %}
 
 {% block main %}
+{% csrf_token %}
+
 <!--  all below the top bar and above the footer -->
-[{{ name }}][{{ filename }}]
-<script src="{{ STATIC_URL }}js/moment-with-locales.js"></script>
 
-<script>
-function startRecording(e){
-	e.preventDefault();
-	$.ajax({
-		type:'GET',
-		url:"{% url 'record' name %}",
-		data:{
-			action:"start_recording",
-		},
-		success:function(data){
-			$.each(data, function(idx, server_data){
-				// data from the server
-				$("#btn_record").attr("style", "background-color:#800000;color:white;");
-				//$("#btn_record").text("Recoding..");
-				$("#btn_record").html("<span class='glyphicon glyphicon-record'></span>Recording...");
-				$("#btn_record").attr("color", "white;");
-			}); 
-		}
-	});
-}
 
-function stopRecording(e){
-	e.preventDefault();
-	$.ajax({
-		type:'GET',
-		url:"{% url 'record' name %}",
-		data:{
-			action:"stop_recording",
-		},
-		success:function(data){
-			$.each(data, function(idx, server_data){
-				//
-				$("#btn_record").attr("style", "background-color:white;");
-				$("#btn_record").html("<span class='glyphicon glyphicon-record'></span>Record");
-			}); 
-			
-		}
-	});
-}
-$(document).ready(function() {
-	$("#btn_record").click(function(e) {
-		startRecording(e);
-	});
-
-	$("#btn_stop").click(function(e) {
-		stopRecording(e);
-	});
-});
-
- $(function () {
-    $("time[data-format]").each(function () {
-         var el = $(this);
-         var dt = moment(el.attr("datetime"));
-         el.text(dt.format(el.data("format")));
-     });
- }); 
-</script>
+<h3>Interview {{ name }}</h3>
+<ul>
+<li>Status: {{ status }}</li>
+<li>Filename: {{ filename }}</li>
+<li>Filesize: {{ filesize }}</li>
+</ul>
 <p>
 <button style="background-color:transparent; border-color:transparent;" class="flaticon-microphone" onclick="window.location.href='{% url 'home' %}'" role="button"></button>
 </p> 
@@ -85,4 +35,25 @@ $(document).ready(function() {
 	<!-- <p><time id="recording_time" data-format="hh:mm:ss A">14:00:00</time></p> -->
 </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    $("#btn_record").click(function(e) {
+        startRecording(e);
+    });
+
+    $("#btn_stop").click(function(e) {
+        stopRecording(e);
+    });
+});
+
+ $(function () {
+    $("time[data-format]").each(function () {
+         var el = $(this);
+         var dt = moment(el.attr("datetime"));
+         el.text(dt.format(el.data("format")));
+     });
+ }); 
+</script>
+
 {% endblock %}

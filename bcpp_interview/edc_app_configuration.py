@@ -19,6 +19,8 @@ class EdcAppConfiguration(object):
         with the corresponding class attribute.
 
         Configuration methods update default data in supporting tables."""
+        print('Preparing edc configuration')
+        print('* content type maps')
         ContentTypeMapHelper().populate()
         ContentTypeMapHelper().sync()
         self.update_or_create_consent_type()
@@ -31,6 +33,7 @@ class EdcAppConfiguration(object):
          'version': '1'}]
 
     def update_or_create_consent_type(self):
+        print('* consent types')
         for item in self.consent_type_setup:
             if settings.USE_TZ:
                 item['start_datetime'] = localize(item.get('start_datetime'))

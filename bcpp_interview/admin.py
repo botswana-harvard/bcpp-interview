@@ -4,7 +4,8 @@ from django.contrib import admin
 from .models import SubjectConsent
 from .forms import SubjectConsentForm
 from edc_consent.admin import BaseConsentModelAdmin
-from bcpp_interview.models import SubjectGroup, Interview, GroupDiscussion, SubjectGroupItem
+from bcpp_interview.models import SubjectGroup, Interview, GroupDiscussion, SubjectGroupItem, InterviewRecording,\
+    GroupDiscussionRecording
 from edc_base.modeladmin.admin.base_model_admin import BaseModelAdmin
 from edc_base.modeladmin.admin.base_tabular_inline import BaseTabularInline
 from edc_consent.actions import flag_as_verified_against_paper, unflag_as_verified_against_paper
@@ -117,6 +118,38 @@ class SubjectGroupAdmin(BaseModelAdmin):
         return list(readonly_fields) + ['group_name']
 
 
+@admin.register(InterviewRecording)
+class InterviewRecordingAdmin(BaseModelAdmin):
+
+    fields = ['sound_filename', 'sound_filesize']
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(InterviewRecordingAdmin, self).get_readonly_fields(request, obj)
+        return list(readonly_fields) + ['sound_filename', 'sound_filesize']
+
+
+@admin.register(GroupDiscussionRecording)
+class GroupDiscussionRecordingAdmin(BaseModelAdmin):
+
+    fields = ['sound_filename', 'sound_filesize']
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(GroupDiscussionRecordingAdmin, self).get_readonly_fields(request, obj)
+        return list(readonly_fields) + ['sound_filename', 'sound_filesize']
+
+
+class InterviewRecordingInline(BaseTabularInline):
+
+    model = InterviewRecording
+    extra = 0
+
+
+class GroupDiscussionInline(BaseTabularInline):
+
+    model = GroupDiscussionRecording
+    extra = 0
+
+
 class BaseInterviewAdmin(BaseModelAdmin):
 
     date_hierarchy = 'interview_datetime'
@@ -159,6 +192,8 @@ class InterviewAdmin(BaseInterviewAdmin):
         'subject_consent__identity',
     ]
 
+    inlines = [InterviewRecordingInline]
+
 
 @admin.register(GroupDiscussion)
 class GroupDiscussionAdmin(BaseInterviewAdmin):
@@ -176,3 +211,5 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
         'subject_group__subject_consent__last_name',
         'subject_group__subject_consent__identity',
     ]
+
+    inlines = [GroupDiscussionInline]

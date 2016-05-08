@@ -101,6 +101,17 @@ DATABASES = {
     }
 }
 
+# ssh -f -N -L 10000:127.0.0.1:5432 bcpp@getresults.bhp.org.bw
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'bcppi',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres',
+#         'HOST': 'localhost',
+#         'PORT': '5432',  # 10000 if remote
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
