@@ -28,7 +28,6 @@ function stopRecording(e){
 		},
 		success:function(json){
 			$("#btn_record").removeClass( "btn-danger" ).addClass( "btn-default" );
-			$("#btn_record").attr("color", "white;");
 			$("#btn_record").prop( "disabled", false );
 			$("#btn_stop").prop( "disabled", true );
 			$('#alert-saving').hide();
