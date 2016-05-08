@@ -7,9 +7,10 @@ function startRecording(e){
 			action:"start_recording",
 		},
 		success:function(json){
-			$("#btn_record").attr("style", "background-color:#800000;color:white;");
+			$("#btn_record").removeClass( "btn-default" ).addClass( "btn-success" );
 			$("#btn_record").html("<span class='glyphicon glyphicon-record'></span>Recording...");
 			$("#btn_record").attr("color", "white;");
+			$("#btn_stop").prop( "disabled", false );;
 			console.log(json);
 		}
 	});

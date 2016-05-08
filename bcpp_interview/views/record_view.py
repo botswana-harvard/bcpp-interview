@@ -32,7 +32,8 @@ class RecordView(TemplateView):
             title=settings.PROJECT_TITLE,
             project_name=settings.PROJECT_TITLE,
             is_popup=True,
-            name=self.kwargs.get('name'),
+            name=self.model_instance.interview_name,
+            pk=self.kwargs.get('pk'),
             filename=self.filename,
         )
         return context

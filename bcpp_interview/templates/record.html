@@ -5,36 +5,50 @@
 
 <!--  all below the top bar and above the footer -->
 
-
-<h3>Interview {{ name }}</h3>
-<ul>
-<li>Status: {{ status }}</li>
-<li>Filename: {{ filename }}</li>
-<li>Filesize: {{ filesize }}</li>
-</ul>
+<div align="center" class="well">
+<h3>Interview <A href="{% url 'admin:bcpp_interview_interview_changelist' %}">{{ name }}</A></h3>
 <p>
 <button style="background-color:transparent; border-color:transparent;" class="flaticon-microphone" onclick="window.location.href='{% url 'home' %}'" role="button"></button>
 </p> 
-<div class="row">
 
-<div class="input-group img-rounded" style="width:300px; float:left; background-color:black;padding:5px 50px 5px">
-	<div class="input-group-btn" style="float:left; margin-left:10px;">								  
-        <button id="btn_record" type="button" class="btn btn-default btn-sm">
-          <span class="glyphicon glyphicon-record"></span> Record
-        </button>
-        <button id="btn_stop" type="button" class="btn btn-default btn-sm">
-          <span class="glyphicon glyphicon-stop"></span> Stop
-        </button>
-        <button id="btn_time" type="button" class="btn btn-default btn-sm">
-          <span class="glyphicon glyphicon-time"></span> 00:00:00
-        </button>
-	</div>
+<!-- Trigger the modal with a button -->
+<button id="btn_record" type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal">Click to Record</button>
+
+<div class="alert alert-warning" id="alert-saving" style="display:none">
+  <strong>Saving ...</strong> Your recording is being saved. Please wait. This will take a few minutes.
 </div>
 
-<div class="col-row-6">
-	<!-- <p><time id="recording_time" data-format="hh:mm:ss A">14:00:00</time></p> -->
+<div class="alert alert-success" id="alert-saved" style="display:none">
+  <a href="{% url 'admin:bcpp_interview_interview_changelist' %}" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Success!</strong> Your recording has been saved.
 </div>
 </div>
+
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Recording for Interview {{ name }} in Session</h4>
+      </div>
+      <div class="modal-body">
+        <p>Your recording has begun.
+        </br>Click Stop below to end the recording.
+        </br>Note that it will take a few minutes to save the recording after you click Stop.
+        </br>Please be patient.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn_stop" type="button" class="btn btn-default" style="align:center" data-dismiss="modal">Stop Recording</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 
 <script>
 $(document).ready(function() {
