@@ -7,7 +7,7 @@ Uses the python module `sounddevice`.
 Note: consented subjects must have been previously consented in BCPP
 
 
-===Interview===
+###Interview
 
 * consent a subject
 * complete a new `Interview` for the consented subject and save
@@ -24,7 +24,7 @@ Note: consented subjects must have been previously consented in BCPP
 * save the `InterviewRecording`
  
 
-===Group Discussion===
+###Group Discussion
 
 same as above except
 
@@ -34,6 +34,6 @@ same as above except
 * in the `GroupDiscussion` change_list select the group discussion and choose the "Start recording interview" action
 ...
 
-===Import subjects management command===
+###Import subjects management command
 
 * import a list of potential subjects from CSV of format 'subject_identifier, 'category', 'community', 'region'.
