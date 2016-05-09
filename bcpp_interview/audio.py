@@ -3,7 +3,6 @@ import os
 import sounddevice as sd
 import time
 
-from django.conf import settings
 from django.utils import timezone
 
 RECORDING = 'recording'
@@ -17,16 +16,18 @@ class AudioError(Exception):
 class Audio(object):
 
     def __init__(self):
-        self.data = np.ndarray(0, dtype='float32')
-        self.filename = None
-        self.status = READY
-        self.recording_time = None
-        self.start_time = 0
         self.block_duration = None
-        self.device = 0
-        self.chunk = 1024
         self.channels = 1
+        self.chunk = 1024
+        self.data = np.ndarray(0, dtype='float32')
+        self.device = 0
+        self.filename = None
+        self.recording_time = None
         self.samplerate = sd.query_devices(self.device, 'input')['default_samplerate']
+        self.start_datetime = None
+        self.start_time = 0
+        self.status = READY
+        self.stop_datetime = None
 
     def record(self, filename, samplerate=None, block_duration=None):
         self.start_datetime = timezone.now()
@@ -62,7 +63,7 @@ class Audio(object):
             hours, remainder = divmod(s, 3600)
             minutes, seconds = divmod(remainder, 60)
             return '{0:02d}:{1:02d}:{2:02d}'.format(hours, minutes, seconds)
-        except (TypeError, AttributeError):
+        except TypeError:
             return '00:00:00'
 
     def stop(self):
