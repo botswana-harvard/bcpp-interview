@@ -66,14 +66,14 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">{{project_name}}</a>
+          <span class="navbar-brand">{{project_name}}</span>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a title="home" href="/"><span class="glyphicon glyphicon-home"></span></a></li>
-            <li><a title="settings" href="/admin/"><span class="glyphicon glyphicon-wrench"></span></a></li>
-            <li><a title="user profile" href="/user_profile/">{{ user.username }}</a></li>
-            <li><a title="logout" href="/logout/"><span class="glyphicon glyphicon-log-out"></span></a></li>
+            <li id="li-topbar-home"><a class="glyphicon glyphicon-home" title="home" href="{% url 'admin:app_list' 'bcpp_interview' %}"></a></li>
+            <li id="li-topbar-settings"><a title="settings" href="/admin/"><span class="glyphicon glyphicon-wrench"></span></a></li>
+            <li id="li-topbar-user-profile"><a title="user profile" href="/user_profile/">{{ user.username }}</a></li>
+            <li id="li-topbar-logout"><a title="logout" href="/logout/"><span class="glyphicon glyphicon-log-out"></span></a></li>
           </ul>
           {% block topbar_search %}
           <form class="navbar-form navbar-right" action="{{request.path}}" method="GET">

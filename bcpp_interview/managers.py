@@ -22,3 +22,9 @@ class RecordingManager(models.Manager):
 
     def get_by_natural_key(self, sound_filename):
         return self.get(sound_filename=sound_filename)
+
+
+class SubjectLossManager(models.Manager):
+
+    def get_by_natural_key(self, subject_identifier):
+        return self.get(subject_identifier=subject_identifier)

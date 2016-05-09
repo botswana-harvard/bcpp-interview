@@ -42,3 +42,8 @@ urlpatterns = [
     url(r'^edc_sync/', include('edc_sync.urls')),
     url(r'', HomeView.as_view(), name='default'),
 ]
+
+admin.site.site_header = 'BCPP Interview'
+admin.site.site_title = 'BCPP Interview'
+admin.site.index_title = 'BCPP Interview Admin'
+admin.site.site_url = '/admin/bcpp_interview/'

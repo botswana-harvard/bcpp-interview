@@ -20,7 +20,7 @@ class Audio(object):
         self.data = np.ndarray(0, dtype='float32')
         self.filename = None
         self.status = READY
-        self.recording_time = 0
+        self.recording_time = None
         self.start_time = 0
         self.block_duration = None
         self.device = 0
@@ -57,7 +57,13 @@ class Audio(object):
 
     @property
     def duration(self):
-        return time.process_time() - self.start_time
+        try:
+            s = (timezone.now() - self.start_datetime).seconds
+            hours, remainder = divmod(s, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            return '{0:02d}:{1:02d}:{2:02d}'.format(hours, minutes, seconds)
+        except (TypeError, AttributeError):
+            return '00:00:00'
 
     def stop(self):
         if self.status != RECORDING:
@@ -80,7 +86,7 @@ class Audio(object):
             self.reset()
 
     def reset(self):
-        self.recording_time = 0
+        self.recording_time = self.duration
         self.data = np.ndarray(0, dtype='float32')
         self.status = READY
         self.start_time = None

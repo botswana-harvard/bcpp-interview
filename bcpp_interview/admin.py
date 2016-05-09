@@ -5,7 +5,7 @@ from .models import SubjectConsent
 from .forms import SubjectConsentForm
 from edc_consent.admin import BaseConsentModelAdmin
 from bcpp_interview.models import SubjectGroup, Interview, GroupDiscussion, SubjectGroupItem, InterviewRecording,\
-    GroupDiscussionRecording
+    GroupDiscussionRecording, PotentialSubject, SubjectLoss
 from edc_base.modeladmin.admin.base_model_admin import BaseModelAdmin
 from edc_base.modeladmin.admin.base_tabular_inline import BaseTabularInline
 from edc_consent.actions import flag_as_verified_against_paper, unflag_as_verified_against_paper
@@ -16,6 +16,7 @@ from bcpp_interview.actions import record
 class SubjectConsentAdmin(BaseConsentModelAdmin):
 
     form = SubjectConsentForm
+
     date_hierarchy = 'consent_datetime'
 
     list_display = [
@@ -118,24 +119,39 @@ class SubjectGroupAdmin(BaseModelAdmin):
         return list(readonly_fields) + ['group_name']
 
 
-@admin.register(InterviewRecording)
-class InterviewRecordingAdmin(BaseModelAdmin):
+class BaseRecordingAdmin(BaseModelAdmin):
 
-    fields = ['sound_filename', 'sound_filesize']
+    date_hierarchy = 'start_datetime'
+
+    fields = [
+        'label', 'verified', 'comment',
+        'start_datetime', 'stop_datetime', 'sound_filename',
+        'sound_filesize', 'recording_time']
+
+    list_display = ['label', 'verified', 'start_datetime', 'stop_datetime', 'recording_time']
+
+    list_filter = ['verified', 'start_datetime']
+
+    search_fields = ['label', 'sound_filename']
+
+    radio_fields = {
+        'verified': admin.VERTICAL}
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(InterviewRecordingAdmin, self).get_readonly_fields(request, obj)
-        return list(readonly_fields) + ['sound_filename', 'sound_filesize']
+        readonly_fields = super(BaseRecordingAdmin, self).get_readonly_fields(request, obj)
+        return list(readonly_fields) + [
+            'start_datetime', 'stop_datetime', 'sound_filename',
+            'sound_filesize', 'recording_time']
+
+
+@admin.register(InterviewRecording)
+class InterviewRecordingAdmin(BaseRecordingAdmin):
+    pass
 
 
 @admin.register(GroupDiscussionRecording)
-class GroupDiscussionRecordingAdmin(BaseModelAdmin):
-
-    fields = ['sound_filename', 'sound_filesize']
-
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(GroupDiscussionRecordingAdmin, self).get_readonly_fields(request, obj)
-        return list(readonly_fields) + ['sound_filename', 'sound_filesize']
+class GroupDiscussionRecordingAdmin(BaseRecordingAdmin):
+    pass
 
 
 class InterviewRecordingInline(BaseTabularInline):
@@ -213,3 +229,34 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
     ]
 
     inlines = [GroupDiscussionInline]
+
+
+@admin.register(PotentialSubject)
+class PotentialSubjectAdmin(BaseModelAdmin):
+
+    list_display = ['subject_identifier', 'category', 'community', 'region']
+
+    list_filter = ['category', 'community', 'region']
+
+    radio_fields = {
+        'category': admin.VERTICAL,
+        'region': admin.VERTICAL
+    }
+
+    search_fields = ['subject_identifier', 'registered_subject__identity']
+
+
+@admin.register(SubjectLoss)
+class SubjectLossAdmin(BaseModelAdmin):
+
+    date_hierarchy = 'report_datetime'
+
+    fields = ['potential_subject', 'report_datetime', 'reason', 'reason_other']
+
+    list_display = ['subject_identifier', 'reason']
+
+    list_filter = ['reason', 'report_datetime']
+
+    radio_fields = {'reason': admin.VERTICAL}
+
+    search_fields = ['subject_identifier', 'registered_subject__identity']

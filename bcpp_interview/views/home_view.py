@@ -11,7 +11,7 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update(
             title=settings.PROJECT_TITLE,
-            project_name=settings.PROJECT_TITLE
+            project_name=settings.PROJECT_TITLE,
         )
         return context
 

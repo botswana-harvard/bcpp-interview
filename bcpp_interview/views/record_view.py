@@ -45,16 +45,18 @@ class RecordView(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         if request.is_ajax():
-            print('action={}'.format(request.GET.get('action')))
             if request.GET.get('action') == 'start_recording' and audio.get_status() == READY:
                 try:
                     audio.record(self.filename, 16000)
                     response_data = {
                         "status": audio.get_status(),
-                        "filename": self.filename}
+                        "recording_time": audio.duration,
+                        "filename": self.filename,
+                        "message": "started {}".format(audio.start_datetime.strftime('%H:%M:%S'))}
                 except AudioError as e:
                     response_data = {
                         "status": 'Error',
+                        "recording_time": '',
                         "filename": self.filename,
                         "message": str(e)}
                 return HttpResponse(json.dumps(response_data), content_type='application/json')
@@ -62,15 +64,29 @@ class RecordView(TemplateView):
                 self.save_recording()
                 response_data = {
                     "status": audio.get_status(),
+                    "recording_time": audio.duration,
                     "filename": self.filename,
-                    "filesize": os.path.getsize(self.filename)}
+                    "filesize": os.path.getsize(self.filename),
+                    "message": ''}
                 return HttpResponse(json.dumps(response_data), content_type='application/json')
                 # return redirect(self.model_instance)
+            elif request.GET.get('action') == 'duration' and audio.get_status() == RECORDING:
+                response_data = {
+                    "status": audio.get_status(),
+                    "recording_time": audio.duration,
+                    "filename": self.filename,
+                    "message": "started {}".format(audio.start_datetime.strftime('%H:%M:%S'))}
             else:
                 response_data = {
                     "status": audio.get_status(),
+                    "recording_time": audio.duration,
                     "filename": self.filename,
-                    "message": "Action ignored"}
+                    "message": ''}
+                try:
+                    response_data.update({
+                        "message": "started {}".format(audio.start_datetime.strftime('%H:%M:%S'))})
+                except AttributeError:
+                    pass
                 return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 
@@ -84,7 +100,6 @@ class RecordView(TemplateView):
                 filename = '{}_{}'.format(temp_filename, n)
                 n += 1
             self._filename = filename + '.npz'
-            print(self._filename)
         return self._filename
 
     def save_recording(self):
@@ -94,13 +109,12 @@ class RecordView(TemplateView):
             recording_attr: self.model_instance,
             'start_datetime': audio.start_datetime,
             'stop_datetime': audio.stop_datetime,
-            'recording_time': audio.recording_time,
+            'recording_time': audio.duration,
             'sound_file': self.filename,
             'sound_filename': self.filename,
             'sound_filesize': os.path.getsize(self.filename)}
         self.model_instance.interviewed = True
         self.model_instance.save()
-        print(self.recording_model._meta.verbose_name)
         self.recording_model.objects.create(
             **recording_options)
         audio.reset()
