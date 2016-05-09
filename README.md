@@ -13,12 +13,12 @@ Note: consented subjects must have been previously consented in BCPP
 * complete a new `Interview` for the consented subject and save
 * in the `Interview` change_list select the interview and choose the "Start recording interview" action
 * on the recording page, click the RECORD button.
-* ''on the recording page, a modal will open with a timer and STOP button''
+* _on the recording page, a modal will open with a timer and STOP button_
 * when the interview is over, click the STOP button
-* ''an alert will appear, wait for the recording to save to file (compressed numpy npz)''
-* ''once saved, an SUCCESS alert will appear''
+* _an alert will appear, wait for the recording to save to file (compressed numpy npz)_
+* _once saved, an SUCCESS alert will appear_
 * dismiss the alert by clicking the 'X'
-* ''a newly created `InterviewRecording` will open''
+* _a newly created `InterviewRecording` will open_
 * on the `InterviewRecording` indicate that the consented subject agrees the recording may be used for analysis
 * on the `InterviewRecording` indicate additional comments of interest for analysis
 * save the `InterviewRecording`
