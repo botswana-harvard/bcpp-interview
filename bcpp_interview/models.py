@@ -1,8 +1,12 @@
-from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
+from django_crypto_fields.fields import EncryptedTextField, IdentityField
 from simple_history.models import HistoricalRecords as AuditTrail
-from django_crypto_fields.fields.encrypted_text_field import EncryptedTextField
+
 
 from edc_constants.choices import YES_NO
 from edc_base.model.models.base_uuid_model import BaseUuidModel
@@ -17,6 +21,9 @@ from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
     SubjectGroupItemManager, InterviewManager, SubjectGroupManager, RecordingManager,
     SubjectLossManager)
+from django.utils.html import format_html
+from django.core.urlresolvers import reverse
+
 
 REGIONS = (
     ('central', 'Central'),
@@ -62,8 +69,6 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
     GENDER_OF_CONSENT = ['M', 'F']
     SUBJECT_TYPES = ['subject']
 
-    registered_subject = models.ForeignKey(RegisteredSubject)
-
     history = AuditTrail()
 
     consent = ConsentManager()
@@ -73,11 +78,86 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name, self.identity, self.subject_identifier)
 
+    def save(self, *args, **kwargs):
+        if not self.id:
+            potential_subject = self.fetch_potential_subject(self.identity)
+            self.subject_identifier = potential_subject.subject_identifier
+        super(SubjectConsent, self).save(*args, **kwargs)
+
+    @classmethod
+    def fetch_potential_subject(cls, identity=None, exception_class=None):
+        exception_class = exception_class or ValidationError
+        try:
+            potential_subject = PotentialSubject.objects.get(identity=identity)
+        except PotentialSubject.DoesNotExist:
+            raise exception_class(
+                'Potential subject with identity \'{}\' was not found.'.format(identity))
+        return potential_subject
+
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'consent_datetime'
         unique_together = (('first_name', 'dob', 'initials', 'version'), )
         ordering = ('created', )
+
+
+class PotentialSubject(BaseUuidModel):
+
+    registered_subject = models.ForeignKey(RegisteredSubject, null=True, editable=False)
+
+    identity = IdentityField(
+        verbose_name="Identity",
+        unique=True,
+        help_text=("Use Omang, Passport number, driver's license number or Omang receipt number")
+    )
+
+    subject_identifier = models.CharField(
+        max_length=25,
+        unique=True)
+
+    subject_consent = models.ForeignKey(SubjectConsent, null=True, editable=False)
+
+    consented = models.BooleanField(default=False, editable=False)
+
+    interviewed = models.BooleanField(default=False, editable=False)
+
+    ki = models.BooleanField(default=False, editable=False)
+
+    fgd = models.BooleanField(default=False, editable=False)
+
+    category = models.CharField(
+        max_length=25,
+        choices=CATEGORIES)
+
+    community = models.CharField(
+        max_length=25)
+
+    region = models.CharField(
+        max_length=25,
+        choices=REGIONS)
+
+    history = AuditTrail()
+
+    def __str__(self):
+        try:
+            initials = self.subject_consent.initials
+        except AttributeError:
+            initials = 'not consented'
+        return '{} [{}] {}'.format(
+            self.subject_identifier, initials, self.get_category_display())
+
+    def consent(self):
+        try:
+            url = reverse('admin:bcpp_interview_subjectconsent_change', args=(self.subject_consent.pk, ))
+            label = 'change {}\'s consent'.format(str(self.subject_consent.first_name).lower())
+        except AttributeError:
+            url = reverse('admin:bcpp_interview_subjectconsent_add')
+            label = 'add consent'
+        next_url_name = 'admin:bcpp_interview_potentialsubject_changelist'
+        return format_html('<a href="{}?next={}&q={}">{}</a>', url, next_url_name, self.identity, label)
+
+    class Meta:
+        app_label = 'bcpp_interview'
 
 
 class SubjectGroup(SyncModelMixin, BaseUuidModel):
@@ -95,14 +175,13 @@ class SubjectGroup(SyncModelMixin, BaseUuidModel):
         max_length=25,
         choices=CATEGORIES)
 
-    community = models.CharField(max_length=25)
-
     history = AuditTrail()
 
     objects = SubjectGroupManager()
 
     def __str__(self):
-        return 'Group \'{}\' by {} on {}'.format(self.group_name, self.user_created, self.created.strftime('%Y-%m-%d'))
+        return 'Group \'{}\' by {} on {}'.format(
+            self.group_name, self.user_created, self.created.strftime('%Y-%m-%d'))
 
     def natural_key(self):
         return self.group_name
@@ -116,19 +195,19 @@ class SubjectGroupItem(SyncModelMixin, BaseUuidModel):
 
     subject_group = models.ForeignKey(SubjectGroup)
 
-    subject_consent = models.ForeignKey(SubjectConsent)
+    potential_subject = models.ForeignKey(PotentialSubject)
 
     history = AuditTrail()
 
     objects = SubjectGroupItemManager()
 
     def natural_key(self):
-        return (self.subject_group, self.subject_consent)
+        return (self.subject_group, self.potential_subject.subject_identifier)
 
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'created'
-        unique_together = (('subject_group', 'subject_consent'), )
+        unique_together = (('subject_group', 'potential_subject'), )
 
 
 class BaseInterview(SyncModelMixin, BaseUuidModel):
@@ -144,15 +223,6 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
 
     interview_datetime = models.DateTimeField(default=timezone.now)
 
-    category = models.CharField(
-        max_length=25,
-        choices=CATEGORIES)
-
-    community = models.CharField(
-        verbose_name='Community',
-        max_length=25,
-    )
-
     location = models.TextField(
         verbose_name='Where is this interview being conducted?',
         max_length=100,
@@ -166,7 +236,7 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
 
     def save(self, *args, **kwargs):
         self.report_datetime = self.interview_datetime
-        super(BaseRecording, self).save(*args, **kwargs)
+        super(BaseInterview, self).save(*args, **kwargs)
 
     def natural_key(self):
         return self.interview_name
@@ -177,10 +247,10 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
 
 class Interview(BaseInterview):
 
-    subject_consent = models.ForeignKey(SubjectConsent)
+    potential_subject = models.ForeignKey(PotentialSubject)
 
     def __str__(self):
-        return self.subject_consent.subject_identifier
+        return self.potential_subject.subject_identifier
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -284,35 +354,6 @@ class GroupDiscussionRecording(BaseRecording):
         get_latest_by = 'start_datetime'
 
 
-class PotentialSubject(BaseUuidModel):
-
-    registered_subject = models.ForeignKey(RegisteredSubject, null=True)
-
-    subject_identifier = models.CharField(
-        max_length=25,
-        editable=False,
-        unique=True)
-
-    category = models.CharField(
-        max_length=25,
-        choices=CATEGORIES)
-
-    community = models.CharField(
-        max_length=25)
-
-    region = models.CharField(
-        max_length=25,
-        choices=REGIONS)
-
-    history = AuditTrail()
-
-    def __str__(self):
-        return self.subject_identifier
-
-    class Meta:
-        app_label = 'bcpp_interview'
-
-
 class SubjectLoss(SyncModelMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
@@ -355,3 +396,31 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
 
     class Meta:
         app_label = 'bcpp_interview'
+        verbose_name_plural = "Subject Loss"
+
+
+@receiver(post_save, sender=SubjectConsent, dispatch_uid='post_save_consented')
+def post_save_consented(sender, instance, raw, created, using, update_fields, **kwargs):
+    if not raw:
+        potential_subject = PotentialSubject.objects.get(identity=instance.identity)
+        potential_subject.consented = True
+        potential_subject.subject_consent = instance
+        potential_subject.save(update_fields=['consented', 'subject_consent'])
+
+
+@receiver(post_save, sender=InterviewRecording, dispatch_uid='post_save_interview_recording')
+def post_save_interview_recording(sender, instance, raw, created, using, update_fields, **kwargs):
+    if not raw:
+        instance.interview.potential_subject.interviewed = True
+        instance.interview.potential_subject.ki = True
+        instance.interview.potential_subject.save(update_fields=['interviewed', 'ki'])
+
+
+@receiver(post_save, sender=GroupDiscussionRecording, dispatch_uid='post_save_group_discussion_recording')
+def post_save_group_discussion_recording(sender, instance, raw, created, using, update_fields, **kwargs):
+    if not raw:
+        for obj in SubjectGroupItem.objects.filter(
+                subject_group__group_discussion__group_discussion_recording=instance):
+            obj.potential_subject.interviewed = True
+            obj.potential_subject.fgd = True
+            obj.potential_subject.save(update_fields=['consented', 'fgd'])

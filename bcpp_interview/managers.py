@@ -14,8 +14,8 @@ class SubjectGroupManager(models.Manager):
 
 class SubjectGroupItemManager(models.Manager):
 
-    def get_by_natural_key(self, subject_group, subject_consent):
-        return self.get(subject_group=subject_group, subject_consent=subject_consent)
+    def get_by_natural_key(self, subject_group, subject_identifier):
+        return self.get(subject_group=subject_group, potential_subject__subject_identifier=subject_identifier)
 
 
 class RecordingManager(models.Manager):

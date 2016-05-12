@@ -2,12 +2,19 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
+from django.forms import ValidationError
+
 from edc_consent.forms.base_consent_form import BaseConsentForm
 
 from .models import SubjectConsent
 
 
 class SubjectConsentForm(BaseConsentForm):
+
+    def clean(self):
+        cleaned_data = super(SubjectConsentForm, self).clean()
+        SubjectConsent.fetch_potential_subject(cleaned_data.get('identity'), ValidationError)
+        return cleaned_data
 
     class Meta:
         model = SubjectConsent

@@ -32,7 +32,6 @@ class SubjectConsentAdmin(BaseConsentModelAdmin):
         'is_verified',
         'is_verified_datetime',
         'language',
-        'study_site',
         'is_literate',
         'consent_datetime',
         'created',
@@ -49,7 +48,6 @@ class SubjectConsentAdmin(BaseConsentModelAdmin):
         'is_literate',
         'witness_name',
         'consent_datetime',
-        'study_site',
         'gender',
         'dob',
         'guardian_name',
@@ -90,9 +88,31 @@ class SubjectConsentAdmin(BaseConsentModelAdmin):
             return ('subject_identifier', 'subject_identifier_as_pk',) + self.readonly_fields
 
 
+@admin.register(SubjectGroupItem)
+class SubjectGroupItemAdmin(BaseModelAdmin):
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "potential_subject":
+            try:
+                potential_subject = PotentialSubject.objects.filter(consented=True, ki=False)
+            except PotentialSubject.DoesNotExist:
+                potential_subject = PotentialSubject.objects.none()
+            kwargs["queryset"] = potential_subject
+        return super(SubjectGroupItemAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 class SubjectGroupItemInline(BaseTabularInline):
     model = SubjectGroupItem
-    extras = 0
+    extra = 1
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "potential_subject":
+            try:
+                potential_subject = PotentialSubject.objects.filter(consented=True, ki=False)
+            except PotentialSubject.DoesNotExist:
+                potential_subject = PotentialSubject.objects.none()
+            kwargs["queryset"] = potential_subject
+        return super(SubjectGroupItemInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(SubjectGroup)
@@ -103,14 +123,13 @@ class SubjectGroupAdmin(BaseModelAdmin):
     fields = [
         'group_name',
         'size',
-        'category',
-        'community']
+        'category']
 
-    list_display = ['group_name', 'category', 'created', 'user_created', 'community']
+    list_display = ['group_name', 'category', 'created', 'user_created']
 
     search_fields = ['group_name', ]
 
-    list_filter = ['category', 'created', 'user_created', 'community']
+    list_filter = ['category', 'created', 'user_created']
 
     inlines = [SubjectGroupItemInline]
 
@@ -146,12 +165,16 @@ class BaseRecordingAdmin(BaseModelAdmin):
 
 @admin.register(InterviewRecording)
 class InterviewRecordingAdmin(BaseRecordingAdmin):
-    pass
+
+    def get_list_display(self, request):
+        return ['interview'] + self.list_display
 
 
 @admin.register(GroupDiscussionRecording)
 class GroupDiscussionRecordingAdmin(BaseRecordingAdmin):
-    pass
+
+    def get_list_display(self, request):
+        return ['group_discussion'] + self.list_display
 
 
 class InterviewRecordingInline(BaseTabularInline):
@@ -170,7 +193,7 @@ class BaseInterviewAdmin(BaseModelAdmin):
 
     date_hierarchy = 'interview_datetime'
 
-    list_filter = ['interviewed', 'category', 'interview_datetime', 'community', 'created', 'user_created', ]
+    list_filter = ['interviewed', 'interview_datetime', 'created', 'user_created', ]
 
     actions = [record]
 
@@ -185,30 +208,35 @@ class InterviewAdmin(BaseInterviewAdmin):
     fields = [
         'interview_name',
         'interview_datetime',
-        'subject_consent',
-        'category',
-        'community',
+        'potential_subject',
         'location',
     ]
 
     list_display = [
         'interview_name',
-        'subject_consent',
-        'category',
+        'potential_subject',
         'interviewed',
         'created',
         'user_created',
-        'community'
     ]
 
     search_fields = [
         'interview_name',
-        'subject_consent__first_name',
-        'subject_consent__last_name',
-        'subject_consent__identity',
+        'potential_subject__subject_consent__first_name',
+        'potential_subject__subject_consent__last_name',
+        'potential_subject__subject_consent__identity',
     ]
 
     inlines = [InterviewRecordingInline]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "potential_subject":
+            try:
+                potential_subject = PotentialSubject.objects.filter(consented=True, ki=False)
+            except PotentialSubject.DoesNotExist:
+                potential_subject = PotentialSubject.objects.none()
+            kwargs["queryset"] = potential_subject
+        return super(InterviewAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(GroupDiscussion)
@@ -223,9 +251,9 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
 
     search_fields = [
         'subject_group__group_name',
-        'subject_group__subject_consent__first_name',
-        'subject_group__subject_consent__last_name',
-        'subject_group__subject_consent__identity',
+        'subject_group__potential_subject__subject_consent__first_name',
+        'subject_group__potential_subject__subject_consent__last_name',
+        'subject_group__potential_subject__subject_consent__identity',
     ]
 
     inlines = [GroupDiscussionInline]
@@ -234,16 +262,20 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
 @admin.register(PotentialSubject)
 class PotentialSubjectAdmin(BaseModelAdmin):
 
-    list_display = ['subject_identifier', 'category', 'community', 'region']
+    list_display = ['subject_identifier', 'identity', 'consent',
+                    'consented', 'interviewed', 'ki', 'fgd',
+                    'category', 'community', 'region']
 
-    list_filter = ['category', 'community', 'region']
+    list_filter = ['consented', 'interviewed', 'ki', 'fgd', 'category', 'community', 'region']
 
     radio_fields = {
         'category': admin.VERTICAL,
         'region': admin.VERTICAL
     }
 
-    search_fields = ['subject_identifier', 'registered_subject__identity']
+    search_fields = ['identity', 'subject_identifier', 'registered_subject__identity']
+
+    readonly_fields = ['subject_identifier', 'identity', 'category', 'community', 'region']
 
 
 @admin.register(SubjectLoss)

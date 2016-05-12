@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'edc_registration',
     'edc_visit_schedule',
     'edc_visit_tracking',
+    'edc_call_manager',
     'bcpp_interview',
 ]
 
@@ -171,8 +172,6 @@ STUDY_OPEN_DATETIME = timezone.datetime(2016, 1, 18)
 LANGUAGES = (
     ('tn', 'Setswana'),
     ('en', 'English'),
-    ('kck', 'Ikalanga'),
-    ('hbs', 'Hambukushu'),
 )
 
 PROJECT_TITLE = 'BCPP Interview'
