@@ -21,9 +21,11 @@ from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
     SubjectGroupItemManager, InterviewManager, SubjectGroupManager, RecordingManager,
     SubjectLossManager)
-from django.utils.html import format_html
-from django.core.urlresolvers import reverse
+from bcpp_interview.managers import GroupDiscussionLabelManager
 
+NOT_LINKED = 'not_linked'
+LINKED_ONLY = 'linked_only'
+INITIATED = 'initiated'
 
 REGIONS = (
     ('central', 'Central'),
@@ -32,9 +34,9 @@ REGIONS = (
 )
 
 CATEGORIES = (
-    ('not_linked', 'Not linked-to-care'),
-    ('linked_only', 'Linked-to-care only'),
-    ('initiated', 'Initiated ART'),
+    (NOT_LINKED, 'Not linked-to-care'),
+    (LINKED_ONLY, 'Linked-to-care only'),
+    (INITIATED, 'Initiated ART'),
 )
 
 
@@ -140,21 +142,13 @@ class PotentialSubject(BaseUuidModel):
 
     def __str__(self):
         try:
-            initials = self.subject_consent.initials
+            first_name = self.subject_consent.first_name
+            last_name = self.subject_consent.last_name
+            name = first_name + ' ' + last_name
         except AttributeError:
-            initials = 'not consented'
-        return '{} [{}] {}'.format(
-            self.subject_identifier, initials, self.get_category_display())
-
-    def consent(self):
-        try:
-            url = reverse('admin:bcpp_interview_subjectconsent_change', args=(self.subject_consent.pk, ))
-            label = 'change {}\'s consent'.format(str(self.subject_consent.first_name).lower())
-        except AttributeError:
-            url = reverse('admin:bcpp_interview_subjectconsent_add')
-            label = 'add consent'
-        next_url_name = 'admin:bcpp_interview_potentialsubject_changelist'
-        return format_html('<a href="{}?next={}&q={}">{}</a>', url, next_url_name, self.identity, label)
+            name = 'not consented'
+        return '{}. {}. {}'.format(
+            name, self.get_category_display(), self.subject_identifier)
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -171,7 +165,6 @@ class SubjectGroup(SyncModelMixin, BaseUuidModel):
         verbose_name="How many consented subjects are in this group?")
 
     category = models.CharField(
-        verbose_name='Members of this group have ...',
         max_length=25,
         choices=CATEGORIES)
 
@@ -257,7 +250,29 @@ class Interview(BaseInterview):
         get_latest_by = 'interview_datetime'
 
 
+class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
+
+    discussion_label = models.CharField(
+        max_length=50,
+        unique=True)
+
+    objects = GroupDiscussionLabelManager()
+
+    def __str__(self):
+        return self.discussion_label
+
+    def natural_key(self):
+        return self.discussion_label
+
+    class Meta:
+        app_label = 'bcpp_interview'
+
+
 class GroupDiscussion(BaseInterview):
+
+    group_discussion_label = models.ForeignKey(
+        to=GroupDiscussionLabel,
+        verbose_name='Discussion Label')
 
     subject_group = models.ForeignKey(SubjectGroup)
 
@@ -420,7 +435,7 @@ def post_save_interview_recording(sender, instance, raw, created, using, update_
 def post_save_group_discussion_recording(sender, instance, raw, created, using, update_fields, **kwargs):
     if not raw:
         for obj in SubjectGroupItem.objects.filter(
-                subject_group__group_discussion__group_discussion_recording=instance):
+                subject_group=instance.group_discussion.subject_group):
             obj.potential_subject.interviewed = True
             obj.potential_subject.fgd = True
             obj.potential_subject.save(update_fields=['consented', 'fgd'])

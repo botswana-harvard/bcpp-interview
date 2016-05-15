@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -12,6 +13,7 @@ class HomeView(TemplateView):
         context.update(
             title=settings.PROJECT_TITLE,
             project_name=settings.PROJECT_TITLE,
+            site_header=admin.site.site_header,
         )
         return context
 

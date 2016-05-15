@@ -12,11 +12,14 @@
     <title>{{title}}</title>
     <link rel="stylesheet" type="text/css" href="{% static "css/flaticon/flaticon.css" %}"> 
     <!-- Bootstrap core CSS -->
-    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet" type="text/css" >
 
     <!-- Custom styles for this template -->
-    <link href="{% static "css/dashboard.css" %}" rel="stylesheet">
-    <link href="{%static "css/receive.css" %}" rel="stylesheet">
+    <link href="{% static "css/dashboard.css" %}" rel="stylesheet" type="text/css" >
+    <link href="{%static "css/receive.css" %}" rel="stylesheet" type="text/css" >
+
+    <!-- Custom styles from Django -->
+    <link href="{%static "/admin/css/base.css" %}" rel="stylesheet" />
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -53,10 +56,14 @@
 
 {% endblock header %}
 
-<body>
-{% block body %}
+<body class="dashboard">
 
+{% block body %}
+<div class="container">
 {% block topbar %}
+<!-- Header -->
+    <div id="header">
+        <div id="branding">
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -83,6 +90,8 @@
         </div>
       </div>
     </nav>
+        </div>
+      </div>
 {% endblock topbar %}
 
 {% block main %}
@@ -92,7 +101,8 @@
 {% block bottombar %}
 {% endblock bottombar %}
 
-{% endblock body %}    
+{% endblock body %}   
+<div class="container"> 
 </body>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script src="{% static "assets/js/ie10-viewport-bug-workaround.js" %}"></script>

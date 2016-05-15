@@ -18,7 +18,7 @@ class SubjectConsentForm(BaseConsentForm):
 
     class Meta:
         model = SubjectConsent
-        fields = '__all__'
+        exclude = ['study_site']
 
 
 class LoginForm(forms.Form):

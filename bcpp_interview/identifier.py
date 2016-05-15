@@ -15,9 +15,9 @@ class GroupIdentifier(ShortIdentifier):
 
 class InterviewIdentifier(ShortIdentifier):
 
-    identifier_pattern = r'^[A-Z0-9]{7}$'
+    identifier_pattern = r'^[A-Z0-9]{5}$'
     prefix_pattern = '[0-9]{2}'
-    random_string_pattern = r'^[A-Z0-9]{7}$'
+    random_string_pattern = r'^[A-Z0-9]{5}$'
 
     def __init__(self):
         prefix = Device().device_id

@@ -1,91 +1,43 @@
 from django.contrib import admin
 
-
-from .models import SubjectConsent
-from .forms import SubjectConsentForm
-from edc_consent.admin import BaseConsentModelAdmin
-from bcpp_interview.models import SubjectGroup, Interview, GroupDiscussion, SubjectGroupItem, InterviewRecording,\
-    GroupDiscussionRecording, PotentialSubject, SubjectLoss
-from edc_base.modeladmin.admin.base_model_admin import BaseModelAdmin
 from edc_base.modeladmin.admin.base_tabular_inline import BaseTabularInline
-from edc_consent.actions import flag_as_verified_against_paper, unflag_as_verified_against_paper
-from bcpp_interview.actions import record
+from edc_consent.admin.mixins import ModelAdminConsentMixin
+
+from edc_base.modeladmin.mixins import (
+    ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
+    ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
+    ModelAdminAuditFieldsMixin)
+
+from .actions import record, create_subject_group, add_to_group_discussion
+from .models import (
+    SubjectGroup, Interview, GroupDiscussion, SubjectGroupItem, InterviewRecording,
+    GroupDiscussionRecording, PotentialSubject, SubjectLoss, SubjectConsent)
+from .forms import SubjectConsentForm
+from bcpp_interview.models import GroupDiscussionLabel
+
+
+class BaseModelAdmin(ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
+                     ModelAdminAuditFieldsMixin, admin.ModelAdmin):
+    list_per_page = 15
+    date_hierarchy = 'created'
+
+
+class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
+
+    additional_instructions = 'After saving you will be returned to the list of Potential Subjects.'
+    redirect_app_label = 'bcpp_interview'
+    redirect_model_name = 'potentialsubject'
 
 
 @admin.register(SubjectConsent)
-class SubjectConsentAdmin(BaseConsentModelAdmin):
+class SubjectConsentAdmin(ModelAdminConsentMixin,
+                          ModelAdminPotentialSubjectRedirectMixin, BaseModelAdmin):
+
+    remove_consent_fields = ['may_store_samples', 'study_site']
+
+    redirect_search_field = 'subject_identifier'
 
     form = SubjectConsentForm
-
-    date_hierarchy = 'consent_datetime'
-
-    list_display = [
-        'subject_identifier', 'is_verified', 'is_verified_datetime', 'first_name',
-        'initials', 'gender', 'dob', 'consent_datetime', 'created', 'modified',
-        'user_created', 'user_modified']
-    search_fields = ['id', 'subject_identifier', 'first_name', 'last_name', 'identity']
-
-    actions = [flag_as_verified_against_paper, unflag_as_verified_against_paper]
-
-    list_filter = [
-        'gender',
-        'is_verified',
-        'is_verified_datetime',
-        'language',
-        'is_literate',
-        'consent_datetime',
-        'created',
-        'modified',
-        'user_created',
-        'user_modified',
-        'hostname_created']
-    fields = [
-        'subject_identifier',
-        'first_name',
-        'last_name',
-        'initials',
-        'language',
-        'is_literate',
-        'witness_name',
-        'consent_datetime',
-        'gender',
-        'dob',
-        'guardian_name',
-        'is_dob_estimated',
-        'identity',
-        'identity_type',
-        'confirm_identity',
-        'is_incarcerated',
-        'comment',
-        'consent_reviewed',
-        'study_questions',
-        'assessment_score',
-        'consent_copy']
-
-    radio_fields = {
-        "language": admin.VERTICAL,
-        "gender": admin.VERTICAL,
-        # "study_site": admin.VERTICAL,
-        "is_dob_estimated": admin.VERTICAL,
-        "identity_type": admin.VERTICAL,
-        "is_incarcerated": admin.VERTICAL,
-        "consent_reviewed": admin.VERTICAL,
-        "study_questions": admin.VERTICAL,
-        "assessment_score": admin.VERTICAL,
-        "consent_copy": admin.VERTICAL,
-        "is_literate": admin.VERTICAL}
-
-    # override to disallow subject to be changed
-    def get_readonly_fields(self, request, obj=None):
-        super(BaseConsentModelAdmin, self).get_readonly_fields(request, obj)
-        if obj:  # In edit mode
-            return (
-                'subject_identifier',
-                'subject_identifier_as_pk',
-                'study_site',
-                'consent_datetime',) + self.readonly_fields
-        else:
-            return ('subject_identifier', 'subject_identifier_as_pk',) + self.readonly_fields
 
 
 @admin.register(SubjectGroupItem)
@@ -116,7 +68,7 @@ class SubjectGroupItemInline(BaseTabularInline):
 
 
 @admin.register(SubjectGroup)
-class SubjectGroupAdmin(BaseModelAdmin):
+class SubjectGroupAdmin(ModelAdminChangelistModelButtonMixin, BaseModelAdmin):
 
     date_hierarchy = 'created'
 
@@ -125,7 +77,7 @@ class SubjectGroupAdmin(BaseModelAdmin):
         'size',
         'category']
 
-    list_display = ['group_name', 'category', 'created', 'user_created']
+    list_display = ['group_name', 'category', 'discussion', 'created', 'user_created']
 
     search_fields = ['group_name', ]
 
@@ -136,6 +88,23 @@ class SubjectGroupAdmin(BaseModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(SubjectGroupAdmin, self).get_readonly_fields(request, obj)
         return list(readonly_fields) + ['group_name']
+
+    def get_group_discussion_button(self, obj):
+        reverse_args = None
+        try:
+            group_discussion = GroupDiscussion.objects.get(subject_group=obj)
+            reverse_args = (group_discussion.pk, )
+        except GroupDiscussion.DoesNotExist:
+            pass
+            reverse_args = None
+        return self.changelist_model_button(
+            'bcpp_interview', 'groupdiscussion', reverse_args=reverse_args,
+            change_label='discussion', add_querystring='?subject_group={}'.format(obj.pk))
+
+    def discussion(self, obj):
+        return self.get_group_discussion_button(obj)
+    discussion.short_description = 'discussion'
+    discussion.allow_tags = True
 
 
 class BaseRecordingAdmin(BaseModelAdmin):
@@ -203,7 +172,9 @@ class BaseInterviewAdmin(BaseModelAdmin):
 
 
 @admin.register(Interview)
-class InterviewAdmin(BaseInterviewAdmin):
+class InterviewAdmin(ModelAdminPotentialSubjectRedirectMixin, BaseInterviewAdmin):
+
+    redirect_search_field = 'potential_subject.subject_identifier'
 
     fields = [
         'interview_name',
@@ -229,6 +200,15 @@ class InterviewAdmin(BaseInterviewAdmin):
 
     inlines = [InterviewRecordingInline]
 
+    def get_readonly_fields(self, request, obj=None):
+        self.readonly_fields = list(self.readonly_fields or [])
+        if obj:
+            self.readonly_fields = list(self.fields)
+            self.readonly_fields.remove('location')
+        else:
+            self.readonly_fields = []
+        return tuple(self.readonly_fields)
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "potential_subject":
             try:
@@ -242,12 +222,26 @@ class InterviewAdmin(BaseInterviewAdmin):
 @admin.register(GroupDiscussion)
 class GroupDiscussionAdmin(BaseInterviewAdmin):
 
+    fields = [
+        'interview_name',
+        'group_discussion_label',
+        'subject_group',
+        'interview_datetime',
+        'location']
+
     list_display = [
+        'group_discussion_label',
         'subject_group',
         'interviewed',
         'created',
         'user_created',
     ]
+
+    def get_list_filter(self, request):
+        self.list_filter = list(super(GroupDiscussionAdmin, self).get_list_filter(request))
+        if 'group_discussion_label' not in self.list_filter:
+            self.list_filter = ['group_discussion_label'] + self.list_filter
+        return tuple(self.list_filter)
 
     search_fields = [
         'subject_group__group_name',
@@ -259,14 +253,20 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
     inlines = [GroupDiscussionInline]
 
 
-@admin.register(PotentialSubject)
-class PotentialSubjectAdmin(BaseModelAdmin):
+@admin.register(GroupDiscussionLabel)
+class GroupDiscussionLabelAdmin(BaseModelAdmin):
+    pass
 
-    list_display = ['subject_identifier', 'identity', 'consent',
+
+@admin.register(PotentialSubject)
+class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelButtonMixin,
+                            BaseModelAdmin):
+
+    list_display = ['subject_identifier', 'identity', 'consent', 'interview', 'subject_group',
                     'consented', 'interviewed', 'ki', 'fgd',
                     'category', 'community', 'region']
 
-    list_filter = ['consented', 'interviewed', 'ki', 'fgd', 'category', 'community', 'region']
+    list_filter = ['consented', 'interviewed', 'category', 'ki', 'fgd', 'community', 'region']
 
     radio_fields = {
         'category': admin.VERTICAL,
@@ -276,6 +276,83 @@ class PotentialSubjectAdmin(BaseModelAdmin):
     search_fields = ['identity', 'subject_identifier', 'registered_subject__identity']
 
     readonly_fields = ['subject_identifier', 'identity', 'category', 'community', 'region']
+
+    actions = [create_subject_group, add_to_group_discussion]
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super(PotentialSubjectAdmin, self).get_search_results(
+            request, queryset, search_term)
+        try:
+            subject_group_items = SubjectGroupItem.objects.filter(
+                subject_group__group_name__icontains=search_term)
+            potential_subjects = [obj.potential_subject.pk for obj in subject_group_items]
+            queryset |= self.model.objects.filter(pk__in=potential_subjects)
+        except SubjectGroupItem.DoesNotExist:
+            pass
+        return queryset, use_distinct
+
+    def consent(self, obj):
+        reverse_args = None
+        if obj.subject_consent:
+            reverse_args = (obj.subject_consent.pk, )
+        return self.changelist_model_button(
+            'bcpp_interview', 'subjectconsent', reverse_args=reverse_args,
+            change_label='consent')
+    consent.short_description = 'Consent'
+    consent.allow_tags = True
+
+    def get_interview_button(self, obj):
+        reverse_args = None
+        querystring = None
+        disabled = None
+        try:
+            SubjectGroupItem.objects.get(potential_subject=obj)
+            return '-'
+        except SubjectGroupItem.DoesNotExist:
+            pass
+        try:
+            interview = Interview.objects.get(potential_subject=obj)
+            reverse_args = (interview.pk, )
+        except Interview.DoesNotExist:
+            if obj.subject_consent:
+                querystring = '?potential_subject=' + str(obj.pk)
+            else:
+                disabled = True
+        return self.changelist_model_button(
+            'bcpp_interview', 'interview', reverse_args=reverse_args,
+            change_label='KI', add_querystring=querystring, disabled=disabled)
+
+    def get_subject_group_button(self, obj):
+        disabled = None
+        change_label = 'FGD'
+        querystring_value = None
+        if not obj.subject_consent:
+            return '-'
+        try:
+            Interview.objects.get(potential_subject=obj)
+            return '-'
+        except Interview.DoesNotExist:
+            pass
+        try:
+            subject_group_item = SubjectGroupItem.objects.get(potential_subject=obj)
+            subject_group = subject_group_item.subject_group
+            change_label = subject_group.group_name
+            querystring_value = str(subject_group.group_name)
+        except SubjectGroupItem.DoesNotExist:
+            return 'add'
+        return self.changelist_list_button(
+            'bcpp_interview', 'subjectgroup', label=change_label,
+            querystring_value=querystring_value, disabled=disabled)
+
+    def interview(self, obj):
+        return self.get_interview_button(obj)
+    interview.short_description = 'interview'
+    interview.allow_tags = True
+
+    def subject_group(self, obj):
+        return self.get_subject_group_button(obj)
+    subject_group.short_description = 'subject group'
+    subject_group.allow_tags = True
 
 
 @admin.register(SubjectLoss)

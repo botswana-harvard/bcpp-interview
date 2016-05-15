@@ -28,3 +28,9 @@ class SubjectLossManager(models.Manager):
 
     def get_by_natural_key(self, subject_identifier):
         return self.get(subject_identifier=subject_identifier)
+
+
+class GroupDiscussionLabelManager(models.Manager):
+
+    def get_by_natural_key(self, discussion_label):
+        return self.get(discussion_label=discussion_label)
