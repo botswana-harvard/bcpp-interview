@@ -334,6 +334,9 @@ class BaseRecording(SyncModelMixin, BaseUuidModel):
 
     objects = RecordingManager()
 
+    def __str__(self):
+        return 'Recording {}'.format(self.label)
+
     def save(self, *args, **kwargs):
         if not self.label:
             self.label = self.sound_filename.split('/')[-1:][0]
