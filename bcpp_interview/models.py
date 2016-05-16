@@ -276,6 +276,12 @@ class GroupDiscussion(BaseInterview):
 
     subject_group = models.ForeignKey(SubjectGroup)
 
+    comment = EncryptedTextField(
+        verbose_name="Additional comment that may assist in analysis of this discussion",
+        max_length=250,
+        blank=True,
+        null=True)
+
     def __str__(self):
         return self.subject_group.group_name
 

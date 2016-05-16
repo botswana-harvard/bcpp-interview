@@ -145,6 +145,8 @@ class GroupDiscussionRecordingAdmin(BaseRecordingAdmin):
     def get_list_display(self, request):
         return ['group_discussion'] + self.list_display
 
+    search_fields = ['label', 'sound_filename', 'group_discussion__subject_group__group_name']
+
 
 class InterviewRecordingInline(BaseTabularInline):
 
@@ -152,10 +154,24 @@ class InterviewRecordingInline(BaseTabularInline):
     extra = 0
 
 
-class GroupDiscussionInline(BaseTabularInline):
+class GroupDiscussionRecordingInline(BaseTabularInline):
 
     model = GroupDiscussionRecording
     extra = 0
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(GroupDiscussionRecordingInline, self).get_readonly_fields(request, obj)
+        return list(readonly_fields) + [
+            'label', 'start_datetime', 'stop_datetime', 'sound_filename',
+            'sound_filesize', 'recording_time']
+
+    fields = [
+        'label', 'verified', 'comment',
+        'start_datetime', 'stop_datetime', 'sound_filename',
+        'sound_filesize', 'recording_time']
+
+    radio_fields = {
+        'verified': admin.VERTICAL}
 
 
 class BaseInterviewAdmin(BaseModelAdmin):
@@ -250,7 +266,7 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
         'subject_group__potential_subject__subject_consent__identity',
     ]
 
-    inlines = [GroupDiscussionInline]
+    inlines = [GroupDiscussionRecordingInline]
 
 
 @admin.register(GroupDiscussionLabel)
