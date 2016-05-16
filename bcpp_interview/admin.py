@@ -128,7 +128,7 @@ class BaseRecordingAdmin(BaseModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BaseRecordingAdmin, self).get_readonly_fields(request, obj)
         return list(readonly_fields) + [
-            'start_datetime', 'stop_datetime', 'sound_filename',
+            'label', 'start_datetime', 'stop_datetime', 'sound_filename',
             'sound_filesize', 'recording_time']
 
 
