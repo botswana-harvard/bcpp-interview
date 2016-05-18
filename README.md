@@ -1,39 +1,83 @@
 # bcpp-interview
 
-Record and interview with a consented subject or record a group discussion with consented subjects.
+Conduct and record In-depth interviews or Focus group discussions.
 
-Uses the python module `sounddevice`.
+* Information on potential subjects is preloaded into the PotentialSubjects 
+* Before participating in an IDI or FGD, each subject must complete the Informed Consent. 
 
-Note: consented subjects must have been previously consented in BCPP
+Uses the python module `sounddevice` for audio recordings.
 
+Important: For now, this is a single user system! The original plan is to deploy on offline laptops and not to access over the network as client server. 
 
-###Interview
+### Consent potential subjects
 
-* consent a subject
-* complete a new `Interview` for the consented subject and save
-* in the `Interview` change_list select the interview and choose the "Start recording interview" action
-* on the recording page, click the RECORD button.
+* From Home, click "Potential Subjects"
+* on the `PotentialSubjects` changelist search for subjects by identity number
+* click the "add" button in the consent column for the subject to be consented
+* complete and save the consent
+* _will return to the `PotentialSubjects` changelist_
+* Follow steps for "In-depth Interviews" or "Focus Group Discussions"
+
+###In-depth Interviews
+
+* From Home, click "Potential Subjects"
+* You may wish to filter the list "by consent" and/or "by interviewed"   
+* Find a consented subject for an IDI  
+* Click "IDI", complete a new `In-depth Interview` for the consented subject and save
+* _will return to `In-depth Interview` changelist
+* On the `In-depth Interview` change_list find the interview and click "Record"
+* Follow steps for Recording
+* _will return to the `In-depth Interview Recording` page when done_
+* Follow steps for Playback and Verification
+
+###Focus Group Discussions
+
+####Create Focus Group
+* From Home, click "Potential Subjects"
+* You may wish to filter the list "by consent" and/or "by interviewed"   
+* Find the consented subjects to be added to the `FocusGroup`  
+* _Note: consented subjects must be in the same category_
+* Using the checkboxes on the left, tick each consented subjects to be added
+* Select "Create Focus Group" from the "Actions" dropdown and click "Go"
+* From one of the focus group members, click "Add" under the Discussion column (_if the discusssion already exists, this will be the disscussion reference number._)
+
+####Add to existing Focus Group  
+* From Home, click "Potential Subjects"
+* You may wish to filter the list "by consent" and/or "by interviewed"   
+* Find and tick at least one consented subject already in the `FocusGroup` 
+* Find and tick the consented subject to be added to the existing `FocusGroup`
+* Select "Add to Existing Focus Group" from the "Actions" dropdown and click "Go"
+* From one of the focus group members, click "Add" under the Discussion column (_if the discusssion already exists, this will be the disscussion reference number._)
+
+### Recording
+Steps are the same for both `In-depth Interview` and `Focus Group Discussion`
+* From Home, click "In-depth Interviews (IDI)" or "Focus Group Discussions"
+* On the changelist, find the IDI or FGD and click the RECORD button.
 * _on the recording page, a modal will open with a timer and STOP button_
-* when the interview is over, click the STOP button
-* _an alert will appear, wait for the recording to save to file (compressed numpy npz)_
-* _once saved, an SUCCESS alert will appear_
-* dismiss the alert by clicking the 'X'
-* _a newly created `InterviewRecording` will open_
-* on the `InterviewRecording` indicate that the consented subject agrees the recording may be used for analysis
-* on the `InterviewRecording` indicate additional comments of interest for analysis
-* save the `InterviewRecording`
+* When the IDI or FGD is over, click the STOP button to stop recording
+* _an orange "Wait" alert will appear, wait for the recording to save to file (compressed numpy npz)_
+* _once the recording has been saved a green "Success" alert will appear_
+* Dismiss the green "Success" alert by clicking the 'X' on the right corning of the green alert
+* Click Home on the top left to return to the main menu.
+
+### Playback and Verification
+Steps are the same for both `In-depth InterviewRecording` and `Focus Group Discussion Recording`
+* From Home, click "Listen to IDI" or "Listen to FGD"
+* Select the recording and click "Play" to listen to the recording
+* Click "Stop" to stop playback
+* Open the recording and indicate if it has been verified (Yes/No) and if required add a comment
+* Save the recording
+* Click Home on the top left to return to the main menu.
  
+###Import Potential Subjects management command
 
-###Group Discussion
+Import a list of potential subjects from CSV of format 'subject_identifier, 'category', 'community', 'region'.
 
-same as above except
+    python manage.py load_csv_data bcpp_interview.potential_subject path_to_file
+    
+###Update Categories management command
 
-* consent a number of subjects
-* create a `SubjectGroup` and add each consented subject
-* create a `GroupDiscussion` and select the newly create `SubjectGroup`
-* in the `GroupDiscussion` change_list select the group discussion and choose the "Start recording interview" action
-...
+Update categories for the imported potential subjects
 
-###Import subjects management command
-
-* import a list of potential subjects from CSV of format 'subject_identifier, 'category', 'community', 'region'.
+    python manage.py update_categories
+    

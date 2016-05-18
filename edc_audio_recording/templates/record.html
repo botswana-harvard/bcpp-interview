@@ -66,7 +66,7 @@ $(document).ready(function() {
         stopRecording(e);
     });
     $("#btn-cancel").click(function(){
-        window.location.href='{% url interview_changelist %}?q={{ name }}';
+        window.location.href='{% url redirect_changelist %}?q={{ name }}';
     });    
 });
 

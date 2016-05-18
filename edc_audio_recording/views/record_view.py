@@ -2,14 +2,14 @@ import re
 import os
 import json
 
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.apps import apps as django_apps
+from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
-from django.http.response import HttpResponse
 
-from bcpp_interview.audio import Audio, RECORDING, READY, AudioError
+from ..audio import Audio, RECORDING, READY, AudioError
 
 audio = Audio()
 
@@ -28,16 +28,16 @@ class RecordView(TemplateView):
             self.kwargs.get('app_label'),
             self.kwargs.get('model_name') + 'recording')
         self.model_instance = model.objects.get(pk=self.kwargs.get('pk'))
-        interview_changelist = 'admin:{}_{}_changelist'.format(
+        redirect_changelist = 'admin:{}_{}_changelist'.format(
             self.model_instance._meta.app_label, self.model_instance._meta.model_name)
-        recording_changelist = 'recordings:{}_{}recording_changelist'.format(
+        recording_changelist = 'recording_admin:{}_{}recording_changelist'.format(
             self.model_instance._meta.app_label, self.model_instance._meta.model_name)
         context.update(
             title=settings.PROJECT_TITLE,
             project_name=settings.PROJECT_TITLE,
             is_popup=True,
             name=self.model_instance.reference,
-            interview_changelist=interview_changelist,
+            redirect_changelist=redirect_changelist,
             recording_changelist=recording_changelist,
             verbose_name=self.model_instance._meta.verbose_name,
             pk=self.kwargs.get('pk'),

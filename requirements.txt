@@ -23,6 +23,7 @@ django-braces
 -e /Users/erikvw/source/edc-base
 -e /Users/erikvw/source/edc-consent
 -e /Users/erikvw/source/edc-call-manager
+-e /Users/erikvw/source/edc-locator
 -e /Users/erikvw/source/edc-sync
 -e /Users/erikvw/source/edc-device
 -e /Users/erikvw/source/edc-meta-data

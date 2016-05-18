@@ -1,13 +1,13 @@
 import json
+import numpy as np
+import sounddevice as sd
+
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.apps import apps as django_apps
-from django.utils.decorators import method_decorator
-import sounddevice as sd
-import numpy as np
-from django.views.generic.base import View, ContextMixin, TemplateView
-from django.shortcuts import render_to_response
 from django.http.response import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.generic.base import TemplateView
 
 
 class PlaybackView(TemplateView):

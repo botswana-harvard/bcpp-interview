@@ -1,35 +1,23 @@
 from django.contrib import admin
-from django.contrib.admin.sites import AdminSite
-from django.core.urlresolvers import reverse
-from django.utils.html import format_html
 
+from edc_audio_recording.admin import recording_admin, ModelAdminRecordingMixin, ModelAdminAudioPlaybackMixin
 from edc_base.modeladmin.admin.base_tabular_inline import BaseTabularInline
 from edc_base.modeladmin.mixins import (
     ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
     ModelAdminAuditFieldsMixin)
 from edc_consent.admin.mixins import ModelAdminConsentMixin
-
-from .actions import record, create_focus_group, add_to_focus_group_discussion
+from simple_history.admin import SimpleHistoryAdmin
+from .actions import create_focus_group, add_to_focus_group_discussion
 from .forms import SubjectConsentForm
 from .models import (
     FocusGroup, Interview, GroupDiscussion, FocusGroupItem, InterviewRecording,
     GroupDiscussionRecording, PotentialSubject, SubjectLoss, SubjectConsent,
-    GroupDiscussionLabel)
-
-
-class RecordingAdminSite(AdminSite):
-    site_header = 'BCPP Interview'
-    site_title = 'BCPP Recordings'
-    index_title = 'BCPP Recordings Admin'
-    site_url = '/recording/bcpp_interview/'
-    # app_index_template = settings.
-
-recording_admin = RecordingAdminSite(name='recordings')
+    GroupDiscussionLabel, SubjectLocator)
 
 
 class BaseModelAdmin(ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
-                     ModelAdminAuditFieldsMixin, admin.ModelAdmin):
+                     ModelAdminAuditFieldsMixin, SimpleHistoryAdmin):
     list_per_page = 10
     date_hierarchy = 'created'
     empty_value_display = '-'
@@ -42,32 +30,9 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
     redirect_model_name = 'potentialsubject'
 
 
-class ModelAdminAudioPlaybackMixin(object):
-
-    def play(self, obj):
-        kwargs = {'app_label': obj._meta.app_label, 'model_name': obj._meta.model_name, 'pk': obj.pk}
-        url = reverse('play', kwargs=kwargs)
-        return format_html(
-            '<button id="play-{id}" onclick="return startPlayback(\'{id}\', \'{url}\');" '
-            'class="button">Play</button>', id=obj.pk, url=url)
-    play.short_description = 'Play'
-
-    def stop(self, obj):
-        kwargs = {'app_label': obj._meta.app_label, 'model_name': obj._meta.model_name, 'pk': obj.pk}
-        url = reverse('play', kwargs=kwargs)
-        return format_html(
-            '<button id="stop-{id}" onclick="return stopPlayback(\'{id}\', \'{url}\');" '
-            'class="button">Stop</button>', id=obj.pk, url=url)
-    stop.short_description = 'Stop'
-
-    def record(self, obj):
-        kwargs = {'app_label': obj._meta.app_label, 'model_name': obj._meta.model_name, 'pk': obj.pk}
-        url = reverse('record', kwargs=kwargs)
-        print(url)
-        return format_html(
-            '<a id="record-{id}" href="{url}" '
-            'class="button">Record</a>', id=obj.pk, url=url)
-    record.short_description = 'record'
+@admin.register(SubjectLocator)
+class SubjectLocatorAdmin(BaseModelAdmin):
+    pass
 
 
 @admin.register(SubjectConsent)
@@ -154,36 +119,8 @@ class FocusGroupAdmin(ModelAdminChangelistModelButtonMixin, BaseModelAdmin):
     potential_subject_button.short_description = 'subjects'
 
 
-class BaseRecordingAdmin(ModelAdminAudioPlaybackMixin, ModelAdminChangelistModelButtonMixin, BaseModelAdmin):
-
-    date_hierarchy = 'start_datetime'
-
-    list_per_page = 5
-
-    fields = [
-        'label', 'verified', 'comment',
-        'start_datetime', 'stop_datetime', 'sound_filename',
-        'sound_filesize', 'recording_time']
-
-    radio_fields = {'verified': admin.VERTICAL}
-
-    list_display = ['label', 'play', 'stop', 'verified', 'played', 'recording_time', 'filesize',
-                    'start_datetime', 'stop_datetime', ]
-
-    list_filter = ['verified', 'played', 'start_datetime']
-
-    search_fields = ['label', 'sound_filename']
-
-    ordering = ('-start_datetime', )
-
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(BaseRecordingAdmin, self).get_readonly_fields(request, obj)
-        return list(readonly_fields) + [
-            'label', 'start_datetime', 'stop_datetime', 'sound_filename',
-            'sound_filesize', 'recording_time']
-
-
-class InterviewRecordingAdmin(BaseRecordingAdmin):
+@admin.register(InterviewRecording, site=recording_admin)
+class InterviewRecordingAdmin(ModelAdminRecordingMixin, BaseModelAdmin):
 
     def get_list_display(self, request):
         self.list_display = list(self.list_display)
@@ -200,10 +137,9 @@ class InterviewRecordingAdmin(BaseRecordingAdmin):
             'bcpp_interview', 'interview', label=obj.interview.reference,
             querystring_value=obj.interview.reference)
 
-recording_admin.register(InterviewRecording, InterviewRecordingAdmin)
 
-
-class GroupDiscussionRecordingAdmin(BaseRecordingAdmin):
+@admin.register(GroupDiscussionRecording, site=recording_admin)
+class GroupDiscussionRecordingAdmin(ModelAdminRecordingMixin, BaseModelAdmin):
 
     def get_list_display(self, request):
         self.list_display = list(self.list_display)
@@ -221,8 +157,6 @@ class GroupDiscussionRecordingAdmin(BaseRecordingAdmin):
         return self.changelist_list_button(
             'bcpp_interview', 'groupdiscussion', label=obj.group_discussion.focus_group.reference,
             querystring_value=obj.group_discussion.focus_group.reference)
-
-recording_admin.register(GroupDiscussionRecording, GroupDiscussionRecordingAdmin)
 
 
 class InterviewRecordingInline(BaseTabularInline):
@@ -256,8 +190,6 @@ class BaseInterviewAdmin(ModelAdminAudioPlaybackMixin, ModelAdminChangelistModel
     date_hierarchy = 'interview_datetime'
 
     list_filter = ['interviewed', 'interview_datetime', 'created', 'user_created', ]
-
-    actions = [record]
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BaseInterviewAdmin, self).get_readonly_fields(request, obj)
@@ -307,8 +239,8 @@ class InterviewAdmin(BaseInterviewAdmin):
             return self.empty_value_display
         return self.changelist_list_button(
             'bcpp_interview', 'interviewrecording', label='{}-recordings'.format(count),
-            querystring_value=obj.reference, namespace="recordings",
-            title='2 recordings exist for this discussion')
+            querystring_value=obj.reference, namespace="recording_admin",
+            title='{} recordings exist for this discussion'.format(count))
     playback_button.short_description = 'Playback'
 
     def get_readonly_fields(self, request, obj=None):
@@ -370,8 +302,8 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
             return self.empty_value_display
         return self.changelist_list_button(
             'bcpp_interview', 'groupdiscussionrecording', label='{}-recordings'.format(count),
-            querystring_value=obj.reference, namespace="recordings",
-            title='2 recordings exist for this discussion')
+            querystring_value=obj.reference, namespace="recording_admin",
+            title='{} recordings exist for this discussion'.format(count))
     playback.short_description = 'Playback'
 
     def get_list_filter(self, request):

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
@@ -7,24 +6,26 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django_crypto_fields.fields import (
     EncryptedTextField, IdentityField, FirstnameField, LastnameField, EncryptedCharField)
-from humanize import naturalsize
 from simple_history.models import HistoricalRecords as AuditTrail
 
-
-from edc_constants.choices import YES_NO
-from edc_constants.constants import NO, NOT_APPLICABLE
+from edc_audio_recording.models import RecordingModelMixin
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
 from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
 from edc_consent.models.fields.bw import IdentityFieldsMixin
+from edc_constants.choices import YES_NO
+from edc_constants.constants import NO, NOT_APPLICABLE
+from edc_locator.models import LocatorMixin
 from edc_registration.models.registered_subject import RegisteredSubject
 from edc_sync.models import SyncModelMixin
 
 from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
-    FocusGroupItemManager, InterviewManager, FocusGroupManager, RecordingManager,
+    FocusGroupItemManager, InterviewManager, FocusGroupManager,
     SubjectLossManager, GroupDiscussionLabelManager)
+from edc_audio_recording.manager import RecordingManager
+
 
 NOT_LINKED = 'not_linked'
 LINKED_ONLY = 'linked_only'
@@ -76,10 +77,6 @@ def group_identifier():
 
 def interview_identifier():
     return InterviewIdentifier().identifier
-
-
-def upload_folder():
-    return str(settings.UPLOAD_FOLDER)
 
 
 class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
@@ -197,6 +194,16 @@ class PotentialSubject(BaseUuidModel):
         app_label = 'bcpp_interview'
 
 
+class SubjectLocator(LocatorMixin, BaseUuidModel):
+
+    potential_subject = models.ForeignKey(PotentialSubject)
+
+    history = AuditTrail()
+
+    class Meta:
+        app_label = 'bcpp_interview'
+
+
 class FocusGroup(SyncModelMixin, BaseUuidModel):
 
     reference = models.CharField(
@@ -270,10 +277,6 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
 
     interviewed = models.BooleanField(default=False, editable=False)
 
-    history = AuditTrail()
-
-    objects = InterviewManager()
-
     def save(self, *args, **kwargs):
         self.report_datetime = self.interview_datetime
         super(BaseInterview, self).save(*args, **kwargs)
@@ -292,6 +295,10 @@ class Interview(BaseInterview):
     def __str__(self):
         return self.potential_subject.subject_identifier
 
+    history = AuditTrail()
+
+    objects = InterviewManager()
+
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'interview_datetime'
@@ -303,6 +310,8 @@ class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
     discussion_label = models.CharField(
         max_length=50,
         unique=True)
+
+    history = AuditTrail()
 
     objects = GroupDiscussionLabelManager()
 
@@ -330,6 +339,10 @@ class GroupDiscussion(BaseInterview):
         blank=True,
         null=True)
 
+    history = AuditTrail()
+
+    objects = InterviewManager()
+
     def __str__(self):
         return self.focus_group.reference
 
@@ -338,72 +351,7 @@ class GroupDiscussion(BaseInterview):
         get_latest_by = 'interview_datetime'
 
 
-class BaseRecording(SyncModelMixin, BaseUuidModel):
-
-    report_datetime = models.DateTimeField(
-        null=True,
-        editable=False)
-
-    label = models.CharField(
-        max_length=25,
-        null=True,
-        help_text=(
-            'Friendly name for this recording or partial recording '
-            'e.g. part 1, part2, or may be left blank.'))
-
-    start_datetime = models.DateTimeField(null=True)
-
-    stop_datetime = models.DateTimeField(null=True)
-
-    recording_time = models.CharField(
-        max_length=10,
-        null=True)
-
-    sound_file = models.FileField(
-        upload_to=upload_folder,
-        null=True)
-
-    sound_filename = models.CharField(
-        max_length=150,
-        unique=True)
-
-    sound_filesize = models.FloatField(
-        default=0.0,
-        blank=True)
-
-    comment = EncryptedTextField(
-        verbose_name="Additional comment that may assist in analysis of this discussion",
-        max_length=250,
-        blank=True,
-        null=True
-    )
-
-    played = models.BooleanField(default=False, editable=False)
-
-    history = AuditTrail()
-
-    objects = RecordingManager()
-
-    def __str__(self):
-        return 'Recording {}'.format(self.label)
-
-    def save(self, *args, **kwargs):
-        if not self.label:
-            self.label = self.sound_filename.split('/')[-1:][0]
-        self.report_datetime = self.start_datetime
-        super(BaseRecording, self).save(*args, **kwargs)
-
-    def natural_key(self):
-        return self.sound_filename
-
-    def filesize(self):
-        return naturalsize(self.sound_filesize, binary=True)
-
-    class Meta:
-        abstract = True
-
-
-class InterviewRecording(BaseRecording):
+class InterviewRecording(SyncModelMixin, RecordingModelMixin, BaseUuidModel):
 
     interview = models.ForeignKey(Interview)
 
@@ -413,12 +361,17 @@ class InterviewRecording(BaseRecording):
         default=NO,
         help_text='Indicate if the subject has agreed that this recording may be used for analysis')
 
+    history = AuditTrail()
+
+    objects = RecordingManager()
+
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'start_datetime'
+        verbose_name = 'In-depth Interview Recording'
 
 
-class GroupDiscussionRecording(BaseRecording):
+class GroupDiscussionRecording(SyncModelMixin, RecordingModelMixin, BaseUuidModel):
 
     group_discussion = models.ForeignKey(GroupDiscussion)
 
@@ -428,9 +381,14 @@ class GroupDiscussionRecording(BaseRecording):
         default=NO,
         help_text='Indicate if the group members have agreed that this recording may be used for analysis')
 
+    history = AuditTrail()
+
+    objects = RecordingManager()
+
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'start_datetime'
+        verbose_name = 'Focus Group Discussion Recording'
 
 
 class SubjectLoss(SyncModelMixin, BaseUuidModel):
@@ -468,7 +426,7 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
     def save(self, *args, **kwargs):
         self.subject_identifier = self.potential_subject.subject_identifier
         self.registered_subject = self.potential_subject.registered_subject
-        super(BaseRecording, self).save(*args, **kwargs)
+        super(SubjectLoss, self).save(*args, **kwargs)
 
     def natural_key(self):
         return self.subject_identifier

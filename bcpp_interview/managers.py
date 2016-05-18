@@ -18,12 +18,6 @@ class FocusGroupItemManager(models.Manager):
         return self.get(focus_group=focus_group, potential_subject__subject_identifier=subject_identifier)
 
 
-class RecordingManager(models.Manager):
-
-    def get_by_natural_key(self, sound_filename):
-        return self.get(sound_filename=sound_filename)
-
-
 class SubjectLossManager(models.Manager):
 
     def get_by_natural_key(self, subject_identifier):

@@ -16,12 +16,15 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.db.utils import OperationalError, ProgrammingError
-from .edc_app_configuration import EdcAppConfiguration
+from edc_call_manager.admin import call_manager_admin
+
 from .admin import recording_admin
+from .edc_app_configuration import EdcAppConfiguration
 from .views import (
-    HomeView, LoginView, LogoutView, TranscribeView, TranslateView, RecordView, PlaybackView)
+    HomeView, LoginView, LogoutView, TranscribeView, TranslateView)
 from bcpp_interview.views.consent_view import ConsentView
 from django.views.generic.base import RedirectView
+# from edc_audio_recording import urls as edc_audio_recording_urls
 
 try:
     edc_app_configuration = EdcAppConfiguration()
@@ -37,15 +40,16 @@ urlpatterns = [
     url(r'^logout/', LogoutView.as_view(url='/login/'), name='logout_url'),
     url(r'^accounts/login/', LoginView.as_view()),
     url(r'^home/', HomeView.as_view(), name='home'),
-    url(r'^record/(?P<app_label>.*)/(?P<model_name>.*)/(?P<pk>[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12})/', RecordView.as_view(), name='record'),
-    url(r'^play/(?P<app_label>.*)/(?P<model_name>.*)/(?P<pk>[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12})/', PlaybackView.as_view(), name='play'),
     url(r'^transcribe/', TranscribeView.as_view(), name='transcribe'),
     url(r'^translate/', TranslateView.as_view(), name='translate'),
     url(r'^consent/', ConsentView.as_view(), name='consent'),
+    url(r'^call_manager/$', RedirectView.as_view(url='/')),
+    url(r'^call_manager/', call_manager_admin.urls),
     url(r'^admin/$', RedirectView.as_view(url='/')),
     url(r'^admin/', admin.site.urls),
-    url(r'^recordings/$', RedirectView.as_view(url='/')),
-    url('^recordings/', recording_admin.urls),
+    url(r'^recording/admin/$', RedirectView.as_view(url='/')),
+    url(r'^recording/$', RedirectView.as_view(url='/')),
+    url(r'^recording/', include('edc_audio_recording.urls')),
     url(r'^edc_sync/', include('edc_sync.urls')),
     url(r'', HomeView.as_view(), name='default'),
 ]

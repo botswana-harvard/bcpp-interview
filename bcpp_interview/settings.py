@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'edc_visit_schedule',
     'edc_visit_tracking',
     'edc_call_manager',
+    'edc_locator',
+    'edc_audio_recording',
     'bcpp_interview',
 ]
 
@@ -69,6 +71,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'bcpp_interview.urls'

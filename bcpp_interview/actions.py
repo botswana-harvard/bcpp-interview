@@ -5,16 +5,6 @@ from django.http.response import HttpResponseRedirect
 from .models import Interview, FocusGroupItem, FocusGroup
 
 
-def record(modeladmin, request, queryset):
-    if queryset.count() != 1:
-        messages.error(request, "Select only ONE in-depth interview or focus group discussion to record.")
-        return None
-    obj = queryset[0]
-    return HttpResponseRedirect("/record/{}/{}/{}/".format(
-        obj._meta.app_label, obj._meta.model_name, obj.pk))
-record.short_description = "Start Recording Session"
-
-
 def verify_available_for_focus_group(request, potential_subject, category):
     warning = None
     if not potential_subject.subject_consent:
