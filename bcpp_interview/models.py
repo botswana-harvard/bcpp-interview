@@ -22,10 +22,16 @@ from .managers import (
     SubjectGroupItemManager, InterviewManager, SubjectGroupManager, RecordingManager,
     SubjectLossManager)
 from bcpp_interview.managers import GroupDiscussionLabelManager
+from django_crypto_fields.fields.firstname_field import FirstnameField
+from django_crypto_fields.fields.lastname_field import LastnameField
+from django_crypto_fields.fields.encrypted_char_field import EncryptedCharField
+from django.core.validators import RegexValidator
 
 NOT_LINKED = 'not_linked'
 LINKED_ONLY = 'linked_only'
 INITIATED = 'initiated'
+INITIATED_T1 = 't1_initiated'
+DEFAULTER = 'DEFAULTER'
 
 REGIONS = (
     ('central', 'Central'),
@@ -36,7 +42,9 @@ REGIONS = (
 CATEGORIES = (
     (NOT_LINKED, 'Not linked-to-care'),
     (LINKED_ONLY, 'Linked-to-care only'),
+    (DEFAULTER, 'Defaulter'),
     (INITIATED, 'Initiated ART'),
+    (INITIATED_T1, 'Initiated ART at T1'),
 )
 
 
@@ -60,6 +68,10 @@ def group_identifier():
 
 def interview_identifier():
     return InterviewIdentifier().identifier
+
+
+def upload_folder():
+    return str(settings.UPLOAD_FOLDER)
 
 
 class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
@@ -117,13 +129,30 @@ class PotentialSubject(BaseUuidModel):
         max_length=25,
         unique=True)
 
+    first_name = FirstnameField(
+        null=True,
+    )
+
+    last_name = LastnameField(
+        verbose_name="Last name",
+        null=True,
+    )
+
+    initials = EncryptedCharField(
+        validators=[RegexValidator(
+            regex=r'^[A-Z]{2,3}$',
+            message=('Ensure initials consist of letters '
+                     'only in upper case, no spaces.')), ],
+        null=True,
+    )
+
     subject_consent = models.ForeignKey(SubjectConsent, null=True, editable=False)
 
     consented = models.BooleanField(default=False, editable=False)
 
     interviewed = models.BooleanField(default=False, editable=False)
 
-    ki = models.BooleanField(default=False, editable=False)
+    idi = models.BooleanField(default=False, editable=False)
 
     fgd = models.BooleanField(default=False, editable=False)
 
@@ -173,8 +202,7 @@ class SubjectGroup(SyncModelMixin, BaseUuidModel):
     objects = SubjectGroupManager()
 
     def __str__(self):
-        return 'Group \'{}\' by {} on {}'.format(
-            self.group_name, self.user_created, self.created.strftime('%Y-%m-%d'))
+        return self.group_name
 
     def natural_key(self):
         return self.group_name
@@ -312,7 +340,7 @@ class BaseRecording(SyncModelMixin, BaseUuidModel):
         null=True)
 
     sound_file = models.FileField(
-        upload_to=str(settings.UPLOAD_FOLDER),
+        upload_to=upload_folder,
         null=True)
 
     sound_filename = models.CharField(
@@ -329,6 +357,8 @@ class BaseRecording(SyncModelMixin, BaseUuidModel):
         blank=True,
         null=True
     )
+
+    played = models.BooleanField(default=False, editable=False)
 
     history = AuditTrail()
 
@@ -429,15 +459,15 @@ def post_save_consented(sender, instance, raw, created, using, update_fields, **
         potential_subject = PotentialSubject.objects.get(identity=instance.identity)
         potential_subject.consented = True
         potential_subject.subject_consent = instance
-        potential_subject.save(update_fields=['consented', 'subject_consent'])
+        potential_subject.save(update_fields=['consented', 'subject_consent', 'user_modified', 'modified'])
 
 
 @receiver(post_save, sender=InterviewRecording, dispatch_uid='post_save_interview_recording')
 def post_save_interview_recording(sender, instance, raw, created, using, update_fields, **kwargs):
     if not raw:
         instance.interview.potential_subject.interviewed = True
-        instance.interview.potential_subject.ki = True
-        instance.interview.potential_subject.save(update_fields=['interviewed', 'ki'])
+        instance.interview.potential_subject.idi = True
+        instance.interview.potential_subject.save(update_fields=['interviewed', 'idi', 'user_modified', 'modified'])
 
 
 @receiver(post_save, sender=GroupDiscussionRecording, dispatch_uid='post_save_group_discussion_recording')
@@ -447,4 +477,4 @@ def post_save_group_discussion_recording(sender, instance, raw, created, using, 
                 subject_group=instance.group_discussion.subject_group):
             obj.potential_subject.interviewed = True
             obj.potential_subject.fgd = True
-            obj.potential_subject.save(update_fields=['consented', 'fgd'])
+            obj.potential_subject.save(update_fields=['interviewed', 'fgd', 'user_modified', 'modified'])

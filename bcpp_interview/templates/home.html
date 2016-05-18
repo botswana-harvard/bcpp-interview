@@ -1,33 +1,56 @@
 {% extends "base.html" %}
 
 {% block main %}
-<!--  all below the top bar and above the footer -->
-      <p></p>
-<div class="container marketing">
+<p></p>
 
-      <!-- Three columns of text below the carousel -->
-      <div class="row">
-        <div class="col-lg-4">
-          <button style="background-color:transparent; border-color:transparent;" class="flaticon-microphone" onclick="window.location.href='{% url 'admin:app_list' 'bcpp_interview' %}'" role="button"></button>
-          <h2>Interview</h2>
-          <p>Consent subjects</p>
-          <p>Select a subject for a KI</p>
-          <p>Select a group of subjects for a FGD</p>
-        </div><!-- /.col-lg-4 -->
-        <div class="col-lg-4">
-          <button style="background-color:transparent; border-color:transparent;" class="flaticon-copy-documents" onclick="window.location.href='{% url 'transcribe' %}'" role="button"></button>
-          <h2>Transcribe</h2>
-          <p>Listen to a recorded interview and transcribe.</p>
-        </div><!-- /.col-lg-4 -->
-        <div class="col-lg-4">
-          <button style="background-color:transparent; border-color:transparent;" class="flaticon-translation" onclick="window.location.href='{% url 'translate' %}'" role="button"></button>
-          <h2>Translate</h2>
-          <p>Translate original transcribed interview text to English</p>
-        </div><!-- /.col-lg-4 -->
-      </div><!-- /.row -->
+<div class="container" align="center">
 
+    <div class="col-sm-4">
+        <div class="container marketing">
+            <ul id="pill-home" class="nav nav-pills nav-stacked">
+              <li class="active"><a href="#" disabled"><span id="pill-protocol">Home</span></a></li>
+              <li><a id="pill-potential-subjects" href="#">Potential Subjects</a></li>
+              <li><a id="pill-idi" href="#">Interviews</a></li>
+              <li><a id="pill-groups" href="#">Groups</a></li>
+              <li><a id="pill-fgd" href="#">Discussions</a></li>
+              <li><a id="pill-listen-idi" href="#">Listen to IDI</a></li>
+              <li><a id="pill-listen-fgd" href="#">Listen to FGD</a></li>
+            </ul>
+        </div><!-- /.container -->   
+    </div>
 
-</div><!-- /.container -->   
+</div>
 
 {% endblock main %}
-      
+
+{% block extra-scripts-bottom %}
+{{ block.super }}
+<script type="text/javascript" language="javascript" class="init">
+    $(document).ready( function () {
+        $('#pill-potential-subjects').click( function(e) {
+            e.preventDefault();
+            window.location.href='{% url 'admin:bcpp_interview_potentialsubject_changelist' %}';
+            });
+        $('#pill-idi').click( function(e) {
+            e.preventDefault();
+            window.location.href='{% url 'admin:bcpp_interview_interview_changelist' %}';
+            });
+        $('#pill-groups').click( function(e) {
+            e.preventDefault();
+            window.location.href='{% url 'admin:bcpp_interview_subjectgroup_changelist' %}';
+            });
+        $('#pill-fgd').click( function(e) {
+            e.preventDefault();
+            window.location.href='{% url 'admin:bcpp_interview_groupdiscussion_changelist' %}';
+            });
+        $('#pill-listen-idi').click( function(e) {
+            e.preventDefault();
+            window.location.href='{% url 'admin:bcpp_interview_interviewrecording_changelist' %}';
+            });
+        $('#pill-listen-fgd').click( function(e) {
+            e.preventDefault();
+            window.location.href='{% url 'admin:bcpp_interview_groupdiscussionrecording_changelist' %}';
+            });
+    });
+</script>
+{% endblock extra-scripts-bottom%} 

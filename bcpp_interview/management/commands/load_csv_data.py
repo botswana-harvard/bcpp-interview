@@ -7,6 +7,13 @@ from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
+
+    """Import model data from CSV.
+
+    For example:
+        python manage.py load_csv_data bcpp_interview.potentialsubject ~/Documents/bcpp/bcpp_qual_study_exported.csv 
+    """
+
     help = 'Load CSV data into a model'
 
     def add_arguments(self, parser):

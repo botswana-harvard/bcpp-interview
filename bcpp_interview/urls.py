@@ -18,7 +18,9 @@ from django.contrib import admin
 from django.db.utils import OperationalError, ProgrammingError
 from .edc_app_configuration import EdcAppConfiguration
 from .views import (
-    HomeView, LoginView, LogoutView, TranscribeView, TranslateView, RecordView)
+    HomeView, LoginView, LogoutView, TranscribeView, TranslateView, RecordView, PlaybackView)
+from bcpp_interview.views.consent_view import ConsentView
+from django.views.generic.base import RedirectView
 
 try:
     edc_app_configuration = EdcAppConfiguration()
@@ -27,7 +29,6 @@ except OperationalError as e:
     print('skipping edc configuration')
 except ProgrammingError as e:
     print('skipping edc configuration')
-    # pass
 
 urlpatterns = [
     url(r'^admin/logout/', LogoutView.as_view(url='/login/')),
@@ -36,8 +37,11 @@ urlpatterns = [
     url(r'^accounts/login/', LoginView.as_view()),
     url(r'^home/', HomeView.as_view(), name='home'),
     url(r'^record/(?P<app_label>.*)/(?P<model_name>.*)/(?P<pk>[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12})/', RecordView.as_view(), name='record'),
+    url(r'^play/(?P<app_label>.*)/(?P<model_name>.*)/(?P<pk>[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12})/', PlaybackView.as_view(), name='play'),
     url(r'^transcribe/', TranscribeView.as_view(), name='transcribe'),
     url(r'^translate/', TranslateView.as_view(), name='translate'),
+    url(r'^consent/', ConsentView.as_view(), name='consent'),
+    url(r'^admin/$', RedirectView.as_view(url='/')),
     url(r'^admin/', admin.site.urls),
     url(r'^edc_sync/', include('edc_sync.urls')),
     url(r'', HomeView.as_view(), name='default'),

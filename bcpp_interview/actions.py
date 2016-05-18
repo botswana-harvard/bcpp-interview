@@ -33,7 +33,7 @@ def verify_available_for_subject_group(request, potential_subject, category):
         try:
             Interview.objects.get(potential_subject=potential_subject)
             messages.warning(
-                request, "Some subjects are setup for a Interview. See {}".format(potential_subject))
+                request, "Some subjects are setup for an individual Interview. See {}".format(potential_subject))
             warning = True
         except Interview.DoesNotExist:
             pass
@@ -104,7 +104,7 @@ def create_subject_group(modeladmin, request, queryset):
     for obj in queryset:
         if not category:
             category = obj.category
-        request, warning = verify_available_for_subject_group(potential_subject=obj)
+        request, warning = verify_available_for_subject_group(request, potential_subject=obj, category=category)
     if not warning:
         subject_group = SubjectGroup.objects.create(
             size=queryset.count(),

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.urlresolvers import reverse
 
 from edc_base.modeladmin.admin.base_tabular_inline import BaseTabularInline
 from edc_consent.admin.mixins import ModelAdminConsentMixin
@@ -11,15 +12,17 @@ from edc_base.modeladmin.mixins import (
 from .actions import record, create_subject_group, add_to_group_discussion
 from .models import (
     SubjectGroup, Interview, GroupDiscussion, SubjectGroupItem, InterviewRecording,
-    GroupDiscussionRecording, PotentialSubject, SubjectLoss, SubjectConsent)
+    GroupDiscussionRecording, PotentialSubject, SubjectLoss, SubjectConsent,
+    GroupDiscussionLabel)
 from .forms import SubjectConsentForm
-from bcpp_interview.models import GroupDiscussionLabel
+from django.utils.html import format_html
 
 
 class BaseModelAdmin(ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
                      ModelAdminAuditFieldsMixin, admin.ModelAdmin):
-    list_per_page = 15
+    list_per_page = 10
     date_hierarchy = 'created'
+    empty_value_display = '-'
 
 
 class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
@@ -27,6 +30,25 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
     additional_instructions = 'After saving you will be returned to the list of Potential Subjects.'
     redirect_app_label = 'bcpp_interview'
     redirect_model_name = 'potentialsubject'
+
+
+class AudioPlaybackMixin(object):
+
+    def play(self, obj):
+        kwargs = {'app_label': obj._meta.app_label, 'model_name': obj._meta.model_name, 'pk': obj.pk}
+        url = reverse('play', kwargs=kwargs)
+        return format_html(
+            '<button id="play-{id}" onclick="return startPlayback(\'{id}\', \'{url}\');" '
+            'class="button">Play</button>', id=obj.pk, url=url)
+    play.short_description = 'Play'
+
+    def stop(self, obj):
+        kwargs = {'app_label': obj._meta.app_label, 'model_name': obj._meta.model_name, 'pk': obj.pk}
+        url = reverse('play', kwargs=kwargs)
+        return format_html(
+            '<button id="stop-{id}" onclick="return stopPlayback(\'{id}\', \'{url}\');" '
+            'class="button">Stop</button>', id=obj.pk, url=url)
+    stop.short_description = 'Stop'
 
 
 @admin.register(SubjectConsent)
@@ -46,7 +68,7 @@ class SubjectGroupItemAdmin(BaseModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "potential_subject":
             try:
-                potential_subject = PotentialSubject.objects.filter(consented=True, ki=False)
+                potential_subject = PotentialSubject.objects.filter(consented=True, idi=False)
             except PotentialSubject.DoesNotExist:
                 potential_subject = PotentialSubject.objects.none()
             kwargs["queryset"] = potential_subject
@@ -60,7 +82,7 @@ class SubjectGroupItemInline(BaseTabularInline):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "potential_subject":
             try:
-                potential_subject = PotentialSubject.objects.filter(consented=True, ki=False)
+                potential_subject = PotentialSubject.objects.filter(consented=True, idi=False)
             except PotentialSubject.DoesNotExist:
                 potential_subject = PotentialSubject.objects.none()
             kwargs["queryset"] = potential_subject
@@ -104,26 +126,29 @@ class SubjectGroupAdmin(ModelAdminChangelistModelButtonMixin, BaseModelAdmin):
     def discussion(self, obj):
         return self.get_group_discussion_button(obj)
     discussion.short_description = 'discussion'
-    discussion.allow_tags = True
 
 
-class BaseRecordingAdmin(BaseModelAdmin):
+class BaseRecordingAdmin(AudioPlaybackMixin, BaseModelAdmin):
 
     date_hierarchy = 'start_datetime'
+
+    list_per_page = 5
 
     fields = [
         'label', 'verified', 'comment',
         'start_datetime', 'stop_datetime', 'sound_filename',
         'sound_filesize', 'recording_time']
 
-    list_display = ['label', 'verified', 'start_datetime', 'stop_datetime', 'recording_time']
+    list_display = ['label', 'play', 'stop', 'verified', 'played',
+                    'start_datetime', 'stop_datetime', 'recording_time']
 
-    list_filter = ['verified', 'start_datetime']
+    list_editable = ('verified', )
+
+    list_filter = ['verified', 'played', 'start_datetime']
 
     search_fields = ['label', 'sound_filename']
 
-    radio_fields = {
-        'verified': admin.VERTICAL}
+    ordering = ('-start_datetime', )
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super(BaseRecordingAdmin, self).get_readonly_fields(request, obj)
@@ -192,6 +217,8 @@ class InterviewAdmin(ModelAdminPotentialSubjectRedirectMixin, BaseInterviewAdmin
 
     redirect_search_field = 'potential_subject.subject_identifier'
 
+    raw_id_fields = ("potential_subject",)
+
     fields = [
         'interview_name',
         'interview_datetime',
@@ -214,7 +241,7 @@ class InterviewAdmin(ModelAdminPotentialSubjectRedirectMixin, BaseInterviewAdmin
         'potential_subject__subject_consent__identity',
     ]
 
-    inlines = [InterviewRecordingInline]
+    # inlines = [InterviewRecordingInline]
 
     def get_readonly_fields(self, request, obj=None):
         self.readonly_fields = list(self.readonly_fields or [])
@@ -228,7 +255,7 @@ class InterviewAdmin(ModelAdminPotentialSubjectRedirectMixin, BaseInterviewAdmin
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "potential_subject":
             try:
-                potential_subject = PotentialSubject.objects.filter(consented=True, ki=False)
+                potential_subject = PotentialSubject.objects.filter(consented=True, idi=False)
             except PotentialSubject.DoesNotExist:
                 potential_subject = PotentialSubject.objects.none()
             kwargs["queryset"] = potential_subject
@@ -261,12 +288,21 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
 
     search_fields = [
         'subject_group__group_name',
-        'subject_group__potential_subject__subject_consent__first_name',
-        'subject_group__potential_subject__subject_consent__last_name',
-        'subject_group__potential_subject__subject_consent__identity',
     ]
 
-    inlines = [GroupDiscussionRecordingInline]
+    # inlines = [GroupDiscussionRecordingInline]
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super(GroupDiscussionAdmin, self).get_search_results(
+            request, queryset, search_term)
+        try:
+            subject_group_items = SubjectGroupItem.objects.filter(
+                subject_group__group_name__icontains=search_term)
+            potential_subjects = [obj.potential_subject.pk for obj in subject_group_items]
+            queryset |= self.model.objects.filter(pk__in=potential_subjects)
+        except SubjectGroupItem.DoesNotExist:
+            pass
+        return queryset, use_distinct
 
 
 @admin.register(GroupDiscussionLabel)
@@ -279,10 +315,10 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
                             BaseModelAdmin):
 
     list_display = ['subject_identifier', 'identity', 'consent', 'interview', 'subject_group',
-                    'consented', 'interviewed', 'ki', 'fgd',
+                    'consented', 'interviewed', 'idi', 'fgd',
                     'category', 'community', 'region']
 
-    list_filter = ['consented', 'interviewed', 'category', 'ki', 'fgd', 'community', 'region']
+    list_filter = ['consented', 'interviewed', 'category', 'idi', 'fgd', 'community', 'region']
 
     radio_fields = {
         'category': admin.VERTICAL,
@@ -315,38 +351,35 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
             'bcpp_interview', 'subjectconsent', reverse_args=reverse_args,
             change_label='consent')
     consent.short_description = 'Consent'
-    consent.allow_tags = True
 
     def get_interview_button(self, obj):
-        reverse_args = None
-        querystring = None
         disabled = None
         try:
             SubjectGroupItem.objects.get(potential_subject=obj)
-            return '-'
+            return self.empty_value_display
         except SubjectGroupItem.DoesNotExist:
             pass
         try:
             interview = Interview.objects.get(potential_subject=obj)
-            reverse_args = (interview.pk, )
+            interview_button = self.changelist_list_button(
+                'bcpp_interview', 'interview', label=interview.interview_name,
+                querystring_value=interview.interview_name, disabled=disabled)
         except Interview.DoesNotExist:
-            if obj.subject_consent:
-                querystring = '?potential_subject=' + str(obj.pk)
-            else:
+            if not obj.subject_consent:
                 disabled = True
-        return self.changelist_model_button(
-            'bcpp_interview', 'interview', reverse_args=reverse_args,
-            change_label='KI', add_querystring=querystring, disabled=disabled)
+            interview_button = self.changelist_model_button(
+                'bcpp_interview', 'subjectconsent', add_label='IDI', disabled=disabled)
+        return interview_button
 
     def get_subject_group_button(self, obj):
         disabled = None
         change_label = 'FGD'
         querystring_value = None
         if not obj.subject_consent:
-            return '-'
+            return self.empty_value_display
         try:
             Interview.objects.get(potential_subject=obj)
-            return '-'
+            return self.empty_value_display
         except Interview.DoesNotExist:
             pass
         try:
@@ -363,12 +396,10 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
     def interview(self, obj):
         return self.get_interview_button(obj)
     interview.short_description = 'interview'
-    interview.allow_tags = True
 
     def subject_group(self, obj):
         return self.get_subject_group_button(obj)
     subject_group.short_description = 'subject group'
-    subject_group.allow_tags = True
 
 
 @admin.register(SubjectLoss)

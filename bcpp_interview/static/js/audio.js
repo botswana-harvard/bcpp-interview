@@ -1,3 +1,37 @@
+function startPlayback(pk, url) {
+	play = '#play-' + pk
+	stop = '#stop-' + pk
+	$.ajax({
+		type:'GET',
+		url: url,
+		data:{
+			action:"play",
+		},
+		success:function(json){
+			$(stop).show();
+			$(play).show();
+		},
+	});
+	return true;
+}
+
+function stopPlayback(pk, url) {
+	play = '#play-' + pk
+	stop = '#stop-' + pk
+	$.ajax({
+		type:'GET',
+		url: url,
+		data:{
+			action:"stop",
+		},
+		success:function(json){
+			$(stop).show();
+			$(play).show();
+		},
+	});
+	return true;
+}
+
 function startRecording(e){
 	e.preventDefault();
 	$('#alert-saving').hide();
