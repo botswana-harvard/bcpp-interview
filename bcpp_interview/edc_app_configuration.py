@@ -1,9 +1,10 @@
 from datetime import datetime
+
 from django.conf import settings
 
 from edc_configuration.convert import localize
-from edc_content_type_map.models.content_type_map_helper import ContentTypeMapHelper
 from edc_consent.models import ConsentType
+from edc_content_type_map.models.content_type_map_helper import ContentTypeMapHelper
 
 study_start_datetime = datetime(2016, 5, 1, 0, 0, 0)
 study_end_datetime = datetime(2017, 5, 1, 0, 0, 0)

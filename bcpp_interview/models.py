@@ -1,14 +1,18 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
-from django_crypto_fields.fields import EncryptedTextField, IdentityField
+from django_crypto_fields.fields import (
+    EncryptedTextField, IdentityField, FirstnameField, LastnameField, EncryptedCharField)
+from humanize import naturalsize
 from simple_history.models import HistoricalRecords as AuditTrail
 
 
 from edc_constants.choices import YES_NO
+from edc_constants.constants import NO, NOT_APPLICABLE
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
 from edc_consent.models.fields import (
@@ -19,19 +23,17 @@ from edc_sync.models import SyncModelMixin
 
 from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
-    SubjectGroupItemManager, InterviewManager, SubjectGroupManager, RecordingManager,
-    SubjectLossManager)
-from bcpp_interview.managers import GroupDiscussionLabelManager
-from django_crypto_fields.fields.firstname_field import FirstnameField
-from django_crypto_fields.fields.lastname_field import LastnameField
-from django_crypto_fields.fields.encrypted_char_field import EncryptedCharField
-from django.core.validators import RegexValidator
+    FocusGroupItemManager, InterviewManager, FocusGroupManager, RecordingManager,
+    SubjectLossManager, GroupDiscussionLabelManager)
 
 NOT_LINKED = 'not_linked'
 LINKED_ONLY = 'linked_only'
 INITIATED = 'initiated'
 INITIATED_T1 = 't1_initiated'
 DEFAULTER = 'DEFAULTER'
+INITIATED_NATIONAL_GUIDELINES = 'national_guidelines'
+INITIATED_EXPANDED_GUIDELINES = 'expanded_guidelines'
+
 
 REGIONS = (
     ('central', 'Central'),
@@ -45,6 +47,12 @@ CATEGORIES = (
     (DEFAULTER, 'Defaulter'),
     (INITIATED, 'Initiated ART'),
     (INITIATED_T1, 'Initiated ART at T1'),
+)
+
+SUB_CATEGORIES = (
+    (INITIATED_NATIONAL_GUIDELINES, 'by national guidelines'),
+    (INITIATED_EXPANDED_GUIDELINES, 'by expanded guidelines'),
+    (NOT_APPLICABLE, 'Not applicable'),
 )
 
 
@@ -160,6 +168,12 @@ class PotentialSubject(BaseUuidModel):
         max_length=25,
         choices=CATEGORIES)
 
+    sub_category = models.CharField(
+        max_length=25,
+        default=NOT_APPLICABLE,
+        choices=SUB_CATEGORIES,
+        help_text='Note: only applicable if subjects are initiated')
+
     community = models.CharField(
         max_length=25)
 
@@ -183,52 +197,57 @@ class PotentialSubject(BaseUuidModel):
         app_label = 'bcpp_interview'
 
 
-class SubjectGroup(SyncModelMixin, BaseUuidModel):
+class FocusGroup(SyncModelMixin, BaseUuidModel):
 
-    group_name = models.CharField(
+    reference = models.CharField(
         max_length=5,
         default=group_identifier,
         unique=True)
 
     size = models.IntegerField(
-        verbose_name="How many consented subjects are in this group?")
+        verbose_name="How many consented subjects are in this focus group?")
 
     category = models.CharField(
         max_length=25,
         choices=CATEGORIES)
 
+    sub_category = models.CharField(
+        max_length=25,
+        choices=SUB_CATEGORIES,
+        help_text='Note: only applicable if subjects are initiated')
+
     history = AuditTrail()
 
-    objects = SubjectGroupManager()
+    objects = FocusGroupManager()
 
     def __str__(self):
-        return self.group_name
+        return self.reference
 
     def natural_key(self):
-        return self.group_name
+        return self.reference
 
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'created'
 
 
-class SubjectGroupItem(SyncModelMixin, BaseUuidModel):
+class FocusGroupItem(SyncModelMixin, BaseUuidModel):
 
-    subject_group = models.ForeignKey(SubjectGroup)
+    focus_group = models.ForeignKey(FocusGroup)
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
     history = AuditTrail()
 
-    objects = SubjectGroupItemManager()
+    objects = FocusGroupItemManager()
 
     def natural_key(self):
-        return (self.subject_group, self.potential_subject.subject_identifier)
+        return (self.focus_group, self.potential_subject.subject_identifier)
 
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'created'
-        unique_together = (('subject_group', 'potential_subject'), )
+        unique_together = (('focus_group', 'potential_subject'), )
 
 
 class BaseInterview(SyncModelMixin, BaseUuidModel):
@@ -237,7 +256,7 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
         null=True,
         editable=False)
 
-    interview_name = models.CharField(
+    reference = models.CharField(
         max_length=7,
         default=interview_identifier,
         unique=True)
@@ -260,7 +279,7 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
         super(BaseInterview, self).save(*args, **kwargs)
 
     def natural_key(self):
-        return self.interview_name
+        return self.reference
 
     class Meta:
         abstract = True
@@ -276,6 +295,7 @@ class Interview(BaseInterview):
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'interview_datetime'
+        verbose_name = 'In-depth Interview'
 
 
 class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
@@ -302,7 +322,7 @@ class GroupDiscussion(BaseInterview):
         to=GroupDiscussionLabel,
         verbose_name='Discussion Label')
 
-    subject_group = models.ForeignKey(SubjectGroup)
+    focus_group = models.ForeignKey(FocusGroup)
 
     comment = EncryptedTextField(
         verbose_name="Additional comment that may assist in analysis of this discussion",
@@ -311,7 +331,7 @@ class GroupDiscussion(BaseInterview):
         null=True)
 
     def __str__(self):
-        return self.subject_group.group_name
+        return self.focus_group.reference
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -348,7 +368,7 @@ class BaseRecording(SyncModelMixin, BaseUuidModel):
         unique=True)
 
     sound_filesize = models.FloatField(
-        null=True,
+        default=0.0,
         blank=True)
 
     comment = EncryptedTextField(
@@ -376,6 +396,9 @@ class BaseRecording(SyncModelMixin, BaseUuidModel):
     def natural_key(self):
         return self.sound_filename
 
+    def filesize(self):
+        return naturalsize(self.sound_filesize, binary=True)
+
     class Meta:
         abstract = True
 
@@ -387,6 +410,7 @@ class InterviewRecording(BaseRecording):
     verified = models.CharField(
         max_length=10,
         choices=YES_NO,
+        default=NO,
         help_text='Indicate if the subject has agreed that this recording may be used for analysis')
 
     class Meta:
@@ -401,6 +425,7 @@ class GroupDiscussionRecording(BaseRecording):
     verified = models.CharField(
         max_length=10,
         choices=YES_NO,
+        default=NO,
         help_text='Indicate if the group members have agreed that this recording may be used for analysis')
 
     class Meta:
@@ -473,8 +498,35 @@ def post_save_interview_recording(sender, instance, raw, created, using, update_
 @receiver(post_save, sender=GroupDiscussionRecording, dispatch_uid='post_save_group_discussion_recording')
 def post_save_group_discussion_recording(sender, instance, raw, created, using, update_fields, **kwargs):
     if not raw:
-        for obj in SubjectGroupItem.objects.filter(
-                subject_group=instance.group_discussion.subject_group):
+        for obj in FocusGroupItem.objects.filter(
+                focus_group=instance.group_discussion.focus_group):
             obj.potential_subject.interviewed = True
             obj.potential_subject.fgd = True
             obj.potential_subject.save(update_fields=['interviewed', 'fgd', 'user_modified', 'modified'])
+
+
+@receiver(post_delete, sender=GroupDiscussionRecording, dispatch_uid='post_delete_group_discussion_recording')
+def post_delete_group_discussion_recording(sender, instance, using, **kwargs):
+    try:
+        GroupDiscussionRecording.objects.get(group_discussion=instance.group_discussion)
+    except GroupDiscussionRecording.DoesNotExist:
+        for focus_group_item in FocusGroupItem.objects.filter(
+                focus_group=instance.group_discussion.focus_group):
+            focus_group_item.potential_subject.interviewed = False
+            focus_group_item.potential_subject.fgd = False
+            focus_group_item.potential_subject.save(update_fields=['fgd', 'modified'])
+    except GroupDiscussionRecording.MultipleObjectsReturned:
+        pass
+
+
+@receiver(post_delete, sender=InterviewRecording, dispatch_uid='post_delete_interview_recording')
+def post_delete_interview_recording(sender, instance, using, **kwargs):
+    try:
+        InterviewRecording.objects.get(interview=instance.interview)
+    except InterviewRecording.DoesNotExist:
+        for potential_subject in PotentialSubject.objects.filter(pk=instance.interview.potential_subject):
+            potential_subject.interviewed = False
+            potential_subject.idi = False
+            potential_subject.save(update_fields=['idi', 'modified'])
+    except InterviewRecording.MultipleObjectsReturned:
+        pass

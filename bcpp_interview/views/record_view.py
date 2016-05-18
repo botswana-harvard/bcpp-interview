@@ -1,3 +1,4 @@
+import re
 import os
 import json
 
@@ -7,7 +8,6 @@ from django.apps import apps as django_apps
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.http.response import HttpResponse
-# from django.shortcuts import render, redirect
 
 from bcpp_interview.audio import Audio, RECORDING, READY, AudioError
 
@@ -28,11 +28,18 @@ class RecordView(TemplateView):
             self.kwargs.get('app_label'),
             self.kwargs.get('model_name') + 'recording')
         self.model_instance = model.objects.get(pk=self.kwargs.get('pk'))
+        interview_changelist = 'admin:{}_{}_changelist'.format(
+            self.model_instance._meta.app_label, self.model_instance._meta.model_name)
+        recording_changelist = 'recordings:{}_{}recording_changelist'.format(
+            self.model_instance._meta.app_label, self.model_instance._meta.model_name)
         context.update(
             title=settings.PROJECT_TITLE,
             project_name=settings.PROJECT_TITLE,
             is_popup=True,
-            name=self.model_instance.interview_name,
+            name=self.model_instance.reference,
+            interview_changelist=interview_changelist,
+            recording_changelist=recording_changelist,
+            verbose_name=self.model_instance._meta.verbose_name,
             pk=self.kwargs.get('pk'),
             filename=self.filename,
         )
@@ -93,7 +100,7 @@ class RecordView(TemplateView):
     @property
     def filename(self):
         if not self._filename:
-            temp_filename = str(os.path.join(settings.UPLOAD_FOLDER, self.model_instance.interview_name))
+            temp_filename = str(os.path.join(settings.UPLOAD_FOLDER, self.model_instance.reference))
             filename = temp_filename
             n = 1
             while os.path.exists(filename + '.npz'):
@@ -102,11 +109,19 @@ class RecordView(TemplateView):
             self._filename = filename + '.npz'
         return self._filename
 
+    @property
+    def interview_model_fk_attr(self):
+        """Return model attr for FK on recording model.
+
+        Assumes recording model has a FK to self.model_instance
+        and the attr name is derived from the model's object name."""
+        words = re.findall('[A-Z][^A-Z]*', self.model_instance._meta.object_name)
+        return '_'.join(words).lower()
+
     def save_recording(self):
-        recording_attr = '_'.join(self.model_instance._meta.verbose_name.split(' ')).lower()
         audio.save(compress=True, reset=False)
         recording_options = {
-            recording_attr: self.model_instance,
+            self.interview_model_fk_attr: self.model_instance,
             'start_datetime': audio.start_datetime,
             'stop_datetime': audio.stop_datetime,
             'recording_time': audio.duration,

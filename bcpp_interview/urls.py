@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.db.utils import OperationalError, ProgrammingError
 from .edc_app_configuration import EdcAppConfiguration
+from .admin import recording_admin
 from .views import (
     HomeView, LoginView, LogoutView, TranscribeView, TranslateView, RecordView, PlaybackView)
 from bcpp_interview.views.consent_view import ConsentView
@@ -43,6 +44,8 @@ urlpatterns = [
     url(r'^consent/', ConsentView.as_view(), name='consent'),
     url(r'^admin/$', RedirectView.as_view(url='/')),
     url(r'^admin/', admin.site.urls),
+    url(r'^recordings/$', RedirectView.as_view(url='/')),
+    url('^recordings/', recording_admin.urls),
     url(r'^edc_sync/', include('edc_sync.urls')),
     url(r'', HomeView.as_view(), name='default'),
 ]

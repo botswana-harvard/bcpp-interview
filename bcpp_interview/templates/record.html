@@ -7,7 +7,7 @@
 <!--  all below the top bar and above the footer -->
 
 <div align="center" class="well">
-<h3>Interview {{ name }}</h3>
+<h3>{{ verbose_name|title }} {{ name }}</h3>
 <span style="background-color:transparent; border-color:transparent;" class="flaticon-microphone"></span>
 </br>
 
@@ -16,7 +16,7 @@
 </br>
 </br>
 
-<button id="btn-cancel" role="button" onclick="window.location.href='{% url 'admin:bcpp_interview_interview_changelist' %}';">Cancel</button>
+<button id="btn-cancel" role="button">Cancel</button>
 
 
 <div class="alert alert-warning" id="alert-saving" style="display:none">
@@ -24,7 +24,7 @@
 </div>
 
 <div class="alert alert-success" id="alert-saved" style="display:none">
-  <a href="{% url 'admin:bcpp_interview_interview_changelist' %}" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <a href="{% url recording_changelist %}?q={{ name }}" class="close" data-dismiss="alert" aria-label="close">&times;</a>
   <strong>Success!</strong> Your recording has been saved.
 </div>
 </div>
@@ -65,6 +65,9 @@ $(document).ready(function() {
     $("#btn-stop").click(function(e) {
         stopRecording(e);
     });
+    $("#btn-cancel").click(function(){
+        window.location.href='{% url interview_changelist %}?q={{ name }}';
+    });    
 });
 
 </script>

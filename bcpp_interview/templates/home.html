@@ -10,11 +10,12 @@
             <ul id="pill-home" class="nav nav-pills nav-stacked">
               <li class="active"><a href="#" disabled"><span id="pill-protocol">Home</span></a></li>
               <li><a id="pill-potential-subjects" href="#">Potential Subjects</a></li>
-              <li><a id="pill-idi" href="#">Interviews</a></li>
-              <li><a id="pill-groups" href="#">Groups</a></li>
-              <li><a id="pill-fgd" href="#">Discussions</a></li>
+              <li><a id="pill-idi" href="#">In-depth Interviews (IDI)</a></li>
+              <li><a id="pill-groups" href="#">Focus Groups</a></li>
+              <li><a id="pill-fgd" href="#">Focus Group Discussions (FGD)</a></li>
               <li><a id="pill-listen-idi" href="#">Listen to IDI</a></li>
               <li><a id="pill-listen-fgd" href="#">Listen to FGD</a></li>
+              <li><a id="pill-call-manager" href="#">Call Manager</a></li>
             </ul>
         </div><!-- /.container -->   
     </div>
@@ -37,7 +38,7 @@
             });
         $('#pill-groups').click( function(e) {
             e.preventDefault();
-            window.location.href='{% url 'admin:bcpp_interview_subjectgroup_changelist' %}';
+            window.location.href='{% url 'admin:bcpp_interview_focusgroup_changelist' %}';
             });
         $('#pill-fgd').click( function(e) {
             e.preventDefault();
@@ -45,11 +46,15 @@
             });
         $('#pill-listen-idi').click( function(e) {
             e.preventDefault();
-            window.location.href='{% url 'admin:bcpp_interview_interviewrecording_changelist' %}';
+            window.location.href='{% url 'recordings:bcpp_interview_interviewrecording_changelist' %}';
             });
         $('#pill-listen-fgd').click( function(e) {
             e.preventDefault();
-            window.location.href='{% url 'admin:bcpp_interview_groupdiscussionrecording_changelist' %}';
+            window.location.href='{% url 'recordings:bcpp_interview_groupdiscussionrecording_changelist' %}';
+            });
+        $('#pill-call-manager').click( function(e) {
+            e.preventDefault();
+            window.location.href='{% url 'admin:app_list' 'edc_call_manager' %}';
             });
     });
 </script>

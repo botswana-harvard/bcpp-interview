@@ -2,20 +2,20 @@ from django.db import models
 
 
 class InterviewManager(models.Manager):
-    def get_by_natural_key(self, interview_identifier):
-        return self.get(interview_identifier=interview_identifier)
+    def get_by_natural_key(self, reference):
+        return self.get(reference=reference)
 
 
-class SubjectGroupManager(models.Manager):
+class FocusGroupManager(models.Manager):
 
-    def get_by_natural_key(self, group_name):
-        return self.get(group_name=group_name)
+    def get_by_natural_key(self, reference):
+        return self.get(reference=reference)
 
 
-class SubjectGroupItemManager(models.Manager):
+class FocusGroupItemManager(models.Manager):
 
-    def get_by_natural_key(self, subject_group, subject_identifier):
-        return self.get(subject_group=subject_group, potential_subject__subject_identifier=subject_identifier)
+    def get_by_natural_key(self, focus_group, subject_identifier):
+        return self.get(focus_group=focus_group, potential_subject__subject_identifier=subject_identifier)
 
 
 class RecordingManager(models.Manager):
