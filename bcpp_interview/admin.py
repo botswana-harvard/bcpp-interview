@@ -30,7 +30,6 @@ class BaseModelAdmin(ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMi
 
 class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
 
-    additional_instructions = 'After saving you will be returned to the list of Potential Subjects.'
     redirect_app_label = 'bcpp_interview'
     redirect_model_name = 'potentialsubject'
 
@@ -55,6 +54,8 @@ class SubjectLocatorAdmin(ModelAdminLocatorMixin, BaseModelAdmin):
 @admin.register(SubjectConsent)
 class SubjectConsentAdmin(ModelAdminConsentMixin,
                           ModelAdminPotentialSubjectRedirectMixin, BaseModelAdmin):
+
+    additional_instructions = 'After saving you will be returned to the list of Potential Subjects.'
 
     mixin_exclude_fields = ['may_store_samples', 'study_site']
 

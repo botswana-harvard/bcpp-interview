@@ -1,17 +1,19 @@
 import json
-
+import pytz
+from datetime import date, datetime
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
-from django.utils import timezone
-from edc_constants.constants import OPEN, CLOSED
+from edc_constants.constants import CLOSED, NO, YES
 from edc_sync.models.outgoing_transaction import OutgoingTransaction
 
 from call_manager.models import Call
 
-from ..models import PotentialSubject
+from ..models import PotentialSubject, InterviewRecording, GroupDiscussionRecording
+
+tz = pytz.timezone(settings.TIME_ZONE)
 
 
 class StatisticsView(TemplateView):
@@ -24,6 +26,8 @@ class StatisticsView(TemplateView):
             'consented_today',
             'contacted_retry',
             'contacted_today',
+            'idi_not_verified',
+            'fgd_not_verified',
             'fgd_complete',
             'fgd_complete_today',
             'idi_complete',
@@ -61,7 +65,7 @@ class StatisticsView(TemplateView):
         calls = Call.objects.filter(call_attempts__gte=1)
         if calls:
             response_data.update(contacted_retry=calls.exclude(call_status=CLOSED).count())
-            calls.filter(modified__gte=timezone.now().date())
+            calls.filter(**self.modified_option)
             if calls:
                 response_data.update(contacted_today=calls.count())
         return self.verified_response_data(response_data)
@@ -85,16 +89,25 @@ class StatisticsView(TemplateView):
                 'not_consented': potential_subjects.filter(consented=False).count(),
                 'not_interviewed': potential_subjects.filter(interviewed=False).count(),
                 'consented': potential_subjects.filter(consented=True).count(),
+                'idi_not_verified': InterviewRecording.objects.filter(verified=NO).count(),
+                'fgd_not_verified': GroupDiscussionRecording.objects.filter(verified=NO).count(),
                 'idi_complete': potential_subjects.filter(idi=True).count(),
                 'fgd_complete': potential_subjects.filter(fgd=True).count(),
             })
-            potential_subjects = potential_subjects.filter(modified__gte=timezone.now().date())
+            potential_subjects = potential_subjects.filter(**self.modified_option)
             response_data.update({
                 'consented_today': potential_subjects.filter(consented=True).count(),
-                'idi_complete_today': potential_subjects.filter(idi=True).count(),
-                'fgd_complete_today': potential_subjects.filter(fgd=True).count(),
+                'idi_complete_today': InterviewRecording.objects.filter(
+                    verified=YES, **self.modified_option).count(),
+                'fgd_complete_today': GroupDiscussionRecording.objects.filter(
+                    verified=YES, **self.modified_option).count(),
             })
         return self.verified_response_data(response_data)
+
+    @property
+    def modified_option(self):
+        d = date.today()
+        return {'modified__gte': tz.localize(datetime(d.year, d.month, d.day, 0, 0, 0))}
 
     def verified_response_data(self, response_data):
         diff = set(response_data.keys()).difference(set(self.response_data.keys()))
