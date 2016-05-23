@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'edc_call_manager',
     'edc_locator',
     'edc_audio_recording',
+    'call_manager',
     'bcpp_interview',
 ]
 

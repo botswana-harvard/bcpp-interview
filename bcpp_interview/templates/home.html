@@ -1,52 +1,144 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+
+{% block extra_scripts%}
+    <script src="{% static "js/audio.js" %}"></script>
+{% endblock extra_scripts%}
+
 
 {% block main %}
 <p></p>
 
-<div class="container" align="center">
 
-    <div id="div-left" class="col-md-4">
-    </div>
     <div id="div-home" class="col-md-4">
         <ul id="nav-pill-home" class="nav nav-pills nav-stacked">
-          <li class="active"><a href="#" disabled">Home</a></li>
-          <li><a id="pill-potential-subjects" href="#">Potential Subjects</a></li>
-          <li><a id="pill-idi" href="#">In-depth Interviews (IDI)</a></li>
-          <li><a id="pill-groups" href="#">Focus Groups</a></li>
-          <li><a id="pill-fgd" href="#">Focus Group Discussions (FGD)</a></li>
-          <li><a id="pill-listen-idi" href="#">Listen to IDI</a></li>
-          <li><a id="pill-listen-fgd" href="#">Listen to FGD</a></li>
-          <li><a id="pill-call-manager" href="#">Call Manager</a></li>
+          <li class="active"><a href="#" disabled">Home 
+                <span class="glyphicon glyphicon-home pull-right" aria-hidden="true">
+          </a></li>
+          <li><a id="pill-call-manager" href="#">Call Subjects
+                <span class="glyphicon glyphicon-earphone pull-right" aria-hidden="true">
+          </a></li>
+          <li><a id="pill-potential-subjects" href="#">Potential Subjects
+                <span id="bdg-potential-subjects" class="badge pull-right"></span>
+                <span class="glyphicon glyphicon-user pull-right" aria-hidden="true">
+          </a></li>
+          <li><a id="pill-groups" href="#">Focus Groups
+                <span class="glyphicon glyphicon-user pull-right" aria-hidden="true">
+                <span class="glyphicon glyphicon-user pull-right" aria-hidden="true">
+          </a></li>
+          <li><a id="pill-idi" href="#">In-depth Interviews (IDI)
+                <span class="glyphicon glyphicon-record pull-right" aria-hidden="true">
+          </a></li>
+          <li><a id="pill-fgd" href="#">Focus Group Discussions (FGD)
+                <span class="glyphicon glyphicon-record pull-right" aria-hidden="true">
+          </a></li>
+          <li><a id="pill-listen-idi" href="#">Listen to IDI
+                <span class="glyphicon glyphicon-volume-up pull-right" aria-hidden="true">
+          </a></li>
+          <li><a id="pill-listen-fgd" href="#">Listen to FGD
+                <span class="glyphicon glyphicon-volume-up pull-right" aria-hidden="true">
+          </a></li>
           <li class="dropup">
-            <a id="pill-home-help" class="dropdown-toggle" data-toggle="dropdown" href="#">Help<span class="caret"></span></a>
+            <a id="pill-home-help" class="dropdown-toggle" data-toggle="dropdown" href="#">Help
+                <span class="caret pull-right"></span>
+            </a>
             <ul class="dropdown-menu">
-              <li class="active"><a id="pill-help" href="#"><span>Help</span></a></li>
+              <li class="dropdown-header">Help</li>
               <li><a id="pill-help-consent" href="#">Consent Potential Subjects</a></li>
-              <li><a id="pill-help-idi" href="#">In-depth Interviews</a></li>
-              <li><a id="pill-help-fgd" href="#">Focus Group Discussions</a></li>
               <li><a id="pill-help-fgd-create" href="#">Create Focus Group</a></li>
               <li><a id="pill-help-fgd-add" href="#">Add to existing Focus Group</a></li>
+              <li><a id="pill-help-idi" href="#">In-depth Interviews</a></li>
+              <li><a id="pill-help-fgd" href="#">Focus Group Discussions</a></li>
            </ul>
           <li class="dropup">
-            <a id="pill-home-help" class="dropdown-toggle" data-toggle="dropdown" href="#">Administration<span class="caret"></span></a>
+            <a id="pill-home-help" class="dropdown-toggle" data-toggle="dropdown" href="#">Administration
+                <span class="caret pull-right"></span>
+            </a>
             <ul class="dropdown-menu">
-              <li><a id="pill-help-consent" href="{% url 'admin:app_list' 'edc_sync' %}">Synchronization</a></li>
+              <li class="dropdown-header">Administration</li>
+              <li><a id="pill-admin-encryption" href="{% url 'encryption_admin:app_list' 'django_crypto_fields' %}"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span> Encryption</a></li>
+              <li><a id="pill-admin-sync" href="{% url 'admin:app_list' 'edc_sync' %}"><span class="glyphicon glyphicon-transfer" aria-hidden="true"></span> Synchronization</a></li>
+              <li><a id="pill-admin-import" href="{% url 'import_potential_subjects' 'bcpp_interview' 'potential_subject' %}"><span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Upload Potential Subjects</a></li>
            </ul>
         </ul>
     </div>
-    <div id="div-right" class="col-md-4">
-    </div>
+    <div id="div-home" class="col-md-4">
+        <div class="panel panel-warning">
+          <!-- Default panel contents -->
+            <div class="panel-heading">Worklist
+              <a id="link-refresh" href=""><i id="bdg-refresh" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
+            </div>
+            <div class="panel-body">
+            <ul class="nav nav-pills nav-stacked">
+            <li role="presentation"><a id="link-not-contacted" href="#">Subjects never contacted<span id="bdg-not-contacted" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-contacted-retry" href="#">Subjects contacted, try again<span id="bdg-contacted-retry" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-not-consented" href="#">Subjects not consented<span id="bdg-not-consented" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-not-interviewed" href="#">Subjects not interviewed<span id="bdg-not-interviewed" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-idi-unverified" href="#">IDIs not verified<span id="bdg-idi-unverified" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-fgd-unverified" href="#">FGDs not verified<span id="bdg-fgd-unverified" class="badge pull-right"></span></a></li>
+            </ul>
+            </div>
+        </div>
+        <div class="panel panel-default">
+          <!-- Default panel contents -->
+          <div class="panel-heading">Administration</div>
+            <div class="panel-body">
+            <ul class="nav nav-pills nav-stacked">
+            <li role="presentation"><a href="#">Pending transactions<span id="bdg-pending-transactions" class="badge pull-right"></span></a></li>
+            </ul>
+            </div>
+        </div>
 
 
-</div>
+
+        </div>
+    <div id="div-home" class="col-md-4">
+        <div class="panel panel-success">
+          <!-- Default panel contents -->
+          <div class="panel-heading"><span id="today">Today</span><span id="todays-date" class="pull-right"></span></div>
+            <div class="panel-body">
+            <ul class="nav nav-pills nav-stacked">
+            <li role="presentation"><a id="link-contacted-today" href="#">Contacted<span id="bdg-contacted-today" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-consented-today" href="#">Consented<span id="bdg-consented-today" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-idi-complete-today" href="#">IDIs complete<span id="bdg-idi-complete-today" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-fgd-complete-today" href="#">FGDs complete<span id="bdg-fgd-complete-today" class="badge pull-right"></span></a></li>
+            </ul>
+            </div>
+        </div>
+        <div class="panel panel-success">
+          <!-- Default panel contents -->
+          <div class="panel-heading">Overall</div>
+            <div class="panel-body">
+            <ul class="nav nav-pills nav-stacked">
+            <li role="presentation"><a id="link-consented" href="#">Consented<span id="bdg-consented" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-idi-complete" href="#">IDIs complete<span id="bdg-idi-complete" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-fgd-complete" href="#">FGDs complete<span id="bdg-fgd-complete" class="badge pull-right"></span></a></li>
+            </ul>
+            </div>
+        </div>
+        </div>
+
 
 {% endblock main %}
 
 {% block extra-scripts-bottom %}
 {{ block.super }}
+
 <script type="text/javascript" language="javascript" class="init">
     $(document).ready( function () {
-        $("#div-help-items").hide();
+        var d = new Date();
+        $("#todays-date").text(d.toDateString());
+        $("#bdg-refresh").click( function(e) {
+            e.preventDefault();
+            updateBadges();
+          });
+        updateBadges();            
+        updatePillLinks();    
+        updatePotentialSubjectLinks();
+        updateCallLinks();
+    });
+    
+    function updatePillLinks() {
         $('#pill-potential-subjects').click( function(e) {
             e.preventDefault();
             window.location.href='{% url 'admin:bcpp_interview_potentialsubject_changelist' %}';
@@ -73,22 +165,58 @@
             });
         $('#pill-call-manager').click( function(e) {
             e.preventDefault();
-            window.location.href='{% url 'call_manager_admin:app_list' 'edc_call_manager' %}';
+            window.location.href='{% url 'call_manager_admin:call_manager_call_changelist' %}';
             });
-        $('#pill-home').click( function(e) {
-            e.preventDefault();
-            $("#div-home").removeClass('active').addClass('active');
-            $("#div-home-items").show();
-            $("#div-help").removeClass('active');
-            $("#div-help-items").hide();
-            });            
-        $('#pill-help').click( function(e) {
-            e.preventDefault();
-            $("#div-home").removeClass('active');
-            $("#div-home-items").toggle();
-            $("#div-help").removeClass('active').addClass('active');
-            $("#div-help-items").toggle();
-            });            
-    });
+    }
+    
+    function updateCallLinks() {
+        
+        $('#link-not-contacted').attr('href', '{% url 'call_manager_admin:call_manager_call_changelist' %}'+'?call_status__exact=NEW');
+        $('#link-contacted-today').attr('href', '{% url 'call_manager_admin:call_manager_call_changelist' %}'+'?call_status__exact=open&'+todayString('modified'));
+    }
+
+    function todayString(column) {
+        var d = new Date();  //timestamp
+        var da = d.getDate();   //day
+        var mon = d.getMonth() + 1;   //month
+        var yr = d.getFullYear();   //year
+        return column+'__day='+da+'&'+column+'__month='+mon+'&'+column+'__year='+yr;
+    } 
+
+    function updatePotentialSubjectLinks() {
+        url = '{% url 'admin:bcpp_interview_potentialsubject_changelist' %}'
+        $('#link-not-consented').attr('href', url+'?consented__exact=0');
+        $('#link-not-interviewed').attr('href', url+'?interviewed__exact=0');
+        $('#link-consented').attr('href', url+'?consented__exact=1');
+        $('#link-interviewed').attr('href', url+'?interviewed__exact=1');
+        $('#link-consented-today').attr('href', url+'?consented__exact=1&'+todayString('modified'));
+        $('#link-interviewed-today').attr('href', url+'?interviewed__exact=1&'+todayString('modified'));
+    }
+    
+    function updateBadges() {
+        $("#bdg-refresh").addClass('fa-spin');
+        $.ajax({
+            type:'GET',
+            url: {% url 'update-statistics' %},
+            success:function(json){
+                $("#bdg-potential-subjects").text(json.potential_subjects);
+                $("#bdg-not-contacted").text(json.not_contacted);
+                $("#bdg-contacted-retry").text(json.contacted_retry);
+                $("#bdg-not-consented").text(json.not_consented);
+                $("#bdg-not-interviewed").text(json.not_interviewed);
+                $("#bdg-consented-today").text(json.consented_today);
+                $("#bdg-contacted-today").text(json.contacted_today);
+                $("#bdg-idi-complete-today").text(json.idi_complete_today);
+                $("#bdg-fgd-complete-today").text(json.fgd_complete_today);
+                $("#bdg-consented").text(json.consented);
+                $("#bdg-idi-complete").text(json.idi_complete);
+                $("#bdg-fgd-complete").text(json.fgd_complete);
+                $("#bdg-pending-transactions").text(json.pending_transactions);
+                $("#bdg-refresh").removeClass('fa-spin');
+              },
+        });
+    return true;
+    }
+ 
 </script>
 {% endblock extra-scripts-bottom%} 

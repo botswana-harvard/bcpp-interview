@@ -21,6 +21,7 @@
     <!-- Custom styles for this template -->
     <link href="{% static "css/dashboard.css" %}" rel="stylesheet" type="text/css" >
     <link href="{%static "css/receive.css" %}" rel="stylesheet" type="text/css" >
+    <link href="{%static "css/font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css" >
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -49,11 +50,9 @@
 
 {% endblock scripts %}
 
-{% block extra_scripts%}
+{% block extra-css %}{% endblock extra-css %}
 
-    <script src="{% static "js/audio.js" %}"></script>
-
-{% endblock extra_scripts%}
+{% block extra-scripts %}{% endblock extra-scripts %}
 
 
 {% endblock header %}
@@ -80,16 +79,11 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li id="li-topbar-home"><a class="glyphicon glyphicon-home" title="home" href="{% url 'admin:app_list' 'bcpp_interview' %}"></a></li>
+            <li id="li-topbar-home"><a class="glyphicon glyphicon-home" title="home" href="{% url 'home' %}"></a></li>
             <li id="li-topbar-settings"><a title="settings" href="/admin/"><span class="glyphicon glyphicon-wrench"></span></a></li>
             <li id="li-topbar-user-profile"><a title="user profile" href="/user_profile/">{{ user.username }}</a></li>
             <li id="li-topbar-logout"><a title="logout" href="/logout/"><span class="glyphicon glyphicon-log-out"></span></a></li>
           </ul>
-          {% block topbar_search %}
-          <form class="navbar-form navbar-right" action="{{request.path}}" method="GET">
-            <input type="text" class="form-control" placeholder="Search..." id="search" name="search">
-          </form>
-          {% endblock topbar_search %}
         </div>
       </div>
     </nav>

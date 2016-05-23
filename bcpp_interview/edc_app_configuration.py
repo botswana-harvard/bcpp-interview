@@ -12,7 +12,7 @@ study_end_datetime = datetime(2017, 5, 1, 0, 0, 0)
 
 class EdcAppConfiguration(object):
 
-    def __init__(self):
+    def __init__(self, ):
         pass
 
     def prepare(self):

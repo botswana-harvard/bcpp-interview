@@ -14,7 +14,7 @@ from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
 from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
 from edc_consent.models.fields.bw import IdentityFieldsMixin
-from edc_constants.choices import YES_NO
+from edc_constants.choices import YES_NO, GENDER
 from edc_constants.constants import NO, NOT_APPLICABLE
 from edc_locator.models import LocatorMixin
 from edc_registration.models.registered_subject import RegisteredSubject
@@ -151,7 +151,16 @@ class PotentialSubject(BaseUuidModel):
         null=True,
     )
 
+    gender = models.CharField(
+        max_length=10,
+        choices=GENDER,
+        null=True)
+
+    dob = models.DateField(null=True)
+
     subject_consent = models.ForeignKey(SubjectConsent, null=True, editable=False)
+
+    contacted = models.BooleanField(default=False, editable=False)
 
     consented = models.BooleanField(default=False, editable=False)
 
@@ -349,6 +358,7 @@ class GroupDiscussion(BaseInterview):
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'interview_datetime'
+        verbose_name = 'Focus Group Discussion'
 
 
 class InterviewRecording(SyncModelMixin, RecordingModelMixin, BaseUuidModel):

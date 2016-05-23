@@ -1,0 +1,32 @@
+import pandas as pd
+
+from bcpp_export.identity256 import identity
+from bcpp_export.dataframes.edc import EdcModelToDataFrame
+
+from bhp066.apps.bcpp_subject.models import SubjectConsent, SubjectLocator
+
+# BCPP is py2, Dj1.6 so switch environments
+# 
+
+# import SubjectConsent
+e = EdcModelToDataFrame(SubjectConsent)
+df = e.dataframe
+df['identity'] = df.apply(lambda row: identity(row, 'identity'), axis=1)
+df['last_name'] = df.apply(lambda row: identity(row, 'last_name'), axis=1)
+df['first_name'] = df.apply(lambda row: identity(row, 'first_name'), axis=1)
+df['initials'] = df.apply(lambda row: identity(row, 'initials'), axis=1)
+df[['subject_identifier', 'last_name', 'identity', 'dob', 'gender', 'consent_datetime', 'version', 'is_minor']].to_csv(
+    '/Users/erikvw/Documents/bcpp/bcpp_qual_study_consent.csv')
+
+# importing the list for PotentialSubjects and merge with SubjectConsent
+df1 = pd.read_csv('/Users/erikvw/Documents/bcpp/bcpp_qual_study_list.csv')
+df2 = df[['subject_identifier', 'last_name', 'identity', 'dob', 'gender', 'consent_datetime', 'version', 'is_minor']]
+df3 = pd.merge(df1, df2.query('version != \'?\''), on='subject_identifier', suffixes=['', '_consent'], how='inner')
+df3.sort_values(['subject_identifier', 'consent_datetime'], inplace=True)
+df3['dup'] = df3.duplicated('subject_identifier', keep='first')
+df3.to_csv('/Users/erikvw/Documents/bcpp/bcpp_qual_study_exported.csv')
+
+# for each PotentialConsent get SubjectLocator
+e = EdcModelToDataFrame(SubjectLocator)
+df = e.dataframe
+

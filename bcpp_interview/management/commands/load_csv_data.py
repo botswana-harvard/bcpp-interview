@@ -34,16 +34,17 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS('CSV \'{}\''.format(csv_filename.split('/')[-1:][0])))
         if model_name == 'potentialsubject':
-            columns = ['community', 'subject_identifier', 'category', 'identity']
+            columns = ['community', 'subject_identifier', 'category', 'identity', 'dob', 'gender']
         with open(csv_filename, 'r', newline='') as f:
             reader = csv.reader(f)
             header = None
             for recs, row in enumerate(reader):
                 if not header:
-                    header = True
+                    header = row
                 else:
                     try:
-                        model.objects.create(**dict(zip(columns, [row[1], row[2], row[3], row[5]])))
+                        model.objects.create(**dict(zip(
+                            columns, [row[header.index(col)] for col in columns])))
                     except TypeError as e:
                         raise CommandError(str(e))
                     except IntegrityError as e:

@@ -1,7 +1,6 @@
 from django.contrib import admin
 
 from edc_audio_recording.admin import recording_admin, ModelAdminRecordingMixin, ModelAdminAudioPlaybackMixin
-from edc_base.modeladmin.admin.base_tabular_inline import BaseTabularInline
 from edc_base.modeladmin.mixins import (
     ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
@@ -14,12 +13,18 @@ from .models import (
     FocusGroup, Interview, GroupDiscussion, FocusGroupItem, InterviewRecording,
     GroupDiscussionRecording, PotentialSubject, SubjectLoss, SubjectConsent,
     GroupDiscussionLabel, SubjectLocator)
+from edc_locator.admin.mixins import ModelAdminLocatorMixin
+from django.contrib.admin.options import TabularInline
+
+
+class BaseModelAdminTabularInline(ModelAdminAuditFieldsMixin, TabularInline):
+    pass
 
 
 class BaseModelAdmin(ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
                      ModelAdminAuditFieldsMixin, SimpleHistoryAdmin):
     list_per_page = 10
-    date_hierarchy = 'created'
+    date_hierarchy = 'modified'
     empty_value_display = '-'
 
 
@@ -31,15 +36,27 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
 
 
 @admin.register(SubjectLocator)
-class SubjectLocatorAdmin(BaseModelAdmin):
-    pass
+class SubjectLocatorAdmin(ModelAdminLocatorMixin, BaseModelAdmin):
+
+    fields = ['potential_subject']
+
+    readonly_fields = ('potential_subject', )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "potential_subject":
+            try:
+                potential_subject = PotentialSubject.objects.get(pk=request.GET.get('potential_subject'))
+                kwargs["queryset"] = [potential_subject]
+            except PotentialSubject.DoesNotExist:
+                pass
+        return super(SubjectLocatorAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(SubjectConsent)
 class SubjectConsentAdmin(ModelAdminConsentMixin,
                           ModelAdminPotentialSubjectRedirectMixin, BaseModelAdmin):
 
-    remove_consent_fields = ['may_store_samples', 'study_site']
+    mixin_exclude_fields = ['may_store_samples', 'study_site']
 
     redirect_search_field = 'subject_identifier'
 
@@ -59,7 +76,7 @@ class FocusGroupItemAdmin(BaseModelAdmin):
         return super(FocusGroupItemAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-class FocusGroupItemInline(BaseTabularInline):
+class FocusGroupItemInline(BaseModelAdminTabularInline):
     model = FocusGroupItem
     extra = 1
 
@@ -159,13 +176,13 @@ class GroupDiscussionRecordingAdmin(ModelAdminRecordingMixin, BaseModelAdmin):
             querystring_value=obj.group_discussion.focus_group.reference)
 
 
-class InterviewRecordingInline(BaseTabularInline):
+class InterviewRecordingInline(BaseModelAdminTabularInline):
 
     model = InterviewRecording
     extra = 0
 
 
-class GroupDiscussionRecordingInline(BaseTabularInline):
+class GroupDiscussionRecordingInline(BaseModelAdminTabularInline):
 
     model = GroupDiscussionRecording
     extra = 0
@@ -323,10 +340,10 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
                             BaseModelAdmin):
 
     list_display = ['subject_identifier', 'identity', 'consent_button', 'in_depth_button',
-                    'focus_group_button', 'consented', 'interviewed', 'idi', 'fgd',
+                    'focus_group_button', 'subject_status', 'idi', 'fgd',
                     'category', 'sub_category', 'community', 'region']
 
-    list_filter = ['consented', 'interviewed', 'category', 'sub_category', 'idi', 'fgd', 'community', 'region']
+    list_filter = ['contacted', 'consented', 'interviewed', 'category', 'sub_category', 'idi', 'fgd', 'community', 'region']
 
     radio_fields = {
         'category': admin.VERTICAL,
@@ -339,6 +356,19 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
     readonly_fields = ['subject_identifier', 'identity', 'category', 'sub_category', 'community', 'region']
 
     actions = [create_focus_group, add_to_focus_group_discussion]
+
+    def subject_status(self, obj):
+        template = '<span>{contacted}&nbsp;&nbsp;{consented}&nbsp;&nbsp;{interviewed}</span>'
+        contacted, consented, interviewed = [''] * 3
+        if obj.contacted:
+            contacted = '<i class="fa fa-phone fa-1x" title="Contacted"></i>'
+            if obj.consented:
+                consented = '<i class="fa fa-file-text fa-1x" title="Consented"></i>'
+                if obj.interviewed:
+                    interviewed = '<i class="fa fa-volume-up fa-1x" title="Interviewed"></i>'
+        return template.format(contacted=contacted, consented=consented, interviewed=interviewed)
+    subject_status.short_dscription = 'subject status'
+    subject_status.allow_tags = True
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super(PotentialSubjectAdmin, self).get_search_results(
