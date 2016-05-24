@@ -31,6 +31,11 @@ class EdcAppConfiguration(object):
          'model_name': 'subjectconsent',
          'start_datetime': study_start_datetime,
          'end_datetime': study_end_datetime,
+         'version': '1'},
+        {'app_label': 'bcpp_interview',
+         'model_name': 'nurseconsent',
+         'start_datetime': study_start_datetime,
+         'end_datetime': study_end_datetime,
          'version': '1'}]
 
     def update_or_create_consent_type(self):

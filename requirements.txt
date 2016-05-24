@@ -5,14 +5,13 @@ cffi
 ipython
 numpy
 sounddevice
-scikits.audiolab
 python-dateutil
 GitPython
 django_extensions==1.6.1
 pycrypto
 six
 humanize
-psycopg2
+# psycopg2
 Unipath
 django-simple-history
 django-crispy-forms

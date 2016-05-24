@@ -45,12 +45,14 @@ urlpatterns = [
         name='import_potential_subjects'),
     url(r'^admin/cm/$', RedirectView.as_view(url='/')),
     url(r'^admin/cm/', call_manager_admin.urls),
+    # url(r'^admin/sync/', edc_sync_admin.urls),
     url(r'^admin/$', RedirectView.as_view(url='/')),
     url(r'^admin/', admin.site.urls),
     url(r'^recording/admin/$', RedirectView.as_view(url='/')),
     url(r'^recording/$', RedirectView.as_view(url='/')),
     url(r'^recording/', include('edc_audio_recording.urls')),
-    url(r'^edc_sync/', include('edc_sync.urls')),
+    url(r'^sync/$', RedirectView.as_view(url='/')),
+    url(r'^sync/', include('edc_sync.urls')),
     url(r'', HomeView.as_view(), name='default'),
 ]
 

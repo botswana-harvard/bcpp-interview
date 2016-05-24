@@ -1,18 +1,17 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Field, Layout, BaseInput, ButtonHolder, HTML, Button
+from crispy_forms.layout import Submit, Field, Layout, BaseInput, ButtonHolder, Button
+
 from django import forms
 from django.db import models
 from django.forms import ValidationError
 from django.core.urlresolvers import reverse
-from django.forms.widgets import SplitDateTimeWidget
 
+from edc_call_manager.admin import call_manager_admin
 from edc_consent.forms.base_consent_form import BaseConsentForm
 from edc_constants.constants import NOT_APPLICABLE
-
-from .models import SubjectConsent, PotentialSubject, INITIATED
 from call_manager.models import LogEntry
-from call_manager.admin import CallAdmin
-from edc_call_manager.admin import call_manager_admin
+
+from .models import NurseConsent, SubjectConsent, PotentialSubject, INITIATED
 
 
 class PotentialSubjectForm(forms.ModelForm):
@@ -40,6 +39,13 @@ class SubjectConsentForm(BaseConsentForm):
     class Meta:
         model = SubjectConsent
         exclude = ['study_site']
+
+
+class NurseConsentForm(BaseConsentForm):
+
+    class Meta:
+        model = NurseConsent
+        exclude = ['study_site', 'guardian_name']
 
 
 class LoginForm(forms.Form):

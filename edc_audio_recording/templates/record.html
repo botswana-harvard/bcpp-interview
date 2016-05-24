@@ -1,5 +1,10 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 {% block topbar_search %}{% endblock %}
+
+{% block extra-scripts%}
+    <script src="{% static "js/audio.js" %}"></script>
+{% endblock extra-scripts %}
 
 {% block main %}
 {% csrf_token %}

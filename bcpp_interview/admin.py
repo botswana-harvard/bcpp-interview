@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin.options import TabularInline
 
 from edc_audio_recording.admin import recording_admin, ModelAdminRecordingMixin, ModelAdminAudioPlaybackMixin
 from edc_base.modeladmin.mixins import (
@@ -6,15 +7,14 @@ from edc_base.modeladmin.mixins import (
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
     ModelAdminAuditFieldsMixin)
 from edc_consent.admin.mixins import ModelAdminConsentMixin
+from edc_locator.admin.mixins import ModelAdminLocatorMixin
 from simple_history.admin import SimpleHistoryAdmin
 from .actions import create_focus_group, add_to_focus_group_discussion
-from .forms import SubjectConsentForm
+from .forms import SubjectConsentForm, NurseConsentForm
 from .models import (
     FocusGroup, Interview, GroupDiscussion, FocusGroupItem, InterviewRecording,
     GroupDiscussionRecording, PotentialSubject, SubjectLoss, SubjectConsent,
-    GroupDiscussionLabel, SubjectLocator)
-from edc_locator.admin.mixins import ModelAdminLocatorMixin
-from django.contrib.admin.options import TabularInline
+    GroupDiscussionLabel, SubjectLocator, NurseConsent)
 
 
 class BaseModelAdminTabularInline(ModelAdminAuditFieldsMixin, TabularInline):
@@ -49,6 +49,18 @@ class SubjectLocatorAdmin(ModelAdminLocatorMixin, BaseModelAdmin):
             except PotentialSubject.DoesNotExist:
                 pass
         return super(SubjectLocatorAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+@admin.register(NurseConsent)
+class NurseConsentAdmin(ModelAdminConsentMixin, ModelAdminModelRedirectMixin, BaseModelAdmin):
+
+    mixin_exclude_fields = ['may_store_samples', 'study_site', 'guardian_name']
+
+    redirect_app_label = 'bcpp_interview'
+    redirect_model_name = 'nurseconsent'
+    redirect_search_field = 'subject_identifier'
+
+    form = NurseConsentForm
 
 
 @admin.register(SubjectConsent)
@@ -362,11 +374,11 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
         template = '<span>{contacted}&nbsp;&nbsp;{consented}&nbsp;&nbsp;{interviewed}</span>'
         contacted, consented, interviewed = [''] * 3
         if obj.contacted:
-            contacted = '<i class="fa fa-phone fa-1x" title="Contacted"></i>'
+            contacted = '<i class="fa fa-phone fa-1x" title="Contacted" aria-hidden="true"></i>'
             if obj.consented:
-                consented = '<i class="fa fa-file-text fa-1x" title="Consented"></i>'
+                consented = '<i class="fa fa-file-text fa-1x" title="Consented" aria-hidden="true"></i>'
                 if obj.interviewed:
-                    interviewed = '<i class="fa fa-volume-up fa-1x" title="Interviewed"></i>'
+                    interviewed = '<i class="fa fa-volume-up fa-1x" title="Interviewed" aria-hidden="true"></i>'
         return template.format(contacted=contacted, consented=consented, interviewed=interviewed)
     subject_status.short_dscription = 'subject status'
     subject_status.allow_tags = True

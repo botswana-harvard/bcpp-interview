@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{% block extra_scripts%}
-    <script src="{% static "js/audio.js" %}"></script>
-{% endblock extra_scripts%}
-
-
 {% block main %}
 <p></p>
 
@@ -13,30 +8,34 @@
     <div id="div-home" class="col-md-4">
         <ul id="nav-pill-home" class="nav nav-pills nav-stacked">
           <li class="active"><a href="#" disabled">Home 
-                <span class="glyphicon glyphicon-home pull-right" aria-hidden="true">
+                <span class="glyphicon glyphicon-home pull-right" aria-hidden="true"></span>
           </a></li>
           <li><a id="pill-call-manager" href="#">Call Subjects
-                <span class="glyphicon glyphicon-earphone pull-right" aria-hidden="true">
+                <span class="glyphicon glyphicon-earphone pull-right" aria-hidden="true"></span>
           </a></li>
           <li><a id="pill-potential-subjects" href="#">Potential Subjects
                 <span id="bdg-potential-subjects" class="badge pull-right"></span>
-                <span class="glyphicon glyphicon-user pull-right" aria-hidden="true">
+                <span class="fa fa-user fa-2x pull-right" aria-hidden="true"></span>
+          </a></li>
+          <li><a id="pill-nurses" href="#">Nurses
+                <span id="bdg-nurses" class="badge pull-right"></span>
+                <span class="fa fa-user-md fa-2x pull-right" aria-hidden="true"></span>
+
           </a></li>
           <li><a id="pill-groups" href="#">Focus Groups
-                <span class="glyphicon glyphicon-user pull-right" aria-hidden="true">
-                <span class="glyphicon glyphicon-user pull-right" aria-hidden="true">
+                <span class="fa fa-users fa-2x pull-right" aria-hidden="true"></span>
           </a></li>
           <li><a id="pill-idi" href="#">In-depth Interviews (IDI)
-                <span class="glyphicon glyphicon-record pull-right" aria-hidden="true">
+                <span class="glyphicon glyphicon-record pull-right" aria-hidden="true"></span>
           </a></li>
           <li><a id="pill-fgd" href="#">Focus Group Discussions (FGD)
-                <span class="glyphicon glyphicon-record pull-right" aria-hidden="true">
+                <span class="glyphicon glyphicon-record pull-right" aria-hidden="true"></span>
           </a></li>
           <li><a id="pill-listen-idi" href="#">Listen to IDI
-                <span class="glyphicon glyphicon-volume-up pull-right" aria-hidden="true">
+                <span class="glyphicon glyphicon-volume-up pull-right" aria-hidden="true"></span>
           </a></li>
           <li><a id="pill-listen-fgd" href="#">Listen to FGD
-                <span class="glyphicon glyphicon-volume-up pull-right" aria-hidden="true">
+                <span class="glyphicon glyphicon-volume-up pull-right" aria-hidden="true"></span
           </a></li>
           <li class="dropup">
             <a id="pill-home-help" class="dropdown-toggle" data-toggle="dropdown" href="#">Help
@@ -57,7 +56,7 @@
             <ul class="dropdown-menu">
               <li class="dropdown-header">Administration</li>
               <li><a id="pill-admin-encryption" href="{% url 'encryption_admin:app_list' 'django_crypto_fields' %}"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span> Encryption</a></li>
-              <li><a id="pill-admin-sync" href="{% url 'admin:app_list' 'edc_sync' %}"><span class="glyphicon glyphicon-transfer" aria-hidden="true"></span> Synchronization</a></li>
+              <li><a id="pill-admin-sync" href="{% url 'edc_sync_admin:app_list' 'edc_sync' %}"><span class="glyphicon glyphicon-transfer" aria-hidden="true"></span> Synchronization</a></li>
               <li><a id="pill-admin-import" href="{% url 'import_potential_subjects' 'bcpp_interview' 'potential_subject' %}"><span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Upload Potential Subjects</a></li>
            </ul>
         </ul>
@@ -84,7 +83,7 @@
           <div class="panel-heading">Administration</div>
             <div class="panel-body">
             <ul class="nav nav-pills nav-stacked">
-            <li role="presentation"><a href="#">Pending transactions<span id="bdg-pending-transactions" class="badge pull-right"></span></a></li>
+            <li role="presentation"><a id="link-pending-transactions" href="#">Pending transactions<span id="bdg-pending-transactions" class="badge pull-right"></span></a></li>
             </ul>
             </div>
         </div>
@@ -127,8 +126,9 @@
 <script type="text/javascript" language="javascript" class="init">
     $(document).ready( function () {
         var d = new Date();
-        $("#todays-date").text(d.toDateString());
-        $("#bdg-refresh").click( function(e) {
+        $('#todays-date').text(d.toDateString());
+        $('#link-pending-transactions').attr('href', '{% url "edc_sync_admin:edc_sync_outgoingtransaction_changelist" %}');
+        $('#bdg-refresh').click( function(e) {
             e.preventDefault();
             updateBadges();
           });
@@ -151,6 +151,10 @@
         $('#pill-potential-subjects').click( function(e) {
             e.preventDefault();
             window.location.href='{% url 'admin:bcpp_interview_potentialsubject_changelist' %}';
+            });
+        $('#pill-nurses').click( function(e) {
+            e.preventDefault();
+            window.location.href='{% url 'admin:bcpp_interview_nurseconsent_changelist' %}';
             });
         $('#pill-idi').click( function(e) {
             e.preventDefault();

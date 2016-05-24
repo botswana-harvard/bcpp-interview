@@ -9,6 +9,7 @@ from django_crypto_fields.fields import (
 from simple_history.models import HistoricalRecords as AuditTrail
 
 from edc_audio_recording.models import RecordingModelMixin
+from edc_audio_recording.manager import RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
 from edc_consent.models.fields import (
@@ -16,6 +17,7 @@ from edc_consent.models.fields import (
 from edc_consent.models.fields.bw import IdentityFieldsMixin
 from edc_constants.choices import YES_NO, GENDER
 from edc_constants.constants import NO, NOT_APPLICABLE
+from edc_identifier.subject.classes import SubjectIdentifier
 from edc_locator.models import LocatorMixin
 from edc_registration.models.registered_subject import RegisteredSubject
 from edc_sync.models import SyncModelMixin
@@ -24,7 +26,6 @@ from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
     FocusGroupItemManager, InterviewManager, FocusGroupManager,
     SubjectLossManager, GroupDiscussionLabelManager)
-from edc_audio_recording.manager import RecordingManager
 
 
 NOT_LINKED = 'not_linked'
@@ -77,6 +78,42 @@ def group_identifier():
 
 def interview_identifier():
     return InterviewIdentifier().identifier
+
+
+class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
+                   PersonalFieldsMixin, CitizenFieldsMixin, VulnerabilityFieldsMixin, BaseUuidModel):
+
+    MIN_AGE_OF_CONSENT = 18
+    MAX_AGE_OF_CONSENT = 99
+    AGE_IS_ADULT = 18
+    GENDER_OF_CONSENT = ['M', 'F']
+    SUBJECT_TYPES = ['nurse']
+
+    interviewed = models.BooleanField(default=False, editable=False)
+
+    idi = models.BooleanField(default=False, editable=False)
+
+    fgd = models.BooleanField(default=False, editable=False)
+
+    history = AuditTrail()
+
+    consent = ConsentManager()
+
+    objects = ObjectConsentManager()
+
+    def __str__(self):
+        return '{} {}'.format(self.first_name, self.last_name, self.identity, self.subject_identifier)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.subject_identifier = SubjectIdentifier(site_code='99').get_identifier()
+        super(NurseConsent, self).save(*args, **kwargs)
+
+    class Meta:
+        app_label = 'bcpp_interview'
+        get_latest_by = 'consent_datetime'
+        unique_together = (('first_name', 'dob', 'initials', 'version'), )
+        ordering = ('created', )
 
 
 class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
