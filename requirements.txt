@@ -17,6 +17,7 @@ django-simple-history
 django-crispy-forms
 django-braces
 django-tastypie
+fake-factory
 # botswana-harvard requirements
 git+https://github.com/erikvw/django-crypto-fields@develop#egg=django_crypto_fields
 git+https://github.com/erikvw/django-revision@develop#egg=django_revision

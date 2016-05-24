@@ -33,21 +33,16 @@ class Command(BaseCommand):
             self.style.SUCCESS('Model \'{}\''.format(model._meta.verbose_name)))
         self.stdout.write(
             self.style.SUCCESS('CSV \'{}\''.format(csv_filename.split('/')[-1:][0])))
-        if model_name == 'potentialsubject':
-            columns = ['community', 'subject_identifier', 'category', 'identity', 'dob', 'gender']
-        with open(csv_filename, 'r', newline='') as f:
-            reader = csv.reader(f)
+#         if model_name == 'potentialsubject':
+#             columns = ['community', 'subject_identifier', 'category', 'identity', 'dob', 'gender']
+        with open(csv_filename, 'r', newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
             header = None
             for recs, row in enumerate(reader):
                 if not header:
                     header = row
                 else:
-                    try:
-                        model.objects.create(**dict(zip(
-                            columns, [row[header.index(col)] for col in columns])))
-                    except TypeError as e:
-                        raise CommandError(str(e))
-                    except IntegrityError as e:
-                        print(str(e), [row[1], row[2], row[3]])
+                    model.objects.create(**row)
+                print('  adding record {}'.format(recs), end='\r')
         self.stdout.write(
             self.style.SUCCESS('Successfully imported {} records'.format(recs)))
