@@ -11,6 +11,7 @@ from simple_history.models import HistoricalRecords as AuditTrail
 from edc_audio_recording.models import RecordingModelMixin
 from edc_audio_recording.manager import RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
+from edc_call_manager.mixins import CallLogLocatorMixin
 from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
 from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
@@ -240,11 +241,14 @@ class PotentialSubject(BaseUuidModel):
         app_label = 'bcpp_interview'
 
 
-class SubjectLocator(LocatorMixin, BaseUuidModel):
+class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
     history = AuditTrail()
+
+    def get_call_log_options(self):
+        return dict(call__potential_subject=self.potential_subject)
 
     class Meta:
         app_label = 'bcpp_interview'

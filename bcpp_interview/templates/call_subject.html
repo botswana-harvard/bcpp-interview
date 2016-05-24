@@ -35,16 +35,6 @@
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading">Contact Information</div>
-        <div class="panel-body">{{ contact_information }}</div>
-    </div>
-
-    <div class="panel panel-default">
-        <div class="panel-heading">Appointments</div>
-        <div class="panel-body">{{ appointments|default:'no open appointments' }}</div>
-    </div>
-
-    <div class="panel panel-default">
         <div class="panel-heading">Contact History</div>
         <div class="panel-body">
         <ul class="nav nav-pills nav-stacked">
@@ -53,6 +43,34 @@
         {% endfor %} 
         </ul>
         </div>
+    </div>
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Subject Contacts</div>
+            <div class="panel-body">
+            <ul class="nav nav-pills nav-stacked">
+                <li role="presentation"><b>Cell</b>: {{ contact_information.subject_cell }}</li>
+                <li role="presentation"><b>May SMS?</b>: {{ contact_information.may_sms_follow_up }}</li>
+                <li role="presentation"><b>Phone</b>: {{ contact_information.subject_phone }}</li>
+                <li role="presentation"><b>Address</b>: {{ contact_information.physical_address }}</li>
+            </ul>
+        </div>
+        {% if contact_information.contact_name %}
+            <div class="panel-heading">Other Contacts</div>
+                <div class="panel-body">
+                <ul class="nav nav-pills nav-stacked">
+                    <li role="presentation">{{ contact_information.contact_name }}</li>
+                    <li role="presentation">{{ contact_information.contact_cell }}</li>
+                    <li role="presentation">{{ contact_information.contact_relation|default:'relation unknown' }}</li>
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Appointments</div>
+        <div class="panel-body">{{ appointments|default:'no open appointments' }}</div>
     </div>
 
 </div>

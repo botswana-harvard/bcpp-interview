@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 
 from ..forms import LogEntryForm
 from call_manager.models import Log, LogEntry
-from bcpp_interview.models import PotentialSubject
+from bcpp_interview.models import PotentialSubject, SubjectLocator
 from edc_base.utils.age import formatted_age
 
 
@@ -22,11 +22,13 @@ class CallSubjectView(FormView):
         subject_identifier = log.call.subject_identifier
         call_status = log.call.get_call_status_display()
         subject = PotentialSubject.objects.get(subject_identifier=subject_identifier)
+        contact_information = SubjectLocator.objects.get(potential_subject=subject).to_dict()
+        print(contact_information)
         context.update(
             title=settings.PROJECT_TITLE,
             project_name=settings.PROJECT_TITLE,
             log_entry_form=LogEntryForm(),
-            contact_information=log.locator_information,
+            contact_information=contact_information,
             contact_history=LogEntry.objects.filter(log=log).order_by('-call_datetime'),
             subject_identifier=subject_identifier,
             name='{} {}'.format(subject.first_name or '', subject.last_name or ''),
