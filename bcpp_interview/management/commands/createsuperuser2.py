@@ -7,4 +7,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         User.objects.create(is_superuser=True, username='django',
-                            password=make_password('cc3721b'), is_staff=True, is_active=True)
+                            password=make_password('django'), is_staff=True, is_active=True)
