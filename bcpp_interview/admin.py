@@ -152,6 +152,10 @@ class FocusGroupAdmin(ModelAdminChangelistModelButtonMixin, BaseModelAdmin):
 @admin.register(InterviewRecording, site=recording_admin)
 class InterviewRecordingAdmin(ModelAdminRecordingMixin, BaseModelAdmin):
 
+    list_filter = ('interview__potential_subject__category',
+                   'interview__potential_subject__sub_category',
+                   'interview__potential_subject__community')
+
     def get_list_display(self, request):
         self.list_display = list(self.list_display)
         if 'interview_button' not in self.list_display:
@@ -170,6 +174,11 @@ class InterviewRecordingAdmin(ModelAdminRecordingMixin, BaseModelAdmin):
 
 @admin.register(GroupDiscussionRecording, site=recording_admin)
 class GroupDiscussionRecordingAdmin(ModelAdminRecordingMixin, BaseModelAdmin):
+
+    list_filter = ('group_discussion__focus_group__category',
+                   'group_discussion__focus_group__sub_category',
+                   # 'group_discussion__community',
+                   )
 
     def get_list_display(self, request):
         self.list_display = list(self.list_display)
@@ -254,6 +263,10 @@ class InterviewAdmin(BaseInterviewAdmin):
         'potential_subject__subject_consent__identity',
     ]
 
+    list_filter = ('potential_subject__category',
+                   'potential_subject__sub_category',
+                   'potential_subject__community')
+
     def category(self, obj):
         return obj.potential_subject.get_category_display()
 
@@ -317,6 +330,9 @@ class GroupDiscussionAdmin(BaseInterviewAdmin):
         'created',
         'user_created',
     ]
+
+    list_filter = ('focus_group__category',
+                   'focus_group__sub_category')
 
     search_fields = ('reference', 'group_discussion_label__discussion_label', 'focus_group__reference')
 

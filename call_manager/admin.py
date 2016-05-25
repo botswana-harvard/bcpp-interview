@@ -3,7 +3,7 @@ from django.contrib.admin.options import StackedInline
 from edc_base.modeladmin.mixins import (
     ModelAdminAuditFieldsMixin,
     ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin, ModelAdminModelRedirectMixin,
-    ModelAdminChangelistButtonMixin, ModelAdminChangelistModelButtonMixin)
+    ModelAdminChangelistModelButtonMixin)
 from edc_call_manager.admin import (
     ModelAdminCallMixin, ModelAdminLogMixin, ModelAdminLogEntryMixin,
     ModelAdminLogEntryInlineMixin, call_manager_admin)
@@ -30,6 +30,8 @@ class CallAdmin(BaseModelAdmin, ModelAdminCallMixin,
                 SimpleHistoryAdmin):
 
     mixin_list_display = None
+
+    list_filter = ('potential_subject__category', 'potential_subject__sub_category', 'potential_subject__community')
 
     list_display = (
         'subject_identifier',
@@ -86,6 +88,9 @@ class LogAdmin(BaseModelAdmin, ModelAdminModelRedirectMixin, ModelAdminLogMixin,
 
     inlines = [LogEntryInlineAdmin]
 
+    list_filter = ('call__potential_subject__category', 'call__potential_subject__sub_category',
+                   'call__potential_subject__community')
+
     readonly_fields = ('call', )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -100,4 +105,5 @@ class LogAdmin(BaseModelAdmin, ModelAdminModelRedirectMixin, ModelAdminLogMixin,
 
 @admin.register(LogEntry, site=call_manager_admin)
 class LogEntryAdmin(BaseModelAdmin, ModelAdminLogEntryMixin, SimpleHistoryAdmin):
-    pass
+    list_filter = ('log__call__potential_subject__category', 'log__call__potential_subject__sub_category',
+                   'log__call__potential_subject__community')
