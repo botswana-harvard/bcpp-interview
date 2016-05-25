@@ -1,6 +1,7 @@
 from django.db import models
 from simple_history.models import HistoricalRecords as AuditTrail
 from edc_call_manager.models import CallModelMixin, LogModelMixin, LogEntryModelMixin
+from edc_call_manager.constants import NO_CONTACT
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_sync.models.sync_model_mixin import SyncModelMixin
 from edc_call_manager.managers import CallManager, LogManager, LogEntryManager
@@ -49,8 +50,9 @@ class LogEntry(SyncModelMixin, LogEntryModelMixin, BaseUuidModel):
         app_label = 'call_manager'
 
 
-@receiver(post_save, sender=Call, dispatch_uid='post_save_bcpp_interview_call')
+@receiver(post_save, sender=LogEntry, dispatch_uid='post_save_bcpp_interview_call')
 def post_save_bcpp_interview_call(sender, instance, raw, created, using, update_fields, **kwargs):
     if not raw:
-        instance.potential_subject.contacted = True
-        instance.potential_subject.save(update_fields=['contacted', 'modified'])
+        if instance.contact_type != NO_CONTACT:
+            instance.log.call.potential_subject.contacted = True
+            instance.log.call.potential_subject.save(update_fields=['contacted', 'modified'])

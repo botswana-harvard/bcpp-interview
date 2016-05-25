@@ -2,9 +2,10 @@
 Django
 pytz
 cffi
+sounddevice
+pysoundfile
 ipython
 numpy
-sounddevice
 python-dateutil
 GitPython
 django_extensions==1.6.1

@@ -1,0 +1,2 @@
+brew install pkg-config libffi
+brew install libsndfile
