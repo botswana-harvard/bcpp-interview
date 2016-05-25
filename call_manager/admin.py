@@ -105,5 +105,6 @@ class LogAdmin(BaseModelAdmin, ModelAdminModelRedirectMixin, ModelAdminLogMixin,
 
 @admin.register(LogEntry, site=call_manager_admin)
 class LogEntryAdmin(BaseModelAdmin, ModelAdminLogEntryMixin, SimpleHistoryAdmin):
+
     list_filter = ('log__call__potential_subject__category', 'log__call__potential_subject__sub_category',
                    'log__call__potential_subject__community')
