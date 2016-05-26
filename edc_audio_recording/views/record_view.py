@@ -56,7 +56,7 @@ class RecordView(TemplateView):
         if request.is_ajax():
             if request.GET.get('action') == 'start_recording' and audio.get_status() == READY:
                 try:
-                    audio.record(self.filename, 44100)
+                    audio.record(self.filename, 16000)
                     response_data = {
                         "status": audio.get_status(),
                         "recording_time": audio.duration,
