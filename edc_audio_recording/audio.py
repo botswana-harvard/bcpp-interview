@@ -1,9 +1,10 @@
+import asyncio
 import numpy as np
 import os
 import sounddevice as sd
-# import soundfile as sf
+import soundfile as sf
 import time
-# from queue import Queue
+from queue import Queue
 
 from django.utils import timezone
 
@@ -34,6 +35,7 @@ class Audio(object):
         self.start_time = 0
         self.status = READY
         self.stop_datetime = None
+        self.subtype = None
 
     def record(self, filename, samplerate=None, block_duration=None):
         self.start_datetime = timezone.now()
@@ -51,22 +53,26 @@ class Audio(object):
             self.status = RECORDING
         return True
 
-#     def record_forever(self, filename, samplerate=None):
-#         """This is blocking, example from sounddevice"""
-#         samplerate = samplerate or self.samplerate
-#         queue = Queue()
-#
-#         def callback(indata, frames, time, status):
-#             """This is called (from a separate thread) for each audio block."""
-#             if status:
-#                 print(status, flush=True)
-#             queue.put(indata.copy())
-#         with sf.SoundFile(filename, mode='x', samplerate=samplerate,
-#                           channels=self.channels, subtype=self.subtype) as file:
-#             with sd.InputStream(samplerate=samplerate, device=self.device,
-#                                 channels=self.channels, callback=callback) as stream:
-#                 while self.alive:
-#                     file.write(queue.get())
+    def record_forever(self, filename, samplerate=None):
+        """example from sounddevice"""
+        self.filename = filename.split('.')[0] + '.ogg'
+        filename = self.filename
+        samplerate = samplerate or self.samplerate
+        queue = Queue()
+
+        def callback(indata, frames, time, status):
+            """This is called (from a separate thread) for each audio block."""
+            if status:
+                print(status, flush=True)
+            queue.put(indata.copy())
+
+        with sf.SoundFile(filename, mode='x', samplerate=samplerate,
+                          channels=self.channels, subtype=self.subtype) as file:
+            with sd.InputStream(samplerate=samplerate, device=self.device,
+                                channels=self.channels, callback=callback):
+                while True:
+                    file.write(queue.get())
+                    yield from asyncio.sleep(1)
 
     def close(self):
         raise KeyboardInterrupt()
