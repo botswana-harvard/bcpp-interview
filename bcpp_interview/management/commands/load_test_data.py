@@ -1,13 +1,16 @@
 import csv
 import os
 import random
+
 from faker import Faker
 from faker.providers import BaseProvider
 
 from django.core.management.base import BaseCommand, CommandError
-from bcpp_interview.models import PotentialSubject, CATEGORIES, SUB_CATEGORIES, INITIATED, SubjectLocator
+
 from edc_identifier.subject.classes.subject_identifier import SubjectIdentifier
 from edc_constants.constants import YES, NO, NOT_APPLICABLE
+
+from bcpp_interview.models import PotentialSubject, CATEGORIES, SUB_CATEGORIES, INITIATED, SubjectLocator
 
 fake = Faker()
 

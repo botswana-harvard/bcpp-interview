@@ -1,7 +1,6 @@
 import csv
 import os
 
-from django.db.utils import IntegrityError
 from django.apps import apps as django_apps
 from django.core.management.base import BaseCommand, CommandError
 

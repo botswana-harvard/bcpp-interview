@@ -1,1 +1,1 @@
-default_app_config = 'call_manager.apps.CallManagerAppConfig'
+default_app_config = 'edc_call_manager.apps.CallManagerAppConfig'

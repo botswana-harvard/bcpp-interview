@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin.options import TabularInline
 
-from edc_audio_recording.admin import recording_admin, ModelAdminRecordingMixin, ModelAdminAudioPlaybackMixin
+from audio_recording.admin import recording_admin, ModelAdminRecordingMixin, ModelAdminAudioPlaybackMixin
 from edc_base.modeladmin.mixins import (
     ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,

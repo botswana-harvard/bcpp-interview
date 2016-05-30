@@ -22,6 +22,10 @@ class Call(SyncModelMixin, CallModelMixin, BaseUuidModel):
     def __str__(self):
         return self.subject_identifier
 
+    @property
+    def subject(self):
+        return self.potential_subject
+
     class Meta:
         app_label = 'call_manager'
 

@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+
 from bcpp_interview.models import (
     PotentialSubject, LINKED_ONLY, NOT_LINKED,
     INITIATED, INITIATED_T1, DEFAULTER)
