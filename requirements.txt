@@ -19,7 +19,6 @@ django-crispy-forms
 django-braces
 django-tastypie
 fake-factory
-# botswana-harvard requirements
 git+https://github.com/erikvw/django-crypto-fields@develop#egg=django_crypto_fields
 git+https://github.com/erikvw/django-revision@develop#egg=django_revision
 git+https://github.com/botswana-harvard/edc-templates@develop#egg=edc_templates
@@ -33,11 +32,4 @@ git+https://github.com/botswana-harvard/edc-content-type-map@develop#egg=edc_con
 git+https://github.com/botswana-harvard/edc-locator@develop#egg=edc_locator
 git+https://github.com/botswana-harvard/edc-identifier@develop#egg=edc_identifier
 git+https://github.com/botswana-harvard/edc-constants@develop#egg=edc_constants
-# are these still required?
-git+https://github.com/botswana-harvard/edc-visit-schedule@develop#egg=edc_visit_schedule
-git+https://github.com/botswana-harvard/edc-visit-tracking@develop#egg=edc_visit_tracking
-git+https://github.com/botswana-harvard/edc-appointment@develop#egg=edc_appointment
-git+https://github.com/botswana-harvard/edc-export@develop#egg=edc_export
-git+https://github.com/botswana-harvard/edc-rule-groups@develop#egg=edc_rule_groups
-git+https://github.com/botswana-harvard/edc-meta-data@develop#egg=edc_meta_data
 git+https://github.com/botswana-harvard/edc-registration@develop#egg=edc_registration
