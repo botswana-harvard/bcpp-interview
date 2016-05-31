@@ -492,9 +492,11 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
 def post_save_consented(sender, instance, raw, created, using, update_fields, **kwargs):
     if not raw:
         potential_subject = PotentialSubject.objects.get(identity=instance.identity)
+        potential_subject.contacted = True
         potential_subject.consented = True
         potential_subject.subject_consent = instance
-        potential_subject.save(update_fields=['consented', 'subject_consent', 'user_modified', 'modified'])
+        potential_subject.save(
+            update_fields=['contacted', 'consented', 'subject_consent', 'user_modified', 'modified'])
 
 
 @receiver(post_save, sender=InterviewRecording, dispatch_uid='post_save_interview_recording')
