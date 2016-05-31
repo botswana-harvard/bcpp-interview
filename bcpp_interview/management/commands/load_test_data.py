@@ -9,10 +9,12 @@ from django.core.management.base import BaseCommand, CommandError
 
 from edc_identifier.subject.classes.subject_identifier import SubjectIdentifier
 from edc_constants.constants import YES, NO, NOT_APPLICABLE
+# from edc_call_manager.caller_site import site_model_callers
 
 from bcpp_interview.models import PotentialSubject, CATEGORIES, SUB_CATEGORIES, INITIATED, SubjectLocator
 
 fake = Faker()
+# site_model_callers.autodiscover()
 
 
 class BwCellProvider(BaseProvider):

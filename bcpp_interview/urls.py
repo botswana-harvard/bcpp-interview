@@ -17,16 +17,16 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 from django_crypto_fields.admin import encryption_admin
+
+from edc_base.views import LoginView, LogoutView
 from edc_call_manager.admin import call_manager_admin
 
 from .views import (
-    HomeView, LoginView, LogoutView, TranscribeView, TranslateView, StatisticsView, ImportDataView)
+    HomeView, StatisticsView)
 
 urlpatterns = [
     url(r'login', LoginView.as_view(), name='login_url'),
     url(r'logout', LogoutView.as_view(pattern_name='login_url'), name='logout_url'),
-    url(r'^transcribe/', TranscribeView.as_view(), name='transcribe'),
-    url(r'^translate/', TranslateView.as_view(), name='translate'),
     url(r'^statistics/', StatisticsView.as_view(), name='update-statistics'),
     url(r'^call_manager/$', RedirectView.as_view(pattern_name='home')),
     url(r'^call_manager/', include('edc_call_manager.urls', 'call_manager')),
@@ -36,9 +36,6 @@ urlpatterns = [
     url(r'^sync/', include('edc_sync.urls')),
     url(r'^encryption/$', RedirectView.as_view(url='/')),
     url(r'^encryption/', encryption_admin.urls),
-    url(r'^admin/import/(?P<app_label>\w+)/(?P<model_name>\w+)/',
-        ImportDataView.as_view(), {'app_label': 'bcpp_interview', 'model_name': 'potential_subject'},
-        name='import_potential_subjects'),
     url(r'^admin/$', RedirectView.as_view(url='/')),
     url(r'^admin/', call_manager_admin.urls),
     url(r'^admin/', admin.site.urls),
