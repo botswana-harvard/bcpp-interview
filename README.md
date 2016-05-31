@@ -30,7 +30,8 @@ For the production environment:
     ...
 
 
-### Consent potential subjects
+### Usage
+#### Consent potential subjects
 
 * From Home, click "Potential Subjects"
 * on the `PotentialSubjects` changelist search for subjects by identity number
@@ -39,7 +40,7 @@ For the production environment:
 * _will return to the `PotentialSubjects` changelist_
 * Follow steps for "In-depth Interviews" or "Focus Group Discussions"
 
-###In-depth Interviews
+####In-depth Interviews
 
 * From Home, click "Potential Subjects"
 * You may wish to filter the list "by consent" and/or "by interviewed"   
@@ -51,9 +52,9 @@ For the production environment:
 * _will return to the `In-depth Interview Recording` page when done_
 * Follow steps for Playback and Verification
 
-###Focus Group Discussions
+####Focus Group Discussions
 
-####Create Focus Group
+#####Create Focus Group
 * From Home, click "Potential Subjects"
 * You may wish to filter the list "by consent" and/or "by interviewed"   
 * Find the consented subjects to be added to the `FocusGroup`  
@@ -62,7 +63,7 @@ For the production environment:
 * Select "Create Focus Group" from the "Actions" dropdown and click "Go"
 * From one of the focus group members, click "Add" under the Discussion column (_if the discusssion already exists, this will be the disscussion reference number._)
 
-####Add to existing Focus Group  
+#####Add to existing Focus Group  
 * From Home, click "Potential Subjects"
 * You may wish to filter the list "by consent" and/or "by interviewed"   
 * Find and tick at least one consented subject already in the `FocusGroup` 
@@ -70,7 +71,7 @@ For the production environment:
 * Select "Add to Existing Focus Group" from the "Actions" dropdown and click "Go"
 * From one of the focus group members, click "Add" under the Discussion column (_if the discusssion already exists, this will be the disscussion reference number._)
 
-### Recording
+#### Recording
 Steps are the same for both `In-depth Interview` and `Focus Group Discussion`
 * From Home, click "In-depth Interviews (IDI)" or "Focus Group Discussions"
 * On the changelist, find the IDI or FGD and click the RECORD button.
@@ -81,7 +82,7 @@ Steps are the same for both `In-depth Interview` and `Focus Group Discussion`
 * Dismiss the green "Success" alert by clicking the 'X' on the right corning of the green alert
 * Click Home on the top left to return to the main menu.
 
-### Playback and Verification
+#### Playback and Verification
 Steps are the same for both `In-depth InterviewRecording` and `Focus Group Discussion Recording`
 * From Home, click "Listen to IDI" or "Listen to FGD"
 * Select the recording and click "Play" to listen to the recording
@@ -90,13 +91,13 @@ Steps are the same for both `In-depth InterviewRecording` and `Focus Group Discu
 * Save the recording
 * Click Home on the top left to return to the main menu.
  
-###Import Potential Subjects management command
+####Import Potential Subjects management command
 
 Import a list of potential subjects from CSV of format 'subject_identifier, 'category', 'community', 'region'.
 
     python manage.py load_csv_data bcpp_interview.potential_subject path_to_file
     
-###Update Categories management command
+####Update Categories management command
 
 Update categories for the imported potential subjects
 
