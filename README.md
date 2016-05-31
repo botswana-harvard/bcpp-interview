@@ -9,6 +9,27 @@ Uses the python module `sounddevice` for audio recordings.
 
 Important: For now, this is a single user system! The original plan is to deploy on offline laptops and not to access over the network as client server. 
 
+### Installation
+
+Let say you start in a `source` folder, e.g. `~/source`:
+
+    cd ~/source
+    git clone <this repo>
+    cd ~/bcpp-interview
+    pip install -r requirements.txt
+    
+For a test environment:
+
+    python manage.py load_test_data
+    python manage.py update_categories
+    python manage.py createsuperuser2
+    
+For the production environment:
+
+    change KEY_PATH in `settings.py`
+    ...
+
+
 ### Consent potential subjects
 
 * From Home, click "Potential Subjects"
