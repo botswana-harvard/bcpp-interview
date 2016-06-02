@@ -52,6 +52,7 @@ For the production environment:
     python manage.py load_production_data bcpp_interview.rawdata path/to/my/file.csv
     
     # download images from google maps
+
     python manage.py fetch_map_images bcpp_interview.subjectlocation 25
 
 ### Usage
