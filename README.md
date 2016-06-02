@@ -48,6 +48,8 @@ For the production environment:
     # Production data    
     # csv file should have same fields as raw data, although only the
     # subject identifier, dob, identity, gender, community, issue, elig_cat are required.
+    # Note that the system doesn't actually use the RawData model. So as long as you populate
+    # PotentialSubject, SubjectLocator, and SubjectLocation (optional) it will work.
     
     python manage.py load_production_data bcpp_interview.rawdata path/to/my/file.csv
     
