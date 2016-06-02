@@ -2,12 +2,16 @@
 
 Conduct and record In-depth interviews or Focus group discussions.
 
-* Information on potential subjects is preloaded into the PotentialSubjects 
-* Before participating in an IDI or FGD, each subject must complete the Informed Consent. 
+* Information on potential subjects is preloaded into the PotentialSubjects along with location and locator information.
+* Contact with participants for appointment scheduling and reminders is managed and tracked with  `edc-call-manager`.
+* Safely stores consent and locator data by encrypting PII with `django-crypto-fields`.
+* Imports and displays satellite images for offline use to assist research assistants to locate participants, `edc-map`. 
+* Enforces informed consent process before further data collection is permitted using `edc-consent`.
+* Records interviews directly on the laptop and manages file storage and linkage to the consented participant/group members.
 
 Uses the python module `sounddevice` for audio recordings.
 
-Important: For now, this is a single user system! The original plan is to deploy on offline laptops and not to access over the network as client server. 
+<B>Important</B>: For now, this is a single user system! The original plan is to deploy on offline laptops and not to access over the network as client server. 
 
 ### Installation
 
