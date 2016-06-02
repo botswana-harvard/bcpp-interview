@@ -11,6 +11,11 @@ Important: For now, this is a single user system! The original plan is to deploy
 
 ### Installation
 
+On MacOSX:
+
+    brew install pkg-config libffi
+    brew install libsndfile  # (optional)
+
 Let say you start in a `source` folder, e.g. `~/source`:
 
     cd ~/source

@@ -20,6 +20,7 @@ from edc_constants.choices import YES_NO, GENDER
 from edc_constants.constants import NO, NOT_APPLICABLE
 from edc_identifier.subject.classes import SubjectIdentifier
 from edc_locator.models import LocatorMixin
+from edc_map.model_mixins import MapperModelMixin
 from edc_sync.models import SyncModelMixin
 
 from registration.models import RegisteredSubject
@@ -486,6 +487,46 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
     class Meta:
         app_label = 'bcpp_interview'
         verbose_name_plural = "Subject Loss"
+
+
+class SubjectLocation(MapperModelMixin, BaseUuidModel):
+
+    subject_identifier = models.CharField(
+        max_length=25,
+        unique=True)
+
+    community = models.CharField(
+        max_length=25)
+
+    def __str__(self):
+        return '{} {} (latitude={}, longitude={})'.format(
+            self.subject_identifier, self.community, self.point.latitude, self.point.longitude)
+
+    def natural_key(self):
+        return self.subject_identifier
+
+    def save(self, *args, **kwargs):
+        self.area_name = self.community
+        self.gps_target_lon = self.gps_confirm_longitude
+        self.gps_target_lat = self.gps_confirm_latitude
+        self.target_radius = 25
+        super(SubjectLocation, self).save(*args, **kwargs)
+
+    class Meta:
+        app_label = 'bcpp_interview'
+        verbose_name_plural = "Subject Location"
+
+
+class Survey(BaseUuidModel):
+    """Dummy survey class for mappers."""
+
+    name = models.CharField(
+        max_length=10,
+        null=True)
+
+    class Meta:
+        app_label = 'bcpp_interview'
+        verbose_name_plural = "Survey"
 
 
 @receiver(post_save, sender=SubjectConsent, dispatch_uid='post_save_consented')

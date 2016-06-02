@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block extra-scripts %}
+{{ block.super }}
+<script type="text/javascript" charset="utf8" src="{% static "js/mapper.js" %}"></script>
+{% endblock extra-scripts %}
+
+{% block main %}
+<p></p>
+{{ context }}
+<div id="div-home" class="col-md-10">
+    <div class="panel panel-default">
+        <div class="panel-body">
+        <button id="id-button-zoom1" type="button" class="btn btn-sm btn-primary">Zoom level 1</button>
+        <button id="id-button-zoom2" type="button" class="btn btn-sm btn-default">Zoom level 2</button>
+        <button id="id-button-zoom3" type="button" class="btn btn-sm btn-default">Zoom level 3</button>
+        <span class="pull-right"><button id="id-button-cancel" type="button" class="btn btn-sm btn-default">Back</button></span>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">{{ map_area|default:"community"|title }} (longitude={{longitude }} latitude={{latitude}}) <span class="pull-right">{{ subject_identifier }}</span></div>
+        <div id="image-container" class="panel-body">
+        <img id="id-image-map" class="img-rounded responsive" src="/media/a99f624b-f3b3-42e8-952a-45cfe5801e9016.jpg"/>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Labels</div>
+        <ul>
+        {% for label, landmark in landmarks %}
+            <li>{{ label }} {{ landmark.name }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+
+
+
+{% endblock main %}
+
+{% block extra-scripts-bottom %}
+{{ block.super }}
+<script type="text/javascript" charset="utf8" class="init">
+var zoom_level = 1;
+$(document).ready( function () {
+    var file_zoom_level_one = '{{ image_file_zoom_level_one }}';
+    var file_zoom_level_two = '{{ image_file_zoom_level_two }}';
+    var file_zoom_level_three = '{{ image_file_zoom_level_three }}';
+
+    $('#id-button-cancel').click( function () {
+        window.location = '{{ next_url }}';
+    });
+    $('#id-image-map').attr('src', '{% static src_image_zoom1 %}');
+    
+    $('#image-container').on('click', 'img', function() {
+        if (zoom_level == 1) {
+            zoom2(file_zoom_level_two);
+        } else if (zoom_level == 2) {
+            zoom3(file_zoom_level_three);
+        } else {
+            zoom1(file_zoom_level_one);
+        };
+    });
+    $('#id-button-zoom1').click( function () {
+        zoom1(file_zoom_level_one);
+    });
+    $('#id-button-zoom2').click( function () {
+        zoom2(file_zoom_level_two);
+    });
+    $('#id-button-zoom3').click( function () {
+        zoom3(file_zoom_level_three);
+    });
+});
+
+function zoom1 (image_map_path) {
+        zoom_level = 1;
+        $('#id-image-map').attr('src', image_map_path);
+        $('#id-image-map-name').text(image_map_path);
+        $('#id-button-zoom1').addClass('btn-primary');
+        $('#id-button-zoom2').addClass('btn-default').removeClass('btn-primary');
+        $('#id-button-zoom3').addClass('btn-default').removeClass('btn-primary');
+};
+function zoom2 (image_map_path) {
+        zoom_level = 2;
+        $('#id-image-map').attr('src', image_map_path);
+        $('#id-image-map-name').text(image_map_path);
+        $('#id-button-zoom2').addClass('btn-primary');
+        $('#id-button-zoom1').addClass('btn-default').removeClass('btn-primary');
+        $('#id-button-zoom3').addClass('btn-default').removeClass('btn-primary');
+};
+function zoom3 (image_map_path) {
+        zoom_level = 3;
+        $('#id-image-map').attr('src', image_map_path);
+        $('#id-image-map-name').text(image_map_path);
+        $('#id-button-zoom3').addClass('btn-primary');
+        $('#id-button-zoom1').addClass('btn-default').removeClass('btn-primary');
+        $('#id-button-zoom2').addClass('btn-default').removeClass('btn-primary');
+};
+</script>
+
+{% endblock extra-scripts-bottom %}

@@ -14,7 +14,10 @@ from .forms import SubjectConsentForm, NurseConsentForm
 from .models import (
     FocusGroup, Interview, GroupDiscussion, FocusGroupItem, InterviewRecording,
     GroupDiscussionRecording, PotentialSubject, SubjectLoss, SubjectConsent,
-    GroupDiscussionLabel, SubjectLocator, NurseConsent)
+    GroupDiscussionLabel, SubjectLocator, NurseConsent, SubjectLocation)
+
+
+admin.site.register(SubjectLocation)
 
 
 class BaseModelAdminTabularInline(ModelAdminAuditFieldsMixin, TabularInline):

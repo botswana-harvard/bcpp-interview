@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'audio_recording',
     'call_manager',
     'registration',
-    'bcpp_interview',
+    'bcpp_interview.apps.BcppInterviewMapAppConfig',
+    'bcpp_interview.apps.BcppInterviewAppConfig',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -85,6 +86,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -156,13 +158,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR.child('static')
 
 MEDIA_ROOT = BASE_DIR.child('media')
+MEDIA_URL = '/media/'
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 
@@ -183,3 +186,5 @@ DEVICE_ID = '15'
 SERVER_DEVICE_ID_LIST = ['99']
 UPLOAD_FOLDER = os.path.join(MEDIA_ROOT, 'upload')
 PROJECT_IDENTIFIER_PREFIX = '066'
+CURRENT_SURVEY = 'bcpp-year-1'
+CURRENT_COMMUNITY = None
