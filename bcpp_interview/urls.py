@@ -27,6 +27,7 @@ from .views import (
     HomeView, StatisticsView, LocationView)
 
 urlpatterns = [
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     url(r'login', LoginView.as_view(), name='login_url'),
     url(r'logout', LogoutView.as_view(pattern_name='login_url'), name='logout_url'),
     url(r'^statistics/', StatisticsView.as_view(), name='update-statistics'),
@@ -47,7 +48,7 @@ urlpatterns = [
     url(r'^', HomeView.as_view(), name='home'),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 admin.site.site_header = 'BCPP Interview'

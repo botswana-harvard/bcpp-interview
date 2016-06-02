@@ -25,7 +25,7 @@
         <div class="panel-heading">{{ map_area|default:"community"|title }} (latitude={{ point.latitude }} longitude={{ point.longitude }}) <span class="pull-right">{{ subject_identifier }}</span></div>
         <div id="image-container" class="panel-body">
         {% if point %}
-            <img id="id-image-map" class="img-rounded responsive" src="/media/a99f624b-f3b3-42e8-952a-45cfe5801e9016.jpg"/>
+            <img id="id-image-map" class="img-rounded img-responsive" src="/media/a99f624b-f3b3-42e8-952a-45cfe5801e9016.jpg"/>
         {% else %}
             <div class="alert alert-warning">
                 No location information available for this subject.
@@ -67,7 +67,7 @@ $(document).ready( function () {
     $('#id-button-back-subject').click( function () {
         window.location = '{{ back_subject_url }}';
     });
-    $('#id-image-map').attr('src', '{% static src_image_zoom1 %}');
+    $('#id-image-map').attr('src', file_zoom_level_one).attr('title', file_zoom_level_one).attr('alt', file_zoom_level_one);
     
     $('#image-container').on('click', 'img', function() {
         if (zoom_level == 1) {
@@ -91,7 +91,7 @@ $(document).ready( function () {
 
 function zoom1 (image_map_path) {
         zoom_level = 1;
-        $('#id-image-map').attr('src', image_map_path);
+        $('#id-image-map').attr('src', image_map_path).attr('title', image_map_path).attr('alt', image_map_path);
         $('#id-image-map-name').text(image_map_path);
         $('#id-button-zoom1').addClass('btn-primary');
         $('#id-button-zoom2').addClass('btn-default').removeClass('btn-primary');
@@ -99,7 +99,7 @@ function zoom1 (image_map_path) {
 };
 function zoom2 (image_map_path) {
         zoom_level = 2;
-        $('#id-image-map').attr('src', image_map_path);
+        $('#id-image-map').attr('src', image_map_path).attr('title', image_map_path).attr('alt', image_map_path);
         $('#id-image-map-name').text(image_map_path);
         $('#id-button-zoom2').addClass('btn-primary');
         $('#id-button-zoom1').addClass('btn-default').removeClass('btn-primary');
@@ -107,7 +107,7 @@ function zoom2 (image_map_path) {
 };
 function zoom3 (image_map_path) {
         zoom_level = 3;
-        $('#id-image-map').attr('src', image_map_path);
+        $('#id-image-map').attr('src', image_map_path).attr('title', image_map_path).attr('alt', image_map_path);
         $('#id-image-map-name').text(image_map_path);
         $('#id-button-zoom3').addClass('btn-primary');
         $('#id-button-zoom1').addClass('btn-default').removeClass('btn-primary');
