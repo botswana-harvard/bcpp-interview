@@ -8,10 +8,11 @@ Conduct and record In-depth interviews or Focus group discussions.
 * Imports and displays satellite images for offline use to assist research assistants to locate participants, `edc-map`. 
 * Enforces informed consent process before further data collection is permitted using `edc-consent`.
 * Records interviews directly on the laptop and manages file storage and linkage to the consented participant/group members.
+* Works offline and data can be synchronized with the server later with `edc-sync`.
 
 Uses the python module `sounddevice` for audio recordings.
 
-<B>Important</B>: For now, this is a single user system! The original plan is to deploy on offline laptops and not to access over the network as client server. 
+<B>Important</B>: For now, this is a single user system! The current plan is to deploy multiple instances on offline laptops and not to access over the network as a client/server model. 
 
 ### Installation
 
