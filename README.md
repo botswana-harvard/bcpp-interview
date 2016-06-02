@@ -17,8 +17,11 @@ Uses the python module `sounddevice` for audio recordings.
 
 On MacOSX:
 
-    brew install pkg-config libffi
-    brew install libsndfile  # (optional)
+    brew install pkg-config libffi libsndfile
+
+On Ubuntu:
+
+    sudo apt-get install libportaudio2 python3-cffi libffi-dev
 
 Let say you start in a `source` folder, e.g. `~/source`:
 
@@ -35,9 +38,20 @@ For a test environment:
     
 For the production environment:
 
+    # Encryption keys
+    # the default KEY_PATH will make the Edc use the keys in the repository.
+    # The keys in the repository cannot be used for a production system.
+    
     change KEY_PATH in `settings.py`
-    ...
-
+    
+    # Production data    
+    # csv file should have same fields as raw data, although only the
+    # subject identifier, dob, identity, gender, community, issue, elig_cat are required.
+    
+    python manage.py load_production_data bcpp_interview.rawdata path/to/my/file.csv
+    
+    # download images from google maps
+    python manage.py fetch_map_images bcpp_interview.subjectlocation 25
 
 ### Usage
 #### Consent potential subjects
