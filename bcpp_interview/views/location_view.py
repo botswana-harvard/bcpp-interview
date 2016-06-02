@@ -13,6 +13,7 @@ class LocationView(MapImageView):
     item_model = SubjectLocation
     item_model_field = 'subject_identifier'
     app_label = 'bcpp_map'
+    filename_field = 'subject_identifier'
 
     def get_context_data(self, **kwargs):
         context = super(LocationView, self).get_context_data(**kwargs)

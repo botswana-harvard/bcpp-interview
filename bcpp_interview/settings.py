@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'edc_content_type_map',
     'edc_device',
     'edc_identifier',
+    'edc_map',
     'edc_locator',
     'edc_registration',
     'edc_sync',

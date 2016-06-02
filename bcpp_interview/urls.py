@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls.static import static
+from django.views import static
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.generic.base import RedirectView
@@ -27,7 +27,7 @@ from .views import (
     HomeView, StatisticsView, LocationView)
 
 urlpatterns = [
-    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    url(r'^media/(?P<path>.*)$', static.serve, {'document_root': settings.MEDIA_ROOT}),
     url(r'login', LoginView.as_view(), name='login_url'),
     url(r'logout', LogoutView.as_view(pattern_name='login_url'), name='logout_url'),
     url(r'^statistics/', StatisticsView.as_view(), name='update-statistics'),
@@ -37,7 +37,6 @@ urlpatterns = [
     url(r'^recording/', include('audio_recording.urls')),
     url(r'^sync/$', RedirectView.as_view(url='/')),
     url(r'^sync/', include('edc_sync.urls')),
-    # url(r'^map/', include('edc_map.urls')),
     url(r'^map/$', RedirectView.as_view(pattern_name='home')),
     url(r'^map/(?P<map_area>\w+)/(?P<subject_identifier>[0-9\-]{14})/', LocationView.as_view(), name='location_url'),
     url(r'^admin/$', RedirectView.as_view(url='/')),
@@ -47,8 +46,6 @@ urlpatterns = [
     url(r'^home/', HomeView.as_view(), name='home'),
     url(r'^', HomeView.as_view(), name='home'),
 ]
-
-# urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 admin.site.site_header = 'BCPP Interview'

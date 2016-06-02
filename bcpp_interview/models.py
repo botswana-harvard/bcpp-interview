@@ -533,6 +533,145 @@ class Survey(BaseUuidModel):
         verbose_name_plural = "Survey"
 
 
+class RawData(BaseUuidModel):
+
+    subject_identifier = models.CharField(
+        max_length=25,
+        null=True)
+
+    identity = IdentityField(null=True)
+
+    last_name = LastnameField(null=True)
+
+    pair = models.CharField(
+        max_length=25,
+        null=True)
+
+    community = models.CharField(
+        max_length=25,
+        null=True)
+
+    intervention = models.CharField(
+        max_length=25,
+        null=True)
+
+    age_at_interview = models.CharField(
+        max_length=25,
+        null=True)
+
+    gender = models.CharField(
+        max_length=25,
+        null=True)
+
+    education = models.CharField(
+        max_length=25,
+        null=True)
+
+    working = models.CharField(
+        max_length=25,
+        null=True)
+
+    referral_appt_dt = models.CharField(
+        max_length=25,
+        null=True)
+
+    cd4_value = models.CharField(
+        max_length=25,
+        null=True)
+
+    viral_load = models.CharField(
+        max_length=25,
+        null=True)
+
+    final_arv_Status = models.CharField(
+        max_length=25,
+        null=True)
+
+    flag = models.CharField(
+        max_length=25,
+        null=True)
+
+    art_eligible = models.CharField(
+        max_length=25,
+        null=True)
+
+    art_eligible_natl = models.CharField(
+        max_length=25,
+        null=True)
+
+    art_eligible_expanded = models.CharField(
+        max_length=25,
+        null=True)
+
+    pims_registration_date = models.CharField(
+        max_length=25,
+        null=True)
+
+    pims_art_initiation_date = models.CharField(
+        max_length=25,
+        null=True)
+
+    pimsclinicname = models.CharField(
+        max_length=25,
+        null=True)
+
+    first_arv = models.CharField(
+        max_length=25,
+        null=True)
+
+    clinic_receiving_from = models.CharField(
+        max_length=25,
+        null=True)
+
+    on_arv = models.CharField(
+        max_length=25,
+        null=True)
+
+    why_no_arv = models.CharField(
+        max_length=25,
+        null=True)
+
+    t1_visit_date = models.CharField(
+        max_length=25,
+        null=True)
+
+    ref_code_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    issue = models.CharField(
+        max_length=25,
+        null=True)
+
+    elig_cat = models.CharField(
+        max_length=25,
+        null=True)
+
+    latitude = models.DecimalField(
+        max_digits=15,
+        null=True,
+        decimal_places=10)
+
+    longitude = models.DecimalField(
+        max_digits=15,
+        null=True,
+        decimal_places=10)
+
+    gender_plot = models.CharField(
+        max_length=25,
+        null=True)
+
+    dob = models.CharField(
+        max_length=25,
+        null=True)
+
+    def __str__(self):
+        return self.subject_identifier
+
+    class Meta:
+        app_label = 'bcpp_interview'
+
+
 @receiver(post_save, sender=SubjectConsent, dispatch_uid='post_save_consented')
 def post_save_consented(sender, instance, raw, created, using, update_fields, **kwargs):
     if not raw:

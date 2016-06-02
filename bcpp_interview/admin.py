@@ -14,7 +14,7 @@ from .forms import SubjectConsentForm, NurseConsentForm
 from .models import (
     FocusGroup, Interview, GroupDiscussion, FocusGroupItem, InterviewRecording,
     GroupDiscussionRecording, PotentialSubject, SubjectLoss, SubjectConsent,
-    GroupDiscussionLabel, SubjectLocator, NurseConsent, SubjectLocation)
+    GroupDiscussionLabel, SubjectLocator, NurseConsent, SubjectLocation, RawData)
 
 
 class BaseModelAdminTabularInline(ModelAdminAuditFieldsMixin, TabularInline):
@@ -34,14 +34,28 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
     redirect_model_name = 'potentialsubject'
 
 
+@admin.register(RawData)
+class RawDataAdmin(admin.ModelAdmin):
+
+    list_per_page = 10
+
+    list_display = ('subject_identifier', 'issue', 'elig_cat', 'art_eligible',
+                    'art_eligible_natl', 'art_eligible_expanded')
+
+    list_filter = ('gender', 'issue', 'elig_cat', 'art_eligible',
+                   'art_eligible_natl', 'art_eligible_expanded')
+
+    search_fields = ('subject_identifier', 'id')
+
+
 @admin.register(SubjectLocation)
 class SubjectLocationAdmin(ModelAdminChangelistModelButtonMixin, BaseModelAdmin):
 
     list_display = ('subject_identifier', 'community', 'map_button', 'potential_subject_button')
 
-    search_fields = ('subject_identifier', )
-
     list_filter = ('map_area', )
+
+    search_fields = ('subject_identifier', 'id')
 
     def potential_subject_button(self, obj):
         return self.changelist_list_button(
