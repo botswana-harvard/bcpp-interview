@@ -17,9 +17,6 @@ from .models import (
     GroupDiscussionLabel, SubjectLocator, NurseConsent, SubjectLocation)
 
 
-admin.site.register(SubjectLocation)
-
-
 class BaseModelAdminTabularInline(ModelAdminAuditFieldsMixin, TabularInline):
     pass
 
@@ -37,12 +34,41 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
     redirect_model_name = 'potentialsubject'
 
 
+@admin.register(SubjectLocation)
+class SubjectLocationAdmin(ModelAdminChangelistModelButtonMixin, BaseModelAdmin):
+
+    list_display = ('subject_identifier', 'community', 'map_button', 'potential_subject_button')
+
+    search_fields = ('subject_identifier', )
+
+    list_filter = ('map_area', )
+
+    def potential_subject_button(self, obj):
+        return self.changelist_list_button(
+            'bcpp_interview', 'potentialsubject', label='subject',
+            querystring_value=obj.subject_identifier)
+    potential_subject_button.short_description = 'subject'
+
+    def map_button(self, obj):
+        return self.button(
+            'location_url', (obj.map_area, obj.subject_identifier, ), label='map')
+    map_button.short_description = 'map'
+
+
 @admin.register(SubjectLocator)
 class SubjectLocatorAdmin(ModelAdminLocatorMixin, BaseModelAdmin):
 
     fields = ['potential_subject']
 
+    list_display_pos = ((2, 'map_button'), )
+
     readonly_fields = ('potential_subject', )
+
+    def map_button(self, obj):
+        return self.button(
+            'location_url',
+            (obj.potential_subject.map_area, obj.potential_subject.subject_identifier, ), label='map')
+    map_button.short_description = 'map'
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "potential_subject":
@@ -371,7 +397,7 @@ class GroupDiscussionLabelAdmin(BaseModelAdmin):
 class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelButtonMixin,
                             BaseModelAdmin):
 
-    list_display = ['subject_identifier', 'identity', 'consent_button', 'in_depth_button',
+    list_display = ['subject_identifier', 'identity', 'map_button', 'consent_button', 'in_depth_button',
                     'focus_group_button', 'subject_status', 'idi', 'fgd',
                     'category', 'sub_category', 'community', 'region']
 
@@ -422,6 +448,11 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
             'bcpp_interview', 'subjectconsent', reverse_args=reverse_args,
             change_label='consent')
     consent_button.short_description = 'Consent'
+
+    def map_button(self, obj):
+        return self.button(
+            'location_url', (obj.map_area, obj.subject_identifier, ), label='map')
+    map_button.short_description = 'map'
 
     def get_in_depth_button(self, obj):
         disabled = None

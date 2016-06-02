@@ -15,20 +15,31 @@
         <button id="id-button-zoom1" type="button" class="btn btn-sm btn-primary">Zoom level 1</button>
         <button id="id-button-zoom2" type="button" class="btn btn-sm btn-default">Zoom level 2</button>
         <button id="id-button-zoom3" type="button" class="btn btn-sm btn-default">Zoom level 3</button>
-        <span class="pull-right"><button id="id-button-cancel" type="button" class="btn btn-sm btn-default">Back</button></span>
+        <span class="pull-right">
+            <button id="id-button-back-call" type="button" class="btn btn-sm btn-default">Call</button>
+            <button id="id-button-back-subject" type="button" class="btn btn-sm btn-default">Subject</button>            
+        </span>
         </div>
     </div>
     <div class="panel panel-default">
-        <div class="panel-heading">{{ map_area|default:"community"|title }} (longitude={{longitude }} latitude={{latitude}}) <span class="pull-right">{{ subject_identifier }}</span></div>
+        <div class="panel-heading">{{ map_area|default:"community"|title }} (latitude={{ point.latitude }} longitude={{ point.longitude }}) <span class="pull-right">{{ subject_identifier }}</span></div>
         <div id="image-container" class="panel-body">
-        <img id="id-image-map" class="img-rounded responsive" src="/media/a99f624b-f3b3-42e8-952a-45cfe5801e9016.jpg"/>
+        {% if point %}
+            <img id="id-image-map" class="img-rounded responsive" src="/media/a99f624b-f3b3-42e8-952a-45cfe5801e9016.jpg"/>
+        {% else %}
+            <div class="alert alert-warning">
+                No location information available for this subject.
+                <button id="id-button-add-point" type="button" class="btn btn-sm btn-default pull-right">Add Coordinates</button>
+                
+            </div>
+        {% endif %}    
         </div>
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">Labels</div>
-        <ul>
-        {% for label, landmark in landmarks %}
-            <li>{{ label }} {{ landmark.name }}</li>
+        <ul class="list-group">
+        {% for label, landmark in landmarks.items %}
+            <li class="list-group-item list-group-item-info"><b>{{ label }}</b>: {{ landmark.name }}</li>
         {% endfor %}
         </ul>
     </div>
@@ -47,8 +58,14 @@ $(document).ready( function () {
     var file_zoom_level_two = '{{ image_file_zoom_level_two }}';
     var file_zoom_level_three = '{{ image_file_zoom_level_three }}';
 
-    $('#id-button-cancel').click( function () {
-        window.location = '{{ next_url }}';
+    $('#id-button-add-point').click( function () {
+        window.location = '{{ add_point_url }}';
+    });
+    $('#id-button-back-call').click( function () {
+        window.location = '{{ back_call_url }}';
+    });
+    $('#id-button-back-subject').click( function () {
+        window.location = '{{ back_subject_url }}';
     });
     $('#id-image-map').attr('src', '{% static src_image_zoom1 %}');
     

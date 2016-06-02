@@ -239,6 +239,10 @@ class PotentialSubject(BaseUuidModel):
         return '{}. {}. {}'.format(
             name, self.get_category_display(), self.subject_identifier)
 
+    @property
+    def map_area(self):
+        return self.community.replace(' ', '_').lower()
+
     class Meta:
         app_label = 'bcpp_interview'
 
@@ -506,7 +510,7 @@ class SubjectLocation(MapperModelMixin, BaseUuidModel):
         return self.subject_identifier
 
     def save(self, *args, **kwargs):
-        self.area_name = self.community
+        self.map_area = self.community.replace(' ', '_').lower()
         self.gps_target_lon = self.gps_confirm_longitude
         self.gps_target_lat = self.gps_confirm_latitude
         self.target_radius = 25
