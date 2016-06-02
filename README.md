@@ -117,16 +117,3 @@ Steps are the same for both `In-depth InterviewRecording` and `Focus Group Discu
 * Open the recording and indicate if it has been verified (Yes/No) and if required add a comment
 * Save the recording
 * Click Home on the top left to return to the main menu.
- 
-####Import Potential Subjects management command
-
-Import a list of potential subjects from CSV of format 'subject_identifier, 'category', 'community', 'region'.
-
-    python manage.py load_csv_data bcpp_interview.potential_subject path_to_file
-    
-####Update Categories management command
-
-Update categories for the imported potential subjects
-
-    python manage.py update_categories
-    
