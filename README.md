@@ -8,17 +8,21 @@ Conduct and record In-depth interviews or Focus group discussions.
 * Imports and displays satellite images for offline use to assist research assistants to locate participants, `edc-map`. 
 * Enforces informed consent process before further data collection is permitted using `edc-consent`.
 * Records interviews directly on the laptop and manages file storage and linkage to the consented participant/group members.
+* Works offline and data can be synchronized with the server later with `edc-sync`.
 
 Uses the python module `sounddevice` for audio recordings.
 
-<B>Important</B>: For now, this is a single user system! The original plan is to deploy on offline laptops and not to access over the network as client server. 
+<B>Important</B>: For now, this is a single user system! The current plan is to deploy multiple instances on offline laptops and not to access over the network as a client/server model. 
 
 ### Installation
 
 On MacOSX:
 
-    brew install pkg-config libffi
-    brew install libsndfile  # (optional)
+    brew install pkg-config libffi libsndfile
+
+On Ubuntu:
+
+    sudo apt-get install libportaudio2 python3-cffi libffi-dev
 
 Let say you start in a `source` folder, e.g. `~/source`:
 
@@ -35,9 +39,23 @@ For a test environment:
     
 For the production environment:
 
+    # Encryption keys
+    # the default KEY_PATH will make the Edc use the keys in the repository.
+    # The keys in the repository cannot be used for a production system.
+    
     change KEY_PATH in `settings.py`
-    ...
+    
+    # Production data    
+    # csv file should have same fields as raw data, although only the
+    # subject identifier, dob, identity, gender, community, issue, elig_cat are required.
+    # Note that the system doesn't actually use the RawData model. So as long as you populate
+    # PotentialSubject, SubjectLocator, and SubjectLocation (optional) it will work.
+    
+    python manage.py load_production_data bcpp_interview.rawdata path/to/my/file.csv
+    
+    # download images from google maps
 
+    python manage.py fetch_map_images bcpp_interview.subjectlocation 25
 
 ### Usage
 #### Consent potential subjects
@@ -99,16 +117,3 @@ Steps are the same for both `In-depth InterviewRecording` and `Focus Group Discu
 * Open the recording and indicate if it has been verified (Yes/No) and if required add a comment
 * Save the recording
 * Click Home on the top left to return to the main menu.
- 
-####Import Potential Subjects management command
-
-Import a list of potential subjects from CSV of format 'subject_identifier, 'category', 'community', 'region'.
-
-    python manage.py load_csv_data bcpp_interview.potential_subject path_to_file
-    
-####Update Categories management command
-
-Update categories for the imported potential subjects
-
-    python manage.py update_categories
-    
