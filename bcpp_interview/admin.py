@@ -37,6 +37,10 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
 @admin.register(RawData)
 class RawDataAdmin(admin.ModelAdmin):
 
+    exclude = ['last_name', 'identity']
+
+    readonly_fields = ['subject_identifier'] + sorted([f.name for f in RawData._meta.fields if f.name not in ['last_name', 'identity', 'subject_identifier']])
+
     list_per_page = 10
 
     list_display = ('subject_identifier', 'issue', 'elig_cat', 'art_eligible',

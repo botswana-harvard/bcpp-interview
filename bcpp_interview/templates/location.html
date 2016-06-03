@@ -3,116 +3,50 @@
 
 {% block extra-scripts %}
 {{ block.super }}
-<script type="text/javascript" charset="utf8" src="{% static "js/mapper.js" %}"></script>
+<script type="text/javascript" charset="utf8" src="{% static 'js/edc_map/map_image_view.js' %}"></script>
 {% endblock extra-scripts %}
 
 {% block main %}
 <p></p>
-{{ context }}
+
 <div id="div-home" class="col-md-10">
+
     <div class="panel panel-default">
-        <div class="panel-body">
-        <button id="id-button-zoom1" type="button" class="btn btn-sm btn-primary">Zoom level 1</button>
-        <button id="id-button-zoom2" type="button" class="btn btn-sm btn-default">Zoom level 2</button>
-        <button id="id-button-zoom3" type="button" class="btn btn-sm btn-default">Zoom level 3</button>
-        <span class="pull-right">
-            <button id="id-button-back-call" type="button" class="btn btn-sm btn-default">Call</button>
-            <button id="id-button-back-subject" type="button" class="btn btn-sm btn-default">Subject</button>            
-        </span>
+        <div id="div-zoom-buttons-container" class="panel-body">
+            <span class="pull-right">
+                <button id="id-button-back-call" type="button" class="btn btn-sm btn-default">Call</button>
+                <button id="id-button-back-subject" type="button" class="btn btn-sm btn-default">Subject</button>            
+            </span>
         </div>
     </div>
+
     <div class="panel panel-default">
-        <div class="panel-heading">{{ map_area|default:"community"|title }} (latitude={{ point.latitude }} longitude={{ point.longitude }}) <span class="pull-right">{{ subject_identifier }}</span></div>
-        <div id="image-container" class="panel-body">
-        {% if point %}
-            <img id="id-image-map" class="img-rounded img-responsive" src="/media/a99f624b-f3b3-42e8-952a-45cfe5801e9016.jpg"/>
-        {% else %}
-            <div class="alert alert-warning">
-                No location information available for this subject.
-                <button id="id-button-add-point" type="button" class="btn btn-sm btn-default pull-right">Add Coordinates</button>
-                
+        <div class="panel-heading">{{ map_area|default:"area"|title }} (latitude={{ point.latitude }} longitude={{ point.longitude }}) <span class="pull-right">{{ subject_identifier }}</span></div>
+            <div id="div-image-maps-container" class="panel-body">
+                <div id="div-missing-image-alert" class="alert alert-warning" style="display:none">
+                </div>
             </div>
-        {% endif %}    
-        </div>
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">{{ map_area|default:"community"|title }} Landmarks</div>
+
+    <div id="div-landmarks" class="panel panel-default" style="display:none">
+        <div class="panel-heading">{{ map_area|default:"area"|title }} Landmarks</div>
         <ul class="list-group">
         {% for label, landmark in landmarks.items %}
             <li class="list-group-item list-group-item-info"><b>{{ label }}</b>: {{ landmark.name }}</li>
         {% endfor %}
         </ul>
     </div>
+
 </div>
-
-
 
 {% endblock main %}
 
 {% block extra-scripts-bottom %}
 {{ block.super }}
 <script type="text/javascript" charset="utf8" class="init">
-var zoom_level = 1;
-$(document).ready( function () {
-    var file_zoom_level_one = '{{ image_file_zoom_level_one }}';
-    var file_zoom_level_two = '{{ image_file_zoom_level_two }}';
-    var file_zoom_level_three = '{{ image_file_zoom_level_three }}';
-
-    $('#id-button-add-point').click( function () {
-        window.location = '{{ add_point_url }}';
+    $(document).ready( function() { 
+        mapImageViewReady('{{ json_data|escapejs }}');
     });
-    $('#id-button-back-call').click( function () {
-        window.location = '{{ back_call_url }}';
-    });
-    $('#id-button-back-subject').click( function () {
-        window.location = '{{ back_subject_url }}';
-    });
-    $('#id-image-map').attr('src', file_zoom_level_one).attr('title', file_zoom_level_one).attr('alt', file_zoom_level_one);
-    
-    $('#image-container').on('click', 'img', function() {
-        if (zoom_level == 1) {
-            zoom2(file_zoom_level_two);
-        } else if (zoom_level == 2) {
-            zoom3(file_zoom_level_three);
-        } else {
-            zoom1(file_zoom_level_one);
-        };
-    });
-    $('#id-button-zoom1').click( function () {
-        zoom1(file_zoom_level_one);
-    });
-    $('#id-button-zoom2').click( function () {
-        zoom2(file_zoom_level_two);
-    });
-    $('#id-button-zoom3').click( function () {
-        zoom3(file_zoom_level_three);
-    });
-});
-
-function zoom1 (image_map_path) {
-        zoom_level = 1;
-        $('#id-image-map').attr('src', image_map_path).attr('title', image_map_path).attr('alt', image_map_path);
-        $('#id-image-map-name').text(image_map_path);
-        $('#id-button-zoom1').addClass('btn-primary');
-        $('#id-button-zoom2').addClass('btn-default').removeClass('btn-primary');
-        $('#id-button-zoom3').addClass('btn-default').removeClass('btn-primary');
-};
-function zoom2 (image_map_path) {
-        zoom_level = 2;
-        $('#id-image-map').attr('src', image_map_path).attr('title', image_map_path).attr('alt', image_map_path);
-        $('#id-image-map-name').text(image_map_path);
-        $('#id-button-zoom2').addClass('btn-primary');
-        $('#id-button-zoom1').addClass('btn-default').removeClass('btn-primary');
-        $('#id-button-zoom3').addClass('btn-default').removeClass('btn-primary');
-};
-function zoom3 (image_map_path) {
-        zoom_level = 3;
-        $('#id-image-map').attr('src', image_map_path).attr('title', image_map_path).attr('alt', image_map_path);
-        $('#id-image-map-name').text(image_map_path);
-        $('#id-button-zoom3').addClass('btn-primary');
-        $('#id-button-zoom1').addClass('btn-default').removeClass('btn-primary');
-        $('#id-button-zoom2').addClass('btn-default').removeClass('btn-primary');
-};
 </script>
 
 {% endblock extra-scripts-bottom %}
