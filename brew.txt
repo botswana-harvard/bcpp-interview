@@ -1,2 +1,4 @@
+# see python soundevice, requires:
+
 brew install pkg-config libffi
 brew install libsndfile

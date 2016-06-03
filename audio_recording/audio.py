@@ -24,6 +24,7 @@ class StopAudio(Exception):
 class Audio(object):
 
     def __init__(self):
+        self.available = True
         self.block_duration = None
         self.channels = 1
         self.chunk = 1024
@@ -31,7 +32,11 @@ class Audio(object):
         self.device = 0
         self.filename = None
         self.recording_time = None
-        self.samplerate = int(sd.query_devices(self.device, 'input')['default_samplerate'])
+        try:
+            self.samplerate = int(sd.query_devices(self.device, 'input')['default_samplerate'])
+        except sd.PortAudioError:
+            self.samplerate = None
+            self.available = False
         self.start_datetime = None
         self.start_time = 0
         self.status = READY
@@ -39,41 +44,45 @@ class Audio(object):
         self.subtype = None
 
     def record(self, filename, samplerate=None, block_duration=None):
-        self.start_datetime = timezone.now()
-        self.samplerate = samplerate or self.samplerate
-        self.filename = filename
-        if os.path.exists(self.filename):
-            raise AudioError('Error recording. File already exists! Got {}'.format(self.filename))
+        if not self.available:
             return False
-        self.block_duration = block_duration or 14400
-        if self.status == READY:
-            self.start_time = time.process_time()
-            self.data = sd.rec(
-                self.block_duration * self.samplerate,
-                channels=self.channels)
-            self.status = RECORDING
+        else:
+            self.start_datetime = timezone.now()
+            self.samplerate = samplerate or self.samplerate
+            self.filename = filename
+            if os.path.exists(self.filename):
+                raise AudioError('Error recording. File already exists! Got {}'.format(self.filename))
+                return False
+            self.block_duration = block_duration or 14400
+            if self.status == READY:
+                self.start_time = time.process_time()
+                self.data = sd.rec(
+                    self.block_duration * self.samplerate,
+                    channels=self.channels)
+                self.status = RECORDING
         return True
 
     def record_forever(self, filename, samplerate=None):
         """example from sounddevice"""
-        self.filename = filename.split('.')[0] + '.ogg'
-        filename = self.filename
-        samplerate = samplerate or self.samplerate
-        queue = Queue()
+        if self.available:
+            self.filename = filename.split('.')[0] + '.ogg'
+            filename = self.filename
+            samplerate = samplerate or self.samplerate
+            queue = Queue()
 
-        def callback(indata, frames, time, status):
-            """This is called (from a separate thread) for each audio block."""
-            if status:
-                print(status, flush=True)
-            queue.put(indata.copy())
+            def callback(indata, frames, time, status):
+                """This is called (from a separate thread) for each audio block."""
+                if status:
+                    print(status, flush=True)
+                queue.put(indata.copy())
 
-        with sf.SoundFile(filename, mode='x', samplerate=samplerate,
-                          channels=self.channels, subtype=self.subtype) as file:
-            with sd.InputStream(samplerate=samplerate, device=self.device,
-                                channels=self.channels, callback=callback):
-                while True:
-                    file.write(queue.get())
-                    yield from asyncio.sleep(1)
+            with sf.SoundFile(filename, mode='x', samplerate=samplerate,
+                              channels=self.channels, subtype=self.subtype) as file:
+                with sd.InputStream(samplerate=samplerate, device=self.device,
+                                    channels=self.channels, callback=callback):
+                    while True:
+                        file.write(queue.get())
+                        yield from asyncio.sleep(1)
 
     def close(self):
         raise KeyboardInterrupt()
