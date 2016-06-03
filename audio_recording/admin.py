@@ -35,7 +35,6 @@ class ModelAdminAudioPlaybackMixin(object):
     def record(self, obj):
         kwargs = {'app_label': obj._meta.app_label, 'model_name': obj._meta.model_name, 'pk': obj.pk}
         url = reverse('record', kwargs=kwargs)
-        print(url)
         return format_html(
             '<a id="record-{id}" href="{url}" '
             'class="button">Record</a>', id=obj.pk, url=url)

@@ -21,3 +21,4 @@ class BcppInterviewMapAppConfig(EdcMapAppConfig):
     verbose_name = 'BCPP Interview Mappers'
     mapper_model = ('bcpp_interview', 'subjectlocation')
     mapper_survey_model = ('bcpp_interview', 'survey')
+    verify_point_on_save = False

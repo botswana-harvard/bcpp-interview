@@ -249,7 +249,7 @@ class PotentialSubject(BaseUuidModel):
 
 class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 
-    potential_subject = models.ForeignKey(PotentialSubject)
+    potential_subject = models.OneToOneField(PotentialSubject)
 
     history = AuditTrail()
 
@@ -537,7 +537,7 @@ class RawData(BaseUuidModel):
 
     subject_identifier = models.CharField(
         max_length=25,
-        null=True)
+        unique=True)
 
     identity = IdentityField(null=True)
 

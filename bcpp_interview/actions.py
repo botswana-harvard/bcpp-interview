@@ -119,6 +119,5 @@ def create_focus_group(modeladmin, request, queryset):
             url = reverse(
                 'admin:bcpp_interview_potentialsubject_changelist') + (
                     '?q={}').format(focus_group.reference)
-    print(url)
     return HttpResponseRedirect(url)
 create_focus_group.short_description = "Create Focus Group"

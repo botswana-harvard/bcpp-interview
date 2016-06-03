@@ -5,8 +5,7 @@ from simple_history.admin import SimpleHistoryAdmin
 
 from edc_base.modeladmin.mixins import (
     ModelAdminAuditFieldsMixin,
-    ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin, ModelAdminModelRedirectMixin,
-    ModelAdminChangelistModelButtonMixin)
+    ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin, ModelAdminModelRedirectMixin)
 from edc_call_manager.admin import (
     ModelAdminCallMixin, ModelAdminLogMixin, ModelAdminLogEntryMixin,
     ModelAdminLogEntryInlineMixin, call_manager_admin)

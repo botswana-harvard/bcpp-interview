@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 from bcpp_interview.models import PotentialSubject, SubjectLocation
 from edc_map.exceptions import MapperError
 from django.db.utils import IntegrityError
+from edc_constants.constants import NOT_APPLICABLE
 
 
 class Command(BaseCommand):
@@ -15,6 +16,8 @@ class Command(BaseCommand):
 
     For example:
         python manage.py load_production_data bcpp_interview.rawdata /Users/erikvw/Documents/bcpp/qualitative_substudy_subject_list10may2016_with_plots.csv
+
+        python manage.py load_production_data bcpp_interview.rawdata /home/django/qualitative_substudy_subject_list10may2016_with_plots.csv
     """
 
     help = 'Load CSV data into a model'
@@ -26,16 +29,21 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         csv_filename = options['csv_filename']
         if not os.path.exists(csv_filename):
-            raise CommandError('CSV file does not exist. Got {}'.format(csv_filename))
+            raise CommandError('Csv file does not exist. Got {}'.format(csv_filename))
         try:
             app_label, model_name = options['model'].split('.')
         except ValueError:
-            raise CommandError('expected app_label.modelname got \'{}\''.format(options['model']))
+            raise CommandError('Expected app_label.modelname got \'{}\''.format(options['model']))
         model = django_apps.get_model(app_label, model_name)
         self.stdout.write(
-            self.style.SUCCESS('Model \'{}\''.format(model._meta.verbose_name)))
+            self.style.NOTICE('Data source: csv \'{}\''.format(csv_filename.split('/')[-1:][0])))
         self.stdout.write(
-            self.style.SUCCESS('CSV \'{}\''.format(csv_filename.split('/')[-1:][0])))
+            self.style.NOTICE('Target model: \'{}\''.format(model._meta.verbose_name)))
+        added = 0
+        with open(csv_filename, 'r', newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            data = list(reader)
+            csv_row_count = len(data)
         with open(csv_filename, 'r', newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             header = None
@@ -45,12 +53,16 @@ class Command(BaseCommand):
                 else:
                     try:
                         obj = model.objects.create(**row)
+                        added += 1
+                        self.stdout.write(
+                            self.style.NOTICE('  adding record {} / {} / {}{}'.format(added, recs, csv_row_count, ' ' * 35)), ending='\r')
                     except IntegrityError:
                         obj = model.objects.get(subject_identifier=row.get('subject_identifier'))
+                        self.stdout.write(
+                            self.style.NOTICE('  processing existing record {} / {} / {}{}'.format(added, recs, csv_row_count, ' ' * 35)), ending='\r')
                     self.create_handler(obj, row)
-                print('  adding record {}'.format(recs), end='\r')
         self.stdout.write(
-            self.style.SUCCESS('Successfully imported {} records'.format(recs)))
+            self.style.SUCCESS('Successfully added {} / {} / {} records{}'.format(added, recs, csv_row_count, ' ' * 35)))
 
     def create_handler(self, obj, row):
         try:
@@ -82,7 +94,7 @@ class Command(BaseCommand):
             pass
 
     def sub_category(self, category, eligibility_category):
-        sub_category = None
+        sub_category = NOT_APPLICABLE
         if category == 'Initiated ART':
             if eligibility_category == 'CD4<=350':
                 sub_category = 'national_guidelines'
