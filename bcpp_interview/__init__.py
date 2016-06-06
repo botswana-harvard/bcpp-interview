@@ -1,1 +1,1 @@
-default_app_config = 'bcpp_interview.apps.BcppInterviewAppConfig'
+# default_app_config = 'bcpp_interview.apps.BcppInterviewAppConfig'

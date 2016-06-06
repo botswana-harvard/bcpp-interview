@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin.options import TabularInline
 
-from audio_recording.admin import recording_admin, ModelAdminRecordingMixin, ModelAdminAudioPlaybackMixin
+from edc_audio_recording.admin import recording_admin, ModelAdminRecordingMixin, ModelAdminAudioPlaybackMixin
 from edc_base.modeladmin.mixins import (
     ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
@@ -37,7 +37,7 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
 @admin.register(RawData)
 class RawDataAdmin(admin.ModelAdmin):
 
-    exclude = ['last_name', 'identity']
+    # exclude = ['last_name', 'identity']
 
     readonly_fields = ['subject_identifier'] + sorted([f.name for f in RawData._meta.fields if f.name not in ['last_name', 'identity', 'subject_identifier']])
 

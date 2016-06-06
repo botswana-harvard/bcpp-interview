@@ -8,8 +8,8 @@ from django_crypto_fields.fields import (
     EncryptedTextField, IdentityField, FirstnameField, LastnameField, EncryptedCharField)
 from simple_history.models import HistoricalRecords as AuditTrail
 
-from audio_recording.models import RecordingModelMixin
-from audio_recording.manager import RecordingManager
+from edc_audio_recording.models import RecordingModelMixin
+from edc_audio_recording.manager import RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_call_manager.mixins import CallLogLocatorMixin
 from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
