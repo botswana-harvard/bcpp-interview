@@ -119,47 +119,6 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
         ordering = ('created', )
 
 
-class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
-                     PersonalFieldsMixin, CitizenFieldsMixin, VulnerabilityFieldsMixin, BaseUuidModel):
-
-    MIN_AGE_OF_CONSENT = 18
-    MAX_AGE_OF_CONSENT = 64
-    AGE_IS_ADULT = 18
-    GENDER_OF_CONSENT = ['M', 'F']
-    SUBJECT_TYPES = ['subject']
-
-    history = AuditTrail()
-
-    consent = ConsentManager()
-
-    objects = ObjectConsentManager()
-
-    def __str__(self):
-        return '{} {}'.format(self.first_name, self.last_name, self.identity, self.subject_identifier)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            potential_subject = self.fetch_potential_subject(self.identity)
-            self.subject_identifier = potential_subject.subject_identifier
-        super(SubjectConsent, self).save(*args, **kwargs)
-
-    @classmethod
-    def fetch_potential_subject(cls, identity=None, exception_class=None):
-        exception_class = exception_class or ValidationError
-        try:
-            potential_subject = PotentialSubject.objects.get(identity=identity)
-        except PotentialSubject.DoesNotExist:
-            raise exception_class(
-                'Potential subject with identity \'{}\' was not found.'.format(identity))
-        return potential_subject
-
-    class Meta:
-        app_label = 'bcpp_interview'
-        get_latest_by = 'consent_datetime'
-        unique_together = (('first_name', 'dob', 'initials', 'version'), )
-        ordering = ('created', )
-
-
 class PotentialSubject(BaseUuidModel):
 
     registered_subject = models.ForeignKey(RegisteredSubject, null=True, editable=False)
@@ -198,8 +157,6 @@ class PotentialSubject(BaseUuidModel):
 
     dob = models.DateField(null=True)
 
-    subject_consent = models.ForeignKey(SubjectConsent, null=True, editable=False)
-
     contacted = models.BooleanField(default=False, editable=False)
 
     consented = models.BooleanField(default=False, editable=False)
@@ -231,10 +188,11 @@ class PotentialSubject(BaseUuidModel):
 
     def __str__(self):
         try:
-            first_name = self.subject_consent.first_name
-            last_name = self.subject_consent.last_name
+            subject_consent = SubjectConsent.objects.get(potential_subject=self)
+            first_name = subject_consent.first_name
+            last_name = subject_consent.last_name
             name = first_name + ' ' + last_name
-        except AttributeError:
+        except SubjectConsent.DoesNotExist:
             name = 'not consented'
         return '{}. {}. {}'.format(
             name, self.get_category_display(), self.subject_identifier)
@@ -245,6 +203,50 @@ class PotentialSubject(BaseUuidModel):
 
     class Meta:
         app_label = 'bcpp_interview'
+
+
+class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
+                     PersonalFieldsMixin, CitizenFieldsMixin, VulnerabilityFieldsMixin, BaseUuidModel):
+
+    MIN_AGE_OF_CONSENT = 18
+    MAX_AGE_OF_CONSENT = 64
+    AGE_IS_ADULT = 18
+    GENDER_OF_CONSENT = ['M', 'F']
+    SUBJECT_TYPES = ['subject']
+
+    potential_subject = models.ForeignKey(PotentialSubject)
+
+    history = AuditTrail()
+
+    consent = ConsentManager()
+
+    objects = ObjectConsentManager()
+
+    def __str__(self):
+        return '{} {}'.format(self.first_name, self.last_name, self.identity, self.subject_identifier)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            potential_subject = self.fetch_potential_subject(self.identity)
+            self.subject_identifier = potential_subject.subject_identifier
+            self.potential_subject = potential_subject
+        super(SubjectConsent, self).save(*args, **kwargs)
+
+    @classmethod
+    def fetch_potential_subject(cls, identity=None, exception_class=None):
+        exception_class = exception_class or ValidationError
+        try:
+            potential_subject = PotentialSubject.objects.get(identity=identity)
+        except PotentialSubject.DoesNotExist:
+            raise exception_class(
+                'Potential subject with identity \'{}\' was not found.'.format(identity))
+        return potential_subject
+
+    class Meta:
+        app_label = 'bcpp_interview'
+        get_latest_by = 'consent_datetime'
+        unique_together = (('first_name', 'dob', 'initials', 'version'), )
+        ordering = ('created', )
 
 
 class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
@@ -678,9 +680,8 @@ def post_save_consented(sender, instance, raw, created, using, update_fields, **
         potential_subject = PotentialSubject.objects.get(identity=instance.identity)
         potential_subject.contacted = True
         potential_subject.consented = True
-        potential_subject.subject_consent = instance
         potential_subject.save(
-            update_fields=['contacted', 'consented', 'subject_consent', 'user_modified', 'modified'])
+            update_fields=['contacted', 'consented', 'user_modified', 'modified'])
 
 
 @receiver(post_save, sender=InterviewRecording, dispatch_uid='post_save_interview_recording')

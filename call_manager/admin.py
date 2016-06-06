@@ -49,7 +49,7 @@ class LogEntryInlineAdmin(ModelAdminLogEntryInlineMixin, ModelAdminStackedInline
 @admin.register(Log, site=call_manager_admin)
 class LogAdmin(BaseModelAdmin, ModelAdminModelRedirectMixin, ModelAdminLogMixin, SimpleHistoryAdmin):
 
-    inlines = [LogEntryInlineAdmin]
+    # inlines = [LogEntryInlineAdmin]
 
     list_filter = ('call__potential_subject__category', 'call__potential_subject__sub_category',
                    'call__potential_subject__community')

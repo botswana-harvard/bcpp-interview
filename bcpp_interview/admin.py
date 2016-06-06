@@ -22,7 +22,8 @@ class BaseModelAdminTabularInline(ModelAdminAuditFieldsMixin, TabularInline):
 
 
 class BaseModelAdmin(ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
-                     ModelAdminAuditFieldsMixin, SimpleHistoryAdmin):
+                     ModelAdminAuditFieldsMixin,
+                     SimpleHistoryAdmin):
     list_per_page = 10
     date_hierarchy = 'modified'
     empty_value_display = '-'
@@ -305,9 +306,9 @@ class InterviewAdmin(BaseInterviewAdmin):
 
     search_fields = [
         'reference',
-        'potential_subject__subject_consent__first_name',
-        'potential_subject__subject_consent__last_name',
-        'potential_subject__subject_consent__identity',
+        'potential_subject__first_name',
+        'potential_subject__last_name',
+        'potential_subject__identity',
     ]
 
     list_filter = ('potential_subject__category',
@@ -460,8 +461,11 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
 
     def consent_button(self, obj):
         reverse_args = None
-        if obj.subject_consent:
-            reverse_args = (obj.subject_consent.pk, )
+        try:
+            subject_consent = SubjectConsent.objects.get(potential_subject=obj)
+            reverse_args = (subject_consent.pk, )
+        except SubjectConsent.DoesNotExist:
+            pass
         return self.changelist_model_button(
             'bcpp_interview', 'subjectconsent', reverse_args=reverse_args,
             change_label='consent')
@@ -485,7 +489,9 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
                 'bcpp_interview', 'interview', label=interview.reference,
                 querystring_value=interview.reference, disabled=disabled)
         except Interview.DoesNotExist:
-            if not obj.subject_consent:
+            try:
+                SubjectConsent.objects.get(potential_subject=obj)
+            except SubjectConsent.DoesNotExist:
                 disabled = True
             interview_button = self.changelist_model_button(
                 'bcpp_interview', 'interview', add_label='IDI',
@@ -497,7 +503,9 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
         disabled = None
         change_label = 'FGD'
         querystring_value = None
-        if not obj.subject_consent:
+        try:
+            SubjectConsent.objects.get(potential_subject=obj)
+        except SubjectConsent.DoesNotExist:
             return self.empty_value_display
         try:
             Interview.objects.get(potential_subject=obj)

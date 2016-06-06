@@ -1,4 +1,5 @@
 import json
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib import admin
 from django.core.urlresolvers import reverse
@@ -15,7 +16,7 @@ class LocationView(MapImageView):
     item_model_field = 'subject_identifier'
     app_label = 'bcpp_map'
     filename_field = 'subject_identifier'
-    zoom_levels = ['14', '15', '16', '17', '18']
+    zoom_levels = django_apps.get_app_config('bcpp_map').zoom_levels
 
     def get_context_data(self, **kwargs):
         context = super(LocationView, self).get_context_data(**kwargs)

@@ -17,6 +17,7 @@ class BcppInterviewMapAppConfig(EdcMapAppConfig):
     mapper_model = ('bcpp_interview', 'subjectlocation')
     mapper_survey_model = ('bcpp_interview', 'survey')
     verify_point_on_save = False
+    zoom_levels = ['14', '15', '16', '17', '18']
 
 
 class ConsentAppConfig(EdcConsentAppConfig):
