@@ -67,6 +67,7 @@ class Command(BaseCommand):
     def create_handler(self, obj, row):
         try:
             PotentialSubject.objects.create(
+                last_name=obj.last_name,
                 subject_identifier=obj.subject_identifier,
                 identity=obj.identity,
                 dob=parser.parse(obj.dob),

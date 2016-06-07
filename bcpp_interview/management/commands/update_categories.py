@@ -1,4 +1,6 @@
+import sys
 from django.core.management.base import BaseCommand, CommandError
+from django.core.management.color import color_style
 
 from bcpp_interview.models import (
     PotentialSubject, LINKED_ONLY, NOT_LINKED,
@@ -23,6 +25,8 @@ category_map = {
     LINKED_ONLY: LINKED_ONLY,
     NOT_LINKED: NOT_LINKED}
 
+style = color_style()
+
 
 class Command(BaseCommand):
 
@@ -35,7 +39,8 @@ class Command(BaseCommand):
                 obj.category = category_map[obj.category]
                 obj.save()
             except KeyError:
-                raise CommandError('Unknown category. Got {}'.format(obj.category))
+                sys.stdout.write(style.WARNING(
+                    'Unknown category. Got {}. expected one of {}\n'.format(obj.category, category_map.keys())))
         recs = PotentialSubject.objects.all().count()
         self.stdout.write(
             self.style.SUCCESS('Successfully updated the category for {} records'.format(recs)))

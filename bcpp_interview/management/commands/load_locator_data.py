@@ -12,7 +12,7 @@ class Command(BaseCommand):
     """Import model data from CSV.
 
     For example:
-        python manage.py load_locator_data bcpp_interview.subjectlocator /Users/erikvw/Documents/bcpp/qualitative_substudy/qualitative_substudy_subject_locators.csv
+        python manage.py load_locator_data bcpp_interview.subjectlocator /Users/erikvw/Documents/bcpp/qualitative_substudy/qualitative_substudy_subject_locator.csv
 
         python manage.py load_locator_data bcpp_interview.subjectlocator /home/django/qualitative_substudy_subject_locators.csv
     """

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import sys
 from unipath import Path
 from django.utils import timezone
 
@@ -98,12 +99,25 @@ WSGI_APPLICATION = 'bcpp_interview.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR.ancestor(1), 'db.sqlite3'),
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR.ancestor(1), 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'OPTIONS': {
+                'read_default_file': os.path.join(BASE_DIR.ancestor(1), 'etc', 'default.cnf'),
+            },
+            'HOST': '',
+            'PORT': '',
+            'ATOMIC_REQUESTS': True,
+        }
+    }
 
 # ssh -f -N -L 10000:127.0.0.1:5432 bcpp@getresults.bhp.org.bw
 # DATABASES = {

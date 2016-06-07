@@ -566,7 +566,7 @@ class RawData(BaseUuidModel):
         null=True)
 
     education = models.CharField(
-        max_length=25,
+        max_length=75,
         null=True)
 
     working = models.CharField(
@@ -590,7 +590,7 @@ class RawData(BaseUuidModel):
         null=True)
 
     flag = models.CharField(
-        max_length=25,
+        max_length=50,
         null=True)
 
     art_eligible = models.CharField(
@@ -630,7 +630,7 @@ class RawData(BaseUuidModel):
         null=True)
 
     why_no_arv = models.CharField(
-        max_length=25,
+        max_length=50,
         null=True)
 
     t1_visit_date = models.CharField(
