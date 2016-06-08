@@ -5,7 +5,7 @@ from edc_audio_recording.admin import recording_admin, ModelAdminRecordingMixin,
 from edc_base.modeladmin.mixins import (
     ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
-    ModelAdminAuditFieldsMixin)
+    ModelAdminAuditFieldsMixin, ModelAdminChangelistButtonMixin)
 from edc_consent.admin.mixins import ModelAdminConsentMixin
 from edc_locator.admin import ModelAdminLocatorMixin
 from simple_history.admin import SimpleHistoryAdmin
@@ -75,19 +75,29 @@ class SubjectLocationAdmin(ModelAdminChangelistModelButtonMixin, BaseModelAdmin)
 
 
 @admin.register(SubjectLocator)
-class SubjectLocatorAdmin(ModelAdminLocatorMixin, BaseModelAdmin):
+class SubjectLocatorAdmin(ModelAdminLocatorMixin, ModelAdminChangelistModelButtonMixin, BaseModelAdmin):
 
     fields = ['potential_subject']
 
-    list_display_pos = ((2, 'map_button'), )
+    list_display_pos = ((2, 'potential_subject_button', ), (3, 'map_button'), )
 
-    readonly_fields = ('potential_subject', )
+    readonly_fields = [field.name
+                       for field in SubjectLocator._meta.fields
+                       if field.name not in ['id']]
+
+    search_fields = ('potential_subject__subject_identifier', 'potential_subject__identity')
 
     def map_button(self, obj):
         return self.button(
             'location_url',
             (obj.potential_subject.map_area, obj.potential_subject.subject_identifier, ), label='map')
     map_button.short_description = 'map'
+
+    def potential_subject_button(self, obj):
+        return self.changelist_list_button(
+            'bcpp_interview', 'potentialsubject', label='subject',
+            querystring_value=obj.potential_subject.subject_identifier)
+    potential_subject_button.short_description = 'subject'
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "potential_subject":
@@ -420,7 +430,8 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
                     'focus_group_button', 'subject_status', 'idi', 'fgd',
                     'category', 'sub_category', 'community', 'region']
 
-    list_filter = ['contacted', 'consented', 'interviewed', 'category', 'sub_category', 'idi', 'fgd', 'community', 'region']
+    list_filter = ['contacted', 'consented', 'interviewed', 'category',
+                   'sub_category', 'idi', 'fgd', 'community', 'region']
 
     radio_fields = {
         'category': admin.VERTICAL,

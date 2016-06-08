@@ -14,7 +14,7 @@ class Command(BaseCommand):
     For example:
         python manage.py load_locator_data bcpp_interview.subjectlocator /Users/erikvw/Documents/bcpp/qualitative_substudy/qualitative_substudy_subject_locator.csv
 
-        python manage.py load_locator_data bcpp_interview.subjectlocator /home/django/qualitative_substudy_subject_locators.csv
+        python manage.py load_locator_data bcpp_interview.subjectlocator /home/django/qualitative_substudy_subject_locator.csv
     """
 
     help = 'Load CSV data into a model if PotentialSubject exists (e.g. locator)'

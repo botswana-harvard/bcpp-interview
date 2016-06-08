@@ -255,6 +255,9 @@ class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 
     history = AuditTrail()
 
+    def __str__(self):
+        return self.potential_subject.subject_identifier
+
     def get_call_log_options(self):
         return dict(call__potential_subject=self.potential_subject)
 
