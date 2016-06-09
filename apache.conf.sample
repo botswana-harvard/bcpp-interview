@@ -1,0 +1,10 @@
+WSGIScriptAlias / /Users/django/source/bcpp-interview/bcpp_interview/wsgi.py
+WSGIPythonPath /Users/django/source/bcpp-interview
+WSGIPythonPath /Users/django/source/bcpp-interview:/Users/django/.virtualenvs/bcpp-interview/lib/python3.5/site-packages
+
+<Directory /Users/django/source/bcpp-interview/bcpp_interview>
+<Files wsgi.py>
+Require all granted
+</Files>
+</Directory>
+
