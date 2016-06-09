@@ -1,5 +1,7 @@
 # add or uncomment in /etc/apache/http.conf
 # LoadModule wsgi_module /usr/local/Cellar/mod_wsgi/4.4.11/libexec/mod_wsgi.so
+# check for this path with: 
+# file `brew list mod_wsgi`
 
 WSGIScriptAlias / /Users/django/source/bcpp-interview/bcpp_interview/wsgi.py
 WSGIPythonPath /Users/django/source/bcpp-interview
