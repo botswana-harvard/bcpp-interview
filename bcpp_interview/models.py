@@ -186,6 +186,14 @@ class PotentialSubject(BaseUuidModel):
 
     history = AuditTrail()
 
+    @property
+    def subject_consent(self):
+        try:
+            subject_consent = SubjectConsent.objects.get(subject_identifier=self.subject_identifier)
+        except SubjectConsent.DoesNotExist:
+            return None
+        return subject_consent
+
     def __str__(self):
         try:
             subject_consent = SubjectConsent.objects.get(potential_subject=self)
