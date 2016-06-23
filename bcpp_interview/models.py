@@ -276,7 +276,7 @@ class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 class FocusGroup(SyncModelMixin, BaseUuidModel):
 
     reference = models.CharField(
-        max_length=5,
+        max_length=15,
         default=group_identifier,
         unique=True)
 
