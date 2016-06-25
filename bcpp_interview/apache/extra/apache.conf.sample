@@ -3,21 +3,40 @@
 #
 # Apache needs to load mod_wsgi. To configure add or uncomment in /etc/apache/http.conf
 #
-# LoadModule wsgi_module /usr/local/Cellar/mod_wsgi/4.4.11/libexec/mod_wsgi.so
+# LoadModule wsgi_module /usr/local/lib/python3.5/site-packages/mod_wsgi/server/mod_wsgi-py35.cpython-35m-darwin.so
 #
 # the apath above assumes you installed mod_wsgi with:
-# brew install homebrew/apache/mod_wsgi
-# You may need to check the path to the mo_wsgi.so file: 
-# file `brew list mod_wsgi`
+# pip3 install mod_wsgi
 #
 
-WSGIScriptAlias / /Users/django/source/bcpp-interview/bcpp_interview/wsgi.py
-WSGIPythonPath /Users/django/source/bcpp-interview
-WSGIPythonPath /Users/django/source/bcpp-interview:/Users/django/.virtualenvs/bcpp-interview/lib/python3.5/site-packages
+<VirtualHost *:80>
+LogLevel info
 
-<Directory /Users/django/source/bcpp-interview/bcpp_interview>
+ErrorLog "/var/log/apache2/bcpp-interview-error_log"
+CustomLog "/var/log/apache2/bcpp-interview-access_log" common
+
+Alias /robots.txt /Users/erikvw/source/bcpp-interview/bcpp_interview/static/robots.txt
+Alias /favicon.ico /Users/erikvw/source/bcpp-interview/bcpp_interview/static/favicon.ico
+
+Alias /static/ /Users/erikvw/source/bcpp-interview/bcpp_interview/static/
+Alias /media/ /Users/erikvw/source/bcpp-interview/bcpp_interview/media/
+
+<Directory /Users/erikvw/source/bcpp-interview/bcpp_interview/static>
+Require all granted
+</Directory>
+
+<Directory /Users/erikvw/source/bcpp-interview/bcpp_interview/media>
+Require all granted
+</Directory>
+
+WSGIDaemonProcess bcpp-interview python-path=/Users/erikvw/source/bcpp-interview:/Users/erikvw/.virtualenvs/bcpp-interview/lib/python3.5/site-packages
+WSGIProcessGroup bcpp-interview
+WSGIScriptAlias / /Users/erikvw/source/bcpp-interview/bcpp_interview/apache/wsgi.py process-group=bcpp-interview
+# WSGIPythonPath /Users/erikvw/source/bcpp-interview:/Users/erikvw/.virtualenvs/bcpp-interview/lib/python3.5/site-packages
+
+<Directory /Users/erikvw/source/bcpp-interview/bcpp_interview/apache>
 <Files wsgi.py>
 Require all granted
 </Files>
 </Directory>
-
+</VirtualHost>

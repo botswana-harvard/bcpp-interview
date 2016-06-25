@@ -17,13 +17,11 @@ from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
 from edc_consent.models.fields.bw import IdentityFieldsMixin
 from edc_constants.choices import YES_NO, GENDER
-from edc_constants.constants import NO, NOT_APPLICABLE
+from edc_constants.constants import NO, NOT_APPLICABLE, MALE, FEMALE
 from edc_identifier.subject.classes import SubjectIdentifier
 from edc_locator.models import LocatorMixin
 from edc_map.model_mixins import MapperModelMixin
 from edc_sync.models import SyncModelMixin
-
-from registration.models import RegisteredSubject
 
 from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
@@ -89,7 +87,7 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
     MIN_AGE_OF_CONSENT = 18
     MAX_AGE_OF_CONSENT = 99
     AGE_IS_ADULT = 18
-    GENDER_OF_CONSENT = ['M', 'F']
+    GENDER_OF_CONSENT = [MALE, FEMALE]
     SUBJECT_TYPES = ['nurse']
 
     interviewed = models.BooleanField(default=False, editable=False)
@@ -120,8 +118,6 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
 
 
 class PotentialSubject(BaseUuidModel):
-
-    registered_subject = models.ForeignKey(RegisteredSubject, null=True, editable=False)
 
     identity = IdentityField(
         verbose_name="Identity",
@@ -219,7 +215,7 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
     MIN_AGE_OF_CONSENT = 18
     MAX_AGE_OF_CONSENT = 64
     AGE_IS_ADULT = 18
-    GENDER_OF_CONSENT = ['M', 'F']
+    GENDER_OF_CONSENT = [MALE, FEMALE]
     SUBJECT_TYPES = ['subject']
 
     potential_subject = models.ForeignKey(PotentialSubject)
@@ -464,8 +460,6 @@ class GroupDiscussionRecording(SyncModelMixin, RecordingModelMixin, BaseUuidMode
 class SubjectLoss(SyncModelMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
-
-    registered_subject = models.ForeignKey(RegisteredSubject, editable=False)
 
     subject_identifier = models.CharField(
         max_length=25,

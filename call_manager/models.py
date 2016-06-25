@@ -1,14 +1,15 @@
 from django.db import models
-from simple_history.models import HistoricalRecords as AuditTrail
-from edc_call_manager.models import CallModelMixin, LogModelMixin, LogEntryModelMixin
-from edc_call_manager.constants import NO_CONTACT
-from edc_base.model.models.base_uuid_model import BaseUuidModel
-from edc_sync.models.sync_model_mixin import SyncModelMixin
-from edc_call_manager.managers import CallManager, LogManager, LogEntryManager
-
-from bcpp_interview.models import PotentialSubject
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
+from simple_history.models import HistoricalRecords as AuditTrail
+
+from edc_base.model.models.base_uuid_model import BaseUuidModel
+from edc_call_manager.constants import NO_CONTACT
+from edc_call_manager.managers import CallManager, LogManager, LogEntryManager
+from edc_call_manager.models import CallModelMixin, LogModelMixin, LogEntryModelMixin
+from edc_sync.models.sync_model_mixin import SyncModelMixin
+
+from bcpp_interview.models import PotentialSubject
 
 
 class Call(SyncModelMixin, CallModelMixin, BaseUuidModel):
