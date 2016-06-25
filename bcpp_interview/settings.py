@@ -34,7 +34,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django_crypto_fields',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_revision',
     'simple_history',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_js_reverse',
+    'corsheaders',
     'crispy_forms',
     'edc_templates',
     'edc_base',
@@ -53,10 +56,11 @@ INSTALLED_APPS = [
     'edc_map',
     'edc_locator',
     'edc_registration',
-    'edc_sync',
+    'edc_sync.apps.EdcSyncAppConfig',
     'edc_audio_recording.apps.AudioRecordingAppConfig',
     'call_manager',
     'registration',
+    'bcpp_interview.apps.DjangoCryptoFieldsApp',
     'bcpp_interview.apps.ConsentAppConfig',
     'bcpp_interview.apps.BcppInterviewMapAppConfig',
     'bcpp_interview.apps.BcppInterviewAppConfig',
