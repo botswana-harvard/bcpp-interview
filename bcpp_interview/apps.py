@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.apps import AppConfig
+from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
 
 from edc_consent.apps import EdcConsentAppConfig
 from edc_map.apps import EdcMapAppConfig
@@ -32,3 +33,8 @@ class ConsentAppConfig(EdcConsentAppConfig):
          'start_datetime': datetime(2016, 5, 1, 0, 0, 0),
          'end_datetime': datetime(2017, 5, 1, 0, 0, 0),
          'version': '1'}]
+
+
+class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
+    name = 'django_crypto_fields'
+    model = ('django_crypto_fields', 'crypt')
