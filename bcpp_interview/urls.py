@@ -52,4 +52,4 @@ urlpatterns = [
 admin.site.site_header = 'BCPP Interview'
 admin.site.site_title = 'BCPP Interview'
 admin.site.index_title = 'BCPP Interview Admin'
-admin.site.site_url = '/admin/bcpp_interview/'
+admin.site.site_url = '/'

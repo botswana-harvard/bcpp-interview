@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django_crypto_fields.fields import (
     EncryptedTextField, IdentityField, FirstnameField, LastnameField, EncryptedCharField)
-from simple_history.models import HistoricalRecords as AuditTrail
+from edc_sync.models import SyncHistoricalRecords
 
 from edc_audio_recording.models import RecordingModelMixin
 from edc_audio_recording.manager import RecordingManager
@@ -22,6 +22,8 @@ from edc_identifier.subject.classes import SubjectIdentifier
 from edc_locator.models import LocatorMixin
 from edc_map.model_mixins import MapperModelMixin
 from edc_sync.models import SyncModelMixin
+
+from registration.models import RegisteredSubject
 
 from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
@@ -96,7 +98,7 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
 
     fgd = models.BooleanField(default=False, editable=False)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     consent = ConsentManager()
 
@@ -118,6 +120,8 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
 
 
 class PotentialSubject(BaseUuidModel):
+
+    registered_subject = models.ForeignKey(RegisteredSubject, null=True, editable=False)
 
     identity = IdentityField(
         verbose_name="Identity",
@@ -180,7 +184,7 @@ class PotentialSubject(BaseUuidModel):
         max_length=25,
         choices=REGIONS)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     @property
     def subject_consent(self):
@@ -220,7 +224,7 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     consent = ConsentManager()
 
@@ -257,7 +261,7 @@ class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 
     potential_subject = models.OneToOneField(PotentialSubject)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     def __str__(self):
         return self.potential_subject.subject_identifier
@@ -288,7 +292,7 @@ class FocusGroup(SyncModelMixin, BaseUuidModel):
         choices=SUB_CATEGORIES,
         help_text='Note: only applicable if subjects are initiated')
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = FocusGroupManager()
 
@@ -309,7 +313,7 @@ class FocusGroupItem(SyncModelMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = FocusGroupItemManager()
 
@@ -360,7 +364,7 @@ class Interview(BaseInterview):
     def __str__(self):
         return self.potential_subject.subject_identifier
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = InterviewManager()
 
@@ -376,7 +380,7 @@ class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
         max_length=50,
         unique=True)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = GroupDiscussionLabelManager()
 
@@ -404,7 +408,7 @@ class GroupDiscussion(BaseInterview):
         blank=True,
         null=True)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = InterviewManager()
 
@@ -427,7 +431,7 @@ class InterviewRecording(SyncModelMixin, RecordingModelMixin, BaseUuidModel):
         default=NO,
         help_text='Indicate if the subject has agreed that this recording may be used for analysis')
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = RecordingManager()
 
@@ -447,7 +451,7 @@ class GroupDiscussionRecording(SyncModelMixin, RecordingModelMixin, BaseUuidMode
         default=NO,
         help_text='Indicate if the group members have agreed that this recording may be used for analysis')
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = RecordingManager()
 
@@ -460,6 +464,8 @@ class GroupDiscussionRecording(SyncModelMixin, RecordingModelMixin, BaseUuidMode
 class SubjectLoss(SyncModelMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
+
+    registered_subject = models.ForeignKey(RegisteredSubject, editable=False)
 
     subject_identifier = models.CharField(
         max_length=25,
@@ -480,7 +486,7 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
         null=True
     )
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = SubjectLossManager()
 

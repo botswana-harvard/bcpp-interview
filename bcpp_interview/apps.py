@@ -9,6 +9,7 @@ from edc_map.apps import EdcMapAppConfig
 
 class BcppInterviewAppConfig(AppConfig):
     name = 'bcpp_interview'
+    institution = 'Botswana Harvard AIDS Institute Partnership'
     verbose_name = 'BCPP Interview'
 
 

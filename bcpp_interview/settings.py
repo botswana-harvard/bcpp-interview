@@ -14,6 +14,7 @@ import os
 import sys
 from unipath import Path
 from django.utils import timezone
+from Crypto.Cipher import AES
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
@@ -29,7 +30,7 @@ SECRET_KEY = '4w#xs+=lrx4$mmqv+vzy^9i!(sni2eh=q_-9(#w4r20sv($2af'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+APP_LABEL = 'bcpp_interview'
 
 # Application definition
 
@@ -55,9 +56,11 @@ INSTALLED_APPS = [
     'edc_identifier',
     'edc_map',
     'edc_locator',
+    # 'edc_registration',
     'edc_sync.apps.EdcSyncAppConfig',
-    'edc_audio_recording.apps.AudioRecordingAppConfig',
+    'registration',
     'call_manager',
+    'edc_audio_recording.apps.AudioRecordingAppConfig',
     'bcpp_interview.apps.DjangoCryptoFieldsApp',
     'bcpp_interview.apps.ConsentAppConfig',
     'bcpp_interview.apps.BcppInterviewMapAppConfig',
@@ -204,3 +207,4 @@ UPLOAD_FOLDER = os.path.join(MEDIA_ROOT, 'upload')
 PROJECT_IDENTIFIER_PREFIX = '066'
 CURRENT_SURVEY = 'bcpp-year-1'
 CURRENT_COMMUNITY = None
+# AES_ENCRYPTION_MODE = AES.MODE_CFB
