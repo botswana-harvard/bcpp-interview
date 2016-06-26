@@ -9,6 +9,7 @@ from django_crypto_fields.constants import LOCAL_MODE, AES, HASH_PREFIX
 from django_crypto_fields.cryptor import Cryptor
 
 from edc_sync.models import OutgoingTransaction, IncomingTransaction
+from django_crypto_fields.field_cryptor import FieldCryptor
 
 
 class Command(BaseCommand):
@@ -17,6 +18,7 @@ class Command(BaseCommand):
         self._worklist = {}
         self.aes_decrypt = Cryptor(aes_encryption_mode=AES_CIPHER.MODE_CFB).aes_decrypt
         self.aes_encrypt = Cryptor(aes_encryption_mode=AES_CIPHER.MODE_CBC).aes_encrypt
+        self.decrypt_field = FieldCryptor(AES, LOCAL_MODE, aes_encryption_mode=AES_CIPHER.MODE_CFB).decrypt
         super(Command, self).__init__(*args, **kwargs)
 
     def handle(self, *args, **options):
