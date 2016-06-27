@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
     def update_crypts(self):
         app = django_apps.get_app_config('django_crypto_fields')
-        crypts = django_apps.get_model(*app.model).objects.filter(algorithm=AES, cipher_mode=AES_CIPHER.MODE_CFB)
+        crypts = django_apps.get_model(*app.model).objects.filter(algorithm=AES).exclude(cipher_mode=AES_CIPHER.MODE_CFB)
         updated = 0
         skipped = 0
         total = crypts.count()
