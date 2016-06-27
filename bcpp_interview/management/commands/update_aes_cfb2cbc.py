@@ -68,7 +68,7 @@ class Command(BaseCommand):
             skipped = 0
             for index, obj in enumerate(transactions):
                 if obj.tx[0:len(HASH_PREFIX)] == HASH_PREFIX.encode():
-                    obj.tx = self.cryptor.aes_encrypt(self.decrypt_field(obj.tx), mode=LOCAL_MODE)
+                    obj.tx = self.aes_encrypt(self.decrypt_field(obj.tx), mode=LOCAL_MODE)
                     if not self.dry_run:
                         obj.save()
                     updated += 1
