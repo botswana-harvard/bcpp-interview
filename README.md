@@ -24,13 +24,77 @@ On Ubuntu:
 
     sudo apt-get install libportaudio2 python3-cffi libffi-dev
 
+Make a virtualenv (see `virtualenvwrapper`):
+
+    mkvirtualenv venv -p /usr/local/bin/python3 --no-site-packages
+    workon venv
+
 Let say you start in a `source` folder, e.g. `~/source`:
 
-    cd ~/source
-    git clone <this repo>
-    cd ~/bcpp-interview
-    pip install -r requirements.txt
+    workon venv
+    $(venv) cd ~/source
+    $(venv) git clone <this repo>
+    $(venv) cd ~/bcpp-interview
+    $(venv) pip install -r requirements.txt
+
+Or you could `pip install bcpp_interview` into a new project instead of cloning it:
+
+    workon venv
+    $(venv) pip install git+https://github.com/botswana-harvard/bcpp-interview@develop#egg=bcpp_interview
+    $(venv) pip install -r ~/.virtualenv/venv/lib/python3.5/site-packages/bcpp_interview/requirements.txt
+
+... and then set up a new project:
     
+    workon venv
+    $(venv) cd ~/source
+    $(venv) django-admin startproject server
+    $(venv) cd server
+
+... edit the settings file to look like this:
+
+    import os
+    from bcpp_interview.settings import *
+    from bcpp_interview.settings import INSTALLED_APPS
+    
+    BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
+    KEY_PATH = os.path.join(BASE_DIR.ancestor(1), 'crypto_fields')
+    INSTALLED_APPS = INSTALLED_APPS + ['client']
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'OPTIONS': {
+                'read_default_file': os.path.join(BASE_DIR.ancestor(1), 'etc', 'default.cnf'),
+            },
+            'HOST': '',
+            'PORT': '',
+            'ATOMIC_REQUESTS': True,
+        }
+    }
+    STATIC_ROOT = BASE_DIR.child('static')
+    MEDIA_ROOT = BASE_DIR.child('media')
+    UPLOAD_FOLDER = os.path.join(MEDIA_ROOT, 'upload')
+
+... create folders:
+
+    cd ~/source/server
+    mkdir etc
+    mkdir crypto_fields
+    mkdir -p server/media/edc_map
+    mkdir -p server/media/upload
+    touch etc/default.cnf
+
+... a `default.cnf` might look like this:
+
+    [client]
+    database = edc
+    user = <account>
+    password = <password>
+    default-character-set = utf8
+    init_command = 'SET default_storage_engine=INNODB'
+
+... encryption keys belong in folder `crypto_fields` or some other folder. Keys will be created for you if the folder is empty on the first boot.
+
+
 For a test environment:
 
     python manage.py load_test_data

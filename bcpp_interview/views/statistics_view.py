@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
+
+from edc_base.views import EdcBaseViewMixin
 from edc_constants.constants import CLOSED, NO, YES
 from edc_sync.models.outgoing_transaction import OutgoingTransaction
 
@@ -18,7 +20,7 @@ from ..models import PotentialSubject, InterviewRecording, GroupDiscussionRecord
 tz = pytz.timezone(settings.TIME_ZONE)
 
 
-class StatisticsView(TemplateView):
+class StatisticsView(EdcBaseViewMixin, TemplateView):
     template_name = 'home.html'
 
     def __init__(self):

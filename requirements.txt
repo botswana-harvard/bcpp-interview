@@ -11,8 +11,7 @@ humanize
 mysqlclient
 django-simple-history
 fake-factory
-pandas
-git+https://github.com/botswana-harvard/edc_registration@develop#egg=edc_registration
+git+https://github.com/botswana-harvard/edc-registration@develop#egg=edc_registration
 git+https://github.com/erikvw/django-crypto-fields@develop#egg=django_crypto_fields
 git+https://github.com/erikvw/django-revision@develop#egg=django_revision
 git+https://github.com/botswana-harvard/edc-templates@develop#egg=edc_templates

@@ -72,6 +72,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -208,3 +209,18 @@ PROJECT_IDENTIFIER_PREFIX = '066'
 CURRENT_SURVEY = 'bcpp-year-1'
 CURRENT_COMMUNITY = None
 # AES_ENCRYPTION_MODE = AES.MODE_CFB
+
+
+# django-cors-headers
+# CORS_ORIGIN_ALLOW_ALL = True  # open to all!
+CORS_ORIGIN_WHITELIST = (
+    'localhost:8000',
+    'localhost:8001',
+)
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 1,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}

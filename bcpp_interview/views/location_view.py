@@ -1,16 +1,18 @@
 import json
+
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib import admin
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 
+from edc_base.views import EdcBaseViewMixin
 from edc_map.views import MapImageView
 
 from ..models import SubjectLocation
-from django.core.serializers.json import DjangoJSONEncoder
 
 
-class LocationView(MapImageView):
+class LocationView(EdcBaseViewMixin, MapImageView):
 
     item_model = SubjectLocation
     item_model_field = 'subject_identifier'

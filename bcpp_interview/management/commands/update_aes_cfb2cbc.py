@@ -44,8 +44,8 @@ class Command(BaseCommand):
                 raise CommandError('{} Got \'{}\''.format(error_msg, settings.AES_ENCRYPTION_MODE))
         except AttributeError:
             raise CommandError(error_msg)
-        self.update_crypts()
         self.update_transactions()
+        self.update_crypts()
         self.stdout.write('Done.\n')
         self.stdout.write(self.style.NOTICE(
             'Important! DO NOT FORGET to remove attribute AES_ENCRYPTION_MODE from settings.py NOW.\n'))
@@ -76,15 +76,22 @@ class Command(BaseCommand):
             sys.stdout.write('{}. {}: {}\n'.format(i + 2, transactions.model._meta.verbose_name, total))
             updated = 0
             skipped = 0
+            errors = 0
             for index, obj in enumerate(transactions):
                 if obj.tx[0:len(HASH_PREFIX)] == HASH_PREFIX.encode():
-                    obj.tx = self.aes_encrypt(self.decrypt_field(obj.tx), mode=LOCAL_MODE)
-                    if not self.dry_run:
-                        obj.save()
-                    updated += 1
+                    try:
+                        obj.tx = self.aes_encrypt(self.decrypt_field(obj.tx), mode=LOCAL_MODE)
+                        if not self.dry_run:
+                            obj.save()
+                        updated += 1
+                    except UnicodeDecodeError:
+                        errors += 1
                 else:
                     skipped += 1
                 sys.stdout.write('  ' + self.msg(total, index + 1, updated, skipped))
+            if errors:
+                self.stdout.write('\n')
+                sys.stdout.write('  Errors: {}'.format(errors))
             self.stdout.write('\n')
 
     def transactions(self):

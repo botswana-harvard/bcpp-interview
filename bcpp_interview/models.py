@@ -8,8 +8,7 @@ from django_crypto_fields.fields import (
     EncryptedTextField, IdentityField, FirstnameField, LastnameField, EncryptedCharField)
 from edc_sync.models import SyncHistoricalRecords
 
-from edc_audio_recording.models import RecordingModelMixin
-from edc_audio_recording.manager import RecordingManager
+from edc_audio_recording.models import RecordingModelMixin, RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_call_manager.mixins import CallLogLocatorMixin
 from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
@@ -300,7 +299,7 @@ class FocusGroup(SyncModelMixin, BaseUuidModel):
         return self.reference
 
     def natural_key(self):
-        return self.reference
+        return (self.reference, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -351,7 +350,7 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
         super(BaseInterview, self).save(*args, **kwargs)
 
     def natural_key(self):
-        return self.reference
+        return (self.reference, )
 
     class Meta:
         abstract = True
@@ -388,7 +387,7 @@ class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
         return self.discussion_label
 
     def natural_key(self):
-        return self.discussion_label
+        return (self.discussion_label, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -435,6 +434,9 @@ class InterviewRecording(SyncModelMixin, RecordingModelMixin, BaseUuidModel):
 
     objects = RecordingManager()
 
+    def natural_key(self):
+        return (self.sound_filename, )
+
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'start_datetime'
@@ -454,6 +456,9 @@ class GroupDiscussionRecording(SyncModelMixin, RecordingModelMixin, BaseUuidMode
     history = SyncHistoricalRecords()
 
     objects = RecordingManager()
+
+    def natural_key(self):
+        return (self.sound_filename, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -499,7 +504,7 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
         super(SubjectLoss, self).save(*args, **kwargs)
 
     def natural_key(self):
-        return self.subject_identifier
+        return (self.subject_identifier, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -520,7 +525,7 @@ class SubjectLocation(MapperModelMixin, BaseUuidModel):
             self.subject_identifier, self.community, self.point.latitude, self.point.longitude)
 
     def natural_key(self):
-        return self.subject_identifier
+        return (self.subject_identifier, )
 
     def save(self, *args, **kwargs):
         self.map_area = self.community.replace(' ', '_').lower()
