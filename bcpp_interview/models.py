@@ -6,12 +6,11 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django_crypto_fields.fields import (
     EncryptedTextField, IdentityField, FirstnameField, LastnameField, EncryptedCharField)
-from edc_sync.models import SyncHistoricalRecords
 
 from edc_audio_recording.models import RecordingModelMixin, RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_call_manager.mixins import CallLogLocatorMixin
-from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
+from edc_consent.models import BaseConsent, ConsentManager
 from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
 from edc_consent.models.fields.bw import IdentityFieldsMixin
@@ -20,14 +19,14 @@ from edc_constants.constants import NO, NOT_APPLICABLE, MALE, FEMALE
 from edc_identifier.subject.classes import SubjectIdentifier
 from edc_locator.models import LocatorMixin
 from edc_map.model_mixins import MapperModelMixin
-from edc_sync.models import SyncModelMixin
-
-from registration.models import RegisteredSubject
+from edc_sync.models import SyncModelMixin, SyncHistoricalRecords
 
 from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
     FocusGroupItemManager, InterviewManager, FocusGroupManager,
-    SubjectLossManager, GroupDiscussionLabelManager)
+    SubjectLossManager, GroupDiscussionLabelManager, PotentialSubjectManager)
+from bcpp_interview.managers import SubjectConsentManager, NurseConsentManager, SubjectLocatorManager,\
+    SubjectLocationManager
 
 
 NOT_LINKED = 'not_linked'
@@ -101,10 +100,13 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
 
     consent = ConsentManager()
 
-    objects = ObjectConsentManager()
+    objects = NurseConsentManager()
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name, self.identity, self.subject_identifier)
+
+    def natural_key(self):
+        return (self.subject_identifier, )
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -119,8 +121,6 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
 
 
 class PotentialSubject(BaseUuidModel):
-
-    registered_subject = models.ForeignKey(RegisteredSubject, null=True, editable=False)
 
     identity = IdentityField(
         verbose_name="Identity",
@@ -185,6 +185,11 @@ class PotentialSubject(BaseUuidModel):
 
     history = SyncHistoricalRecords()
 
+    objects = PotentialSubjectManager()
+
+    def natural_key(self):
+        return (self.subject_identifier, )
+
     @property
     def subject_consent(self):
         try:
@@ -227,10 +232,13 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
 
     consent = ConsentManager()
 
-    objects = ObjectConsentManager()
+    objects = SubjectConsentManager()
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name, self.identity, self.subject_identifier)
+
+    def natural_key(self):
+        return (self.subject_identifier, )
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -262,8 +270,14 @@ class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 
     history = SyncHistoricalRecords()
 
+    objects = SubjectLocatorManager()
+
     def __str__(self):
         return self.potential_subject.subject_identifier
+
+    def natural_key(self):
+        return self.potential_subject.natural_key()
+    natural_key.dependencies = ['bcpp_interview.potentialsubject']
 
     def get_call_log_options(self):
         return dict(call__potential_subject=self.potential_subject)
@@ -316,8 +330,12 @@ class FocusGroupItem(SyncModelMixin, BaseUuidModel):
 
     objects = FocusGroupItemManager()
 
+    def __str__(self):
+        return self.potential_subject.subject_identifier
+
     def natural_key(self):
-        return (self.focus_group, self.potential_subject.subject_identifier)
+        return self.focus_group.natural_key() + self.potential_subject.natural_key()
+    natural_key.dependencies = ['bcpp_interview.focusgroup', 'bcpp_interview.potentialsubject']
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -360,12 +378,15 @@ class Interview(BaseInterview):
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
-    def __str__(self):
-        return self.potential_subject.subject_identifier
-
     history = SyncHistoricalRecords()
 
     objects = InterviewManager()
+
+    def __str__(self):
+        return self.potential_subject.subject_identifier
+
+    def natural_key(self):
+        return (self.reference, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -413,6 +434,9 @@ class GroupDiscussion(BaseInterview):
 
     def __str__(self):
         return self.focus_group.reference
+
+    def natural_key(self):
+        return (self.reference, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -470,8 +494,6 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
-    registered_subject = models.ForeignKey(RegisteredSubject, editable=False)
-
     subject_identifier = models.CharField(
         max_length=25,
         unique=True,
@@ -519,6 +541,8 @@ class SubjectLocation(MapperModelMixin, BaseUuidModel):
 
     community = models.CharField(
         max_length=25)
+
+    objects = SubjectLocationManager()
 
     def __str__(self):
         return '{} {} (latitude={}, longitude={})'.format(

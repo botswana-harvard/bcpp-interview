@@ -5,8 +5,8 @@ from django.core.management.base import BaseCommand
 from edc_sync.models.incoming_transaction import IncomingTransaction
 
 from bcpp_interview.models import (
-    FocusGroupItem, GroupDiscussion, GroupDiscussionLabel, InterviewRecording,
-    GroupDiscussionRecording)
+    FocusGroupItem, GroupDiscussion, InterviewRecording,
+    GroupDiscussionRecording, SubjectConsent, SubjectLocator, Interview, SubjectLoss)
 
 
 class Command(BaseCommand):
@@ -19,7 +19,10 @@ class Command(BaseCommand):
             'focus_group': [FocusGroupItem, GroupDiscussion],
             'interview': [InterviewRecording],
             'group_discussion': [GroupDiscussionRecording],
-            'group_discussion_label': [GroupDiscussionLabel],
+            'group_discussion_label': [GroupDiscussion],
+            'potential_subject': [SubjectConsent, SubjectLocator, FocusGroupItem, Interview, SubjectLoss],
+            'focus_group': [FocusGroupItem, GroupDiscussion],
+            'group_discussion_label': [GroupDiscussion],
         }
 
         sys.stdout.write('\nFixing JSON for affected incoming transactions\n')
