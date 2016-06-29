@@ -14,25 +14,23 @@ import os
 import sys
 from unipath import Path
 from django.utils import timezone
-from Crypto.Cipher import AES
 
-from edc_sync.constants import CLIENT, SERVER
 
+from bcpp_interview.config import CORS_ORIGIN_WHITELIST, EDC_SYNC_ROLE
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
-
+ETC_DIR = os.path.join(BASE_DIR.ancestor(1), 'etc')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '4w#xs+=lrx4$mmqv+vzy^9i!(sni2eh=q_-9(#w4r20sv($2af'
+with open(os.path.join(ETC_DIR, 'secret_key.txt')) as f:
+    SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-APP_LABEL = 'bcpp_interview'
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 
@@ -117,7 +115,7 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'OPTIONS': {
-                'read_default_file': os.path.join(BASE_DIR.ancestor(1), 'etc', 'default.cnf'),
+                'read_default_file': os.path.join(ETC_DIR, 'default.cnf'),
             },
             'HOST': '',
             'PORT': '',
@@ -208,22 +206,14 @@ UPLOAD_FOLDER = os.path.join(MEDIA_ROOT, 'upload')
 PROJECT_IDENTIFIER_PREFIX = '066'
 CURRENT_SURVEY = 'bcpp-year-1'
 CURRENT_COMMUNITY = None
-# AES_ENCRYPTION_MODE = AES.MODE_CFB
 
-
-# django-cors-headers
-# CORS_ORIGIN_ALLOW_ALL = True  # open to all!
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8000',
-    'localhost:8001',
-)
-
+CORS_ORIGIN_WHITELIST = CORS_ORIGIN_WHITELIST
 REST_FRAMEWORK = {
     'PAGE_SIZE': 1,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
+EDC_SYNC_ROLE = EDC_SYNC_ROLE
 
-# EDC_SYNC_ROLE = SERVER
-# EDC_SYNC_ROLE = CLIENT
+APP_LABEL = 'bcpp_interview'
