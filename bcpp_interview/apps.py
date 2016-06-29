@@ -1,10 +1,18 @@
 from datetime import datetime
 
 from django.apps import AppConfig
-from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
+from django.conf import settings
+from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig as DjangoCryptoFieldsAppConfigParent
 
-from edc_consent.apps import EdcConsentAppConfig
-from edc_map.apps import EdcMapAppConfig
+from edc_consent.apps import EdcConsentAppConfig as EdcConsentAppConfigParent
+from edc_map.apps import EdcMapAppConfig as EdcMapAppConfigParent
+from edc_sync.apps import EdcSyncAppConfig as EdcSyncAppConfigParent
+from edc_sync.constants import SERVER
+
+try:
+    edc_sync_role = settings.EDC_SYNC_ROLE
+except AttributeError:
+    edc_sync_role = SERVER
 
 
 class BcppInterviewAppConfig(AppConfig):
@@ -13,7 +21,7 @@ class BcppInterviewAppConfig(AppConfig):
     verbose_name = 'BCPP Interview'
 
 
-class BcppInterviewMapAppConfig(EdcMapAppConfig):
+class BcppMapAppConfig(EdcMapAppConfigParent):
     name = 'bcpp_map'
     verbose_name = 'BCPP Interview Mappers'
     mapper_model = ('bcpp_interview', 'subjectlocation')
@@ -22,7 +30,7 @@ class BcppInterviewMapAppConfig(EdcMapAppConfig):
     zoom_levels = ['14', '15', '16', '17', '18']
 
 
-class ConsentAppConfig(EdcConsentAppConfig):
+class EdcConsentAppConfig(EdcConsentAppConfigParent):
     consent_type_setup = [
         {'app_label': 'bcpp_interview',
          'model_name': 'subjectconsent',
@@ -36,6 +44,11 @@ class ConsentAppConfig(EdcConsentAppConfig):
          'version': '1'}]
 
 
-class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
+class DjangoCryptoFieldsAppConfig(DjangoCryptoFieldsAppConfigParent):
     name = 'django_crypto_fields'
     model = ('django_crypto_fields', 'crypt')
+
+
+class EdcSyncAppConfig(EdcSyncAppConfigParent):
+    name = 'edc_sync'
+    role = edc_sync_role

@@ -16,6 +16,8 @@ from unipath import Path
 from django.utils import timezone
 from Crypto.Cipher import AES
 
+from edc_sync.constants import CLIENT, SERVER
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 
@@ -57,13 +59,13 @@ INSTALLED_APPS = [
     'edc_map',
     'edc_locator',
     # 'edc_registration',
-    'edc_sync.apps.EdcSyncAppConfig',
     'registration',
     'call_manager',
     'edc_audio_recording.apps.AudioRecordingAppConfig',
-    'bcpp_interview.apps.DjangoCryptoFieldsApp',
-    'bcpp_interview.apps.ConsentAppConfig',
-    'bcpp_interview.apps.BcppInterviewMapAppConfig',
+    'bcpp_interview.apps.DjangoCryptoFieldsAppConfig',
+    'bcpp_interview.apps.EdcSyncAppConfig',
+    'bcpp_interview.apps.BcppMapAppConfig',
+    'bcpp_interview.apps.EdcConsentAppConfig',
     'bcpp_interview.apps.BcppInterviewAppConfig',
 ]
 
@@ -224,3 +226,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
+
+# EDC_SYNC_ROLE = SERVER
+# EDC_SYNC_ROLE = CLIENT
