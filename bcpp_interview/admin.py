@@ -439,7 +439,7 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
         'region': admin.VERTICAL
     }
 
-    search_fields = ['identity', 'subject_identifier', 'registered_subject__identity']
+    search_fields = ['identity', 'subject_identifier', ]
 
     readonly_fields = ['subject_identifier', 'identity', 'category', 'sub_category', 'community', 'region']
 
@@ -556,4 +556,4 @@ class SubjectLossAdmin(BaseModelAdmin):
 
     radio_fields = {'reason': admin.VERTICAL}
 
-    search_fields = ['subject_identifier', 'registered_subject__identity']
+    search_fields = ['subject_identifier', ]
