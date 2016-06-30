@@ -392,6 +392,7 @@ class Interview(BaseInterview):
         app_label = 'bcpp_interview'
         get_latest_by = 'interview_datetime'
         verbose_name = 'In-depth Interview'
+        unique_together = ('reference', 'potential_subject')
 
 
 class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
