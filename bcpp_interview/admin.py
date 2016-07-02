@@ -5,7 +5,7 @@ from edc_audio_recording.admin import recording_admin, ModelAdminRecordingMixin,
 from edc_base.modeladmin.mixins import (
     ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
-    ModelAdminAuditFieldsMixin, ModelAdminChangelistButtonMixin)
+    ModelAdminAuditFieldsMixin)
 from edc_consent.admin.mixins import ModelAdminConsentMixin
 from edc_locator.admin import ModelAdminLocatorMixin
 from simple_history.admin import SimpleHistoryAdmin
@@ -37,8 +37,6 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
 
 @admin.register(RawData)
 class RawDataAdmin(admin.ModelAdmin):
-
-    # exclude = ['last_name', 'identity']
 
     readonly_fields = ['subject_identifier'] + sorted([f.name for f in RawData._meta.fields if f.name not in ['last_name', 'identity', 'subject_identifier']])
 
