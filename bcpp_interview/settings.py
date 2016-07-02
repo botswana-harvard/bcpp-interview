@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'edc_locator',
     # 'registration',
     'call_manager',
-    'edc_audio_recording.apps.AudioRecordingAppConfig',
+    'edc_audio_recording.apps.EdcAudioRecordingAppConfig',
     'bcpp_interview.apps.DjangoCryptoFieldsAppConfig',
     'bcpp_interview.apps.EdcSyncAppConfig',
     'bcpp_interview.apps.EdcConsentAppConfig',
