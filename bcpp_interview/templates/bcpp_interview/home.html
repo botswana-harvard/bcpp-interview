@@ -1,6 +1,11 @@
 {% extends "edc_base/base.html" %}
 {% load staticfiles %}
 
+{% block extra-scripts %}
+{{ block.super }}
+<script type="text/javascript" charset="utf8" class="init" src="{% static "bcpp_interview/js/home.js" %}"></script>
+{% endblock extra-scripts %} 
+
 {% block main %}
 <div class="container">
 
@@ -133,8 +138,3 @@
 
 </div>
 {% endblock main %}
-
-{% block extra-scripts-bottom %}
-{{ block.super }}
-<script type="text/javascript" charset="utf8" class="init" src="{% static "bcpp_interview/js/home.js" %}"></script>
-{% endblock extra-scripts-bottom%} 
