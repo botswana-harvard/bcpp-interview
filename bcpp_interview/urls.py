@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^call_manager/', include('edc_call_manager.urls', 'call_manager')),
     # url(r'^recording/$', RedirectView.as_view(pattern_name='home_url')),
     url(r'^recording/', include('edc_audio_recording.urls')),
+    url(r'^edc-consent/', include('edc_consent.urls')),
     url(r'^edc-sync/', include('edc_sync.urls')),
     url(r'^map/$', RedirectView.as_view(pattern_name='home_url')),
     url(r'^map/(?P<map_area>\w+)/(?P<subject_identifier>[0-9\-]{14})/',

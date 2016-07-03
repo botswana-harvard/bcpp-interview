@@ -14,7 +14,7 @@ import os
 import sys
 from unipath import Path
 from django.utils import timezone
-
+from bcpp_interview.logging import LOGGING
 
 from bcpp_interview.config import CORS_ORIGIN_WHITELIST, EDC_SYNC_ROLE
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -29,7 +29,7 @@ with open(os.path.join(ETC_DIR, 'secret_key.txt')) as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
@@ -173,7 +173,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = BASE_DIR.child('static')
+STATIC_ROOT = BASE_DIR.ancestor(1).child('static')
 
 MEDIA_ROOT = BASE_DIR.child('media')
 MEDIA_URL = '/media/'

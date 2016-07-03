@@ -6,7 +6,7 @@ from edc_base.modeladmin.mixins import (
     ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
     ModelAdminAuditFieldsMixin)
-from edc_consent.admin.mixins import ModelAdminConsentMixin
+from edc_consent.admin import ModelAdminConsentMixin
 from edc_locator.admin import ModelAdminLocatorMixin
 from simple_history.admin import SimpleHistoryAdmin
 from .actions import create_focus_group, add_to_focus_group_discussion
