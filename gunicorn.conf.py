@@ -1,3 +1,4 @@
+# http://cheng.logdown.com/posts/2015/01/29/deploy-django-nginx-gunicorn-on-mac-osx-part-2
 # cd /Users/erikvw/source/bcpp-interview/
 # gunicorn -c gunicorn.conf.py bcpp_interview.wsgi --pid /Users/erikvw/source/bcpp-interview/logs/gunicorn.pid --daemon
 #
