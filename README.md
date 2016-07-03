@@ -121,6 +121,44 @@ For the production environment:
 
     python manage.py fetch_map_images bcpp_interview.subjectlocation 25
 
+### gunicorn / nginx
+
+In settings set DEBUG=False and update ALLOW_HOSTS accordingly:
+
+    DEBUG = False
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+Start `gunicorn`:
+
+    cd ~/bcpp-interview
+    gunicorn -c gunicorn.conf.py bcpp_interview.wsgi --pid ~/bcpp-interview/logs/gunicorn.pid --daemon
+    
+Ensure `/usr/local/etc/nginx/nginx.conf` reads from `sites-enabled`:
+
+    http{
+        include /usr/local/etc/nginx/sites-enabled/*;
+
+Edit the paths in the `bcpp-interview.nginx.conf` file.
+
+    nano ~/bcpp-interview/nginx.conf
+    
+Copy or link modified nginx.conf file to `sites-enabled`. For example:
+
+    cd ~/bcpp-interview
+    sudo ln -s ~/bcpp-interview/nginx.conf /usr/local/etc/nginx/sites-enabled/bcpp-interview.conf
+
+Test `nginx`:
+    
+    sudo nginx -t
+    
+If no errors, start `nginx`:
+
+    sudo nginx
+    
+Browse:
+
+    http://localhost
+
 ### Usage
 #### Consent potential subjects
 
