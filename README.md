@@ -123,30 +123,49 @@ For the production environment:
 
 ### gunicorn / nginx
 
+Activate the virtualenv and install `gunicorn`.
+
+    workon bcpp-interview
+    pip install gunicorn
+    deactivate
+    workon bcpp-interview
+
 In settings set DEBUG=False and update ALLOW_HOSTS accordingly:
 
     DEBUG = False
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-Start `gunicorn`:
+Collect static files and build `js_reverse` js file:
+
+    cd ~/bcpp-interview
+    python manage.py collectstatic
+    python manage.py collectstatic_js_reverse
+
+Edit paths in `gunicorn.conf.py` to reflect your installation.
+
+Start `gunicorn` in daemon mode from same folder where `manage.py` resides:
 
     cd ~/bcpp-interview
     gunicorn -c gunicorn.conf.py bcpp_interview.wsgi --pid ~/bcpp-interview/logs/gunicorn.pid --daemon
+
+This should return nothing. If you get `connection refused`, check your paths in the conf file.:
+
+    curl http://127.0.0.1:9000
     
-Ensure `/usr/local/etc/nginx/nginx.conf` reads from `sites-enabled`:
+Now for `nginx`, on macosx, ensure `/usr/local/etc/nginx/nginx.conf` reads from `sites-enabled`:
 
     http{
         include /usr/local/etc/nginx/sites-enabled/*;
+
+Copy nginx.conf file to `sites-available`. For example:
+
+    cd ~/bcpp-interview
+    sudo cp ~/bcpp-interview/nginx.conf /usr/local/etc/nginx/sites-enabled/bcpp-interview.conf
 
 Edit the paths in the `bcpp-interview.nginx.conf` file.
 
     nano ~/bcpp-interview/nginx.conf
     
-Copy or link modified nginx.conf file to `sites-enabled`. For example:
-
-    cd ~/bcpp-interview
-    sudo ln -s ~/bcpp-interview/nginx.conf /usr/local/etc/nginx/sites-enabled/bcpp-interview.conf
-
 Test `nginx`:
     
     sudo nginx -t
