@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'edc_identifier',
     'edc_map',
     'edc_locator',
-    # 'registration',
     'call_manager',
     'edc_audio_recording.apps.EdcAudioRecordingAppConfig',
     'bcpp_interview.apps.DjangoCryptoFieldsAppConfig',
@@ -183,7 +182,7 @@ MEDIA_URL = '/media/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 
