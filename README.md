@@ -160,11 +160,15 @@ Now for `nginx`, on macosx, ensure `/usr/local/etc/nginx/nginx.conf` reads from 
 Copy nginx.conf file to `sites-available`. For example:
 
     cd ~/bcpp-interview
-    sudo cp ~/bcpp-interview/nginx.conf /usr/local/etc/nginx/sites-enabled/bcpp-interview.conf
+    sudo cp ~/bcpp-interview/nginx.conf /usr/local/etc/nginx/sites-available/bcpp-interview.conf
 
 Edit the paths in the `bcpp-interview.nginx.conf` file.
 
     nano ~/bcpp-interview/nginx.conf
+
+Link to `sites-enabled`. (Remove `default` if it is there):
+
+    sudo ln -s /usr/local/etc/nginx/sites-available/bcpp-interview.conf /usr/local/etc/nginx/sites-enabled/bcpp-interview.conf
     
 Test `nginx`:
     
