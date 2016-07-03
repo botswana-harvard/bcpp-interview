@@ -1,5 +1,6 @@
 # python3
 Django
+gunicorn
 cffi
 sounddevice
 pysoundfile
