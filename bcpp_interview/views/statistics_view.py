@@ -21,7 +21,7 @@ tz = pytz.timezone(settings.TIME_ZONE)
 
 
 class StatisticsView(EdcBaseViewMixin, TemplateView):
-    template_name = 'home.html'
+    template_name = 'bcpp_interview/home.html'
 
     def __init__(self):
         self._response_data = {}
