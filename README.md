@@ -162,9 +162,9 @@ Copy nginx.conf file to `sites-available`. For example:
     cd ~/bcpp-interview
     sudo cp ~/bcpp-interview/nginx.conf /usr/local/etc/nginx/sites-available/bcpp-interview.conf
 
-Edit the paths in the `bcpp-interview.nginx.conf` file.
+Edit the paths in the `bcpp-interview.conf` file.
 
-    nano ~/bcpp-interview/nginx.conf
+    nano /usr/local/etc/nginx/sites-available/bcpp-interview.conf
 
 Link to `sites-enabled`. (Remove `default` if it is there):
 
