@@ -18,11 +18,12 @@ Uses the python module `sounddevice` for audio recordings.
 
 On MacOSX:
 
-    brew install pkg-config libffi libsndfile
+    brew update
+    brew install pkg-config libffi libsndfile nginx
 
 On Ubuntu:
 
-    sudo apt-get install libportaudio2 python3-cffi libffi-dev
+    sudo apt-get install libportaudio2 python3-cffi libffi-dev gunicorn nginx
 
 Make a virtualenv (see `virtualenvwrapper`):
 
