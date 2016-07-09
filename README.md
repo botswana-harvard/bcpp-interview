@@ -144,6 +144,9 @@ Collect static files and build `js_reverse` js file:
 
 Edit paths in `gunicorn.conf.py` to reflect your installation.
 
+    cd ~/bcpp-interview
+    nano gunicorn.conf.py
+
 Start `gunicorn` in daemon mode from same folder where `manage.py` resides:
 
     cd ~/bcpp-interview
@@ -153,19 +156,32 @@ This should return nothing. If you get `connection refused`, check your paths in
 
     curl http://127.0.0.1:9000
     
-Now for `nginx`, on macosx, ensure `/usr/local/etc/nginx/nginx.conf` reads from `sites-enabled`:
+Now for `nginx`, on macosx, make `sites-available` and `sites-enabled` folders (they should already exist on Ubuntu):
 
-    http{
-        include /usr/local/etc/nginx/sites-enabled/*;
+    sudo mkdir /usr/local/etc/nginx/sites-available/
+    sudo mkdir /usr/local/etc/nginx/sites-enabled/
 
 Copy nginx.conf file to `sites-available`. For example:
 
     cd ~/bcpp-interview
     sudo cp ~/bcpp-interview/nginx.conf /usr/local/etc/nginx/sites-available/bcpp-interview.conf
 
+ensure `/usr/local/etc/nginx/nginx.conf` reads from `sites-enabled`:
+
+    sudo nano /usr/local/etc/nginx/nginx.conf
+
+in section `http {}` add this line:    
+
+    http{
+
+        include /usr/local/etc/nginx/sites-enabled/*;
+        ...
+        ...
+    }
+
 Edit the paths in the `bcpp-interview.conf` file.
 
-    nano /usr/local/etc/nginx/sites-available/bcpp-interview.conf
+    sudo nano /usr/local/etc/nginx/sites-available/bcpp-interview.conf
 
 Link to `sites-enabled`. (Remove `default` if it is there):
 
