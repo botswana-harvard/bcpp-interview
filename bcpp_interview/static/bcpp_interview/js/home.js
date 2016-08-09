@@ -1,5 +1,6 @@
     $(document).ready( function () {
         var d = new Date();
+        alert('hello');
         $('#todays-date').text(d.toDateString());
         $('#link-pending-transactions').attr('href', Urls[ 'edc-sync-home-url' ]());
         $('#bdg-refresh').click( function(e) {

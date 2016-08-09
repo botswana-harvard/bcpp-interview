@@ -9,6 +9,38 @@ from edc_map.exceptions import MapperError
 from django.db.utils import IntegrityError
 from edc_constants.constants import NOT_APPLICABLE
 
+category_map = {
+    'DEFAULTER': 'DEFAULTER',
+    'Did not link': 'not_linked',
+    'Initiated ART': 'initiated',
+    'Initiated after T1 visit': 't1_initiated',
+    'Linked, did not initiate': 'linked_only',
+    'initiated': 'initiated',
+    'linked_only': 'linked_only',
+    'not_linked': 'not_linked'
+}
+
+
+def category(row):
+    if row['category'] in category_map:
+        return category_map[row['category']]
+    else:
+        return row['category']
+
+sub_category_map = {
+    'CD4<=350': 'national_guidelines',
+    'CD4>350, VL>10000': 'expanded_guidelines',
+    'Pregnant': 'national_guidelines',
+    'VL>10000': 'expanded_guidelines'}
+
+
+def sub_category(row):
+    if row['sub_category'] in sub_category_map:
+        return sub_category_map[row['sub_category']]
+    else:
+        return row['sub_category']
+
+
 
 class Command(BaseCommand):
 
@@ -72,8 +104,8 @@ class Command(BaseCommand):
                 identity=obj.identity,
                 dob=parser.parse(obj.dob),
                 gender=obj.gender,
-                category=obj.issue,
-                sub_category=self.sub_category(obj.issue, obj.elig_cat),
+                category=obj.category,
+                sub_category=obj.sub_category,
                 community=obj.community,
             )
         except IntegrityError as e:

@@ -6,7 +6,7 @@ from edc_sync.models import SyncHistoricalRecords
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_call_manager.constants import NO_CONTACT
 from edc_call_manager.managers import CallManager, LogManager, LogEntryManager
-from edc_call_manager.models import CallModelMixin, LogModelMixin, LogEntryModelMixin
+from edc_call_manager.model_mixins import CallModelMixin, LogModelMixin, LogEntryModelMixin
 from edc_sync.models.sync_model_mixin import SyncModelMixin
 
 from bcpp_interview.models import PotentialSubject

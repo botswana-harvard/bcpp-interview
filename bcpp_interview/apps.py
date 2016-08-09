@@ -2,11 +2,11 @@ from datetime import datetime
 
 from django.apps import AppConfig
 from django.conf import settings
-from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig as DjangoCryptoFieldsAppConfigParent
 
+from edc_base.apps import AppConfig as EdcBaseAppConfigParent
 from edc_consent.apps import EdcConsentAppConfig as EdcConsentAppConfigParent
 from edc_map.apps import EdcMapAppConfig as EdcMapAppConfigParent
-from edc_sync.apps import EdcSyncAppConfig as EdcSyncAppConfigParent
+from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
 from edc_sync.constants import SERVER
 
 try:
@@ -15,9 +15,13 @@ except AttributeError:
     edc_sync_role = SERVER
 
 
+class EdcBaseAppConfig(EdcBaseAppConfigParent):
+    institution = 'Botswana Harvard AIDS Institute Partnership'
+    project_name = 'BCPP Interview'
+
+
 class BcppInterviewAppConfig(AppConfig):
     name = 'bcpp_interview'
-    institution = 'Botswana Harvard AIDS Institute Partnership'
     verbose_name = 'BCPP Interview'
 
 
@@ -42,11 +46,6 @@ class EdcConsentAppConfig(EdcConsentAppConfigParent):
          'start_datetime': datetime(2016, 5, 1, 0, 0, 0),
          'end_datetime': datetime(2017, 5, 1, 0, 0, 0),
          'version': '1'}]
-
-
-class DjangoCryptoFieldsAppConfig(DjangoCryptoFieldsAppConfigParent):
-    name = 'django_crypto_fields'
-    model = ('django_crypto_fields', 'crypt')
 
 
 class EdcSyncAppConfig(EdcSyncAppConfigParent):

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_revision',
     'simple_history',
     'rest_framework',
     'rest_framework.authtoken',
@@ -48,18 +49,16 @@ INSTALLED_APPS = [
     'django_js_reverse',
     'corsheaders',
     'crispy_forms',
-    'django_revision.apps.AppConfig',
-    'django_crypto_fields.apps.AppConfig',
-    'edc_base.apps.AppConfig',
+    'edc_base',
+    'edc_call_manager.apps.EdcCallManagerAppConfig',
     'edc_content_type_map.apps.EdcContentTypeAppConfig',
     'edc_device',
     'edc_identifier',
     'edc_map',
     'edc_locator',
-    # 'edc_call_manager.apps.AppConfig',
+    'call_manager',
     'edc_audio_recording.apps.EdcAudioRecordingAppConfig',
-    'call_manager.apps.AppConfig',
-    'call_manager.apps.EdcCallManagerAppConfig',
+    'bcpp_interview.apps.DjangoCryptoFieldsAppConfig',
     'bcpp_interview.apps.EdcSyncAppConfig',
     'bcpp_interview.apps.EdcConsentAppConfig',
     'bcpp_interview.apps.BcppMapAppConfig',
@@ -104,25 +103,12 @@ WSGI_APPLICATION = 'bcpp_interview.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-if 'test' in sys.argv:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR.ancestor(1), 'db.sqlite3'),
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR.ancestor(1), 'db.sqlite3'),
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'OPTIONS': {
-                'read_default_file': os.path.join(ETC_DIR, 'default.cnf'),
-            },
-            'HOST': '',
-            'PORT': '',
-            'ATOMIC_REQUESTS': True,
-        }
-    }
+}
 
 # ssh -f -N -L 10000:127.0.0.1:5432 bcpp@getresults.bhp.org.bw
 # DATABASES = {
@@ -197,7 +183,7 @@ LANGUAGES = (
     ('en', 'English'),
 )
 
-PROJECT_TITLE = 'BCPP Interview'
+PROJECT_TITLE = 'Botswana Combination Prevention Project'
 INSTITUTION = 'Botswana-Harvard AIDS Institute Partnership'
 PROTOCOL_REVISION = '0.1dev'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
@@ -216,6 +202,8 @@ REST_FRAMEWORK = {
     ),
 }
 EDC_SYNC_ROLE = EDC_SYNC_ROLE
+
+APP_LABEL = 'bcpp_interview'
 
 
 # SECURE_CONTENT_TYPE_NOSNIFF = True

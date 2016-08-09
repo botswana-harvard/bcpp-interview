@@ -9,7 +9,10 @@ from django_crypto_fields.fields import (
 
 from edc_audio_recording.models import RecordingModelMixin, RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
+from edc_call_manager.constants import NO_CONTACT
+from edc_call_manager.managers import CallManager, LogManager, LogEntryManager
 from edc_call_manager.mixins import CallLogLocatorMixin
+from edc_call_manager.models import CallModelMixin, LogModelMixin, LogEntryModelMixin
 from edc_consent.models import BaseConsent, ConsentManager
 from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
@@ -24,9 +27,8 @@ from edc_sync.models import SyncModelMixin, SyncHistoricalRecords
 from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
     FocusGroupItemManager, InterviewManager, FocusGroupManager,
-    SubjectLossManager, GroupDiscussionLabelManager, PotentialSubjectManager)
-from bcpp_interview.managers import SubjectConsentManager, NurseConsentManager, SubjectLocatorManager,\
-    SubjectLocationManager
+    SubjectLossManager, GroupDiscussionLabelManager, PotentialSubjectManager,
+    SubjectConsentManager, NurseConsentManager, SubjectLocatorManager, SubjectLocationManager)
 
 
 NOT_LINKED = 'not_linked'
@@ -34,6 +36,7 @@ LINKED_ONLY = 'linked_only'
 INITIATED = 'initiated'
 INITIATED_T1 = 't1_initiated'
 DEFAULTER = 'DEFAULTER'
+
 INITIATED_NATIONAL_GUIDELINES = 'national_guidelines'
 INITIATED_EXPANDED_GUIDELINES = 'expanded_guidelines'
 
@@ -113,11 +116,8 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
             self.subject_identifier = SubjectIdentifier(site_code='99').get_identifier()
         super(NurseConsent, self).save(*args, **kwargs)
 
-    class Meta:
+    class Meta(BaseConsent.Meta):
         app_label = 'bcpp_interview'
-        get_latest_by = 'consent_datetime'
-        unique_together = (('first_name', 'dob', 'initials', 'version'), )
-        ordering = ('created', )
 
 
 class PotentialSubject(BaseUuidModel):
@@ -257,11 +257,8 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
                 'Potential subject with identity \'{}\' was not found.'.format(identity))
         return potential_subject
 
-    class Meta:
+    class Meta(BaseConsent.Meta):
         app_label = 'bcpp_interview'
-        get_latest_by = 'consent_datetime'
-        unique_together = (('first_name', 'dob', 'initials', 'version'), )
-        ordering = ('created', )
 
 
 class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):

@@ -1,9 +1,10 @@
 {% extends "edc_base/base.html" %}
 {% load staticfiles %}
-
 {% block extra-scripts %}
 {{ block.super }}
-<script type="text/javascript" charset="utf8" class="init" src="{% static "bcpp_interview/js/home.js" %}"></script>
+<!-- begin bcpp-interview extra-scripts -->
+  <script type="text/javascript" charset="utf8" class="init" src="{% static "bcpp_interview/js/home.js" %}"></script>
+<!-- end bcpp-interview extra-scripts -->
 {% endblock extra-scripts %} 
 
 {% block main %}
