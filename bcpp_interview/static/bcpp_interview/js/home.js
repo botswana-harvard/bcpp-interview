@@ -1,7 +1,7 @@
     $(document).ready( function () {
         var d = new Date();
         $('#todays-date').text(d.toDateString());
-        $('#link-pending-transactions').attr('href', Urls[ 'edc-sync-home-url' ]());
+        $('#link-pending-transactions').attr('href', Urls[ 'edc-sync:home-url' ]());
         $('#bdg-refresh').click( function(e) {
             e.preventDefault();
             updateBadges();
@@ -52,7 +52,7 @@
             });
         $('#pill-audio-recordings').click( function(e) {
             e.preventDefault();
-            window.location.href=Urls['edc-audio-recording-home-url']();
+            window.location.href=Urls['edc-audio-recording:home-url']();
             });
     }
     

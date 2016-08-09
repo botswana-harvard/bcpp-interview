@@ -23,9 +23,12 @@ from django_crypto_fields.admin import crypto_fields_admin
 
 from edc_base.views import LoginView, LogoutView
 from edc_call_manager.admin import edc_call_manager_admin
+from edc_sync.admin import edc_sync_admin
 
 from .views import (
     HomeView, StatisticsView, LocationView)
+from edc_audio_recording.admin import recording_admin
+from edc_consent.admin import edc_consent_admin
 # from django.views.decorators.cache import cache_page
 
 urlpatterns = [
@@ -35,10 +38,10 @@ urlpatterns = [
     url(r'logout', LogoutView.as_view(pattern_name='login_url'), name='logout_url'),
     url(r'^statistics/', StatisticsView.as_view(), name='update-statistics'),
     url(r'^call_manager/$', RedirectView.as_view(pattern_name='home_url')),
-    url(r'^call_manager/', include('edc_call_manager.urls', 'call_manager')),
-    url(r'^edc-audio-recording/', include('edc_audio_recording.urls')),
-    url(r'^edc-consent/', include('edc_consent.urls')),
-    url(r'^edc-sync/', include('edc_sync.urls')),
+    url(r'^call_manager/', include('edc_call_manager.urls', 'edc-call-manager')),
+    url(r'^edc-audio-recording/', include('edc_audio_recording.urls', 'edc-audio-recording')),
+    url(r'^edc-consent/', include('edc_consent.urls', 'edc-consent')),
+    url(r'^edc-sync/', include('edc_sync.urls', 'edc-sync')),
     url(r'^map/$', RedirectView.as_view(pattern_name='home_url')),
     url(r'^map/(?P<map_area>\w+)/(?P<subject_identifier>[0-9\-]{14})/',
         LocationView.as_view(), name='location_url'),
@@ -46,6 +49,9 @@ urlpatterns = [
     url(r'^admin/$', RedirectView.as_view(pattern_name='home_url')),
     url(r'^admin/', crypto_fields_admin.urls),
     url(r'^admin/', edc_call_manager_admin.urls),
+    url(r'^admin/', edc_sync_admin.urls),
+    url(r'^admin/', recording_admin.urls),
+    url(r'^admin/', edc_consent_admin.urls),
     url(r'^admin/', admin.site.urls),
     url(r'^home/', HomeView.as_view(), name='home_url'),
     url(r'^', HomeView.as_view(), name='home_url'),
