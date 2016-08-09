@@ -1,4 +1,5 @@
 from django.apps import AppConfig as DjangoAppConfig
+
 from edc_call_manager.apps import AppConfig as EdcCallManagerAppConfigParent
 
 

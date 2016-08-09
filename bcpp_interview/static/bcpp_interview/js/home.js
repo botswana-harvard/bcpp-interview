@@ -1,6 +1,5 @@
     $(document).ready( function () {
         var d = new Date();
-        alert('hello');
         $('#todays-date').text(d.toDateString());
         $('#link-pending-transactions').attr('href', Urls[ 'edc-sync-home-url' ]());
         $('#bdg-refresh').click( function(e) {
@@ -11,7 +10,7 @@
         updatePillLinks();    
         updatePotentialSubjectLinks();
         updateVerifyConsentLinks();
-        callUrl = Urls['call_manager_admin:call_manager_call_changelist']();
+        callUrl = Urls['edc_call_manager_admin:call_manager_call_changelist']();
         updateCallLinks(callUrl);
         idiUrl = Urls['recording_admin:bcpp_interview_interviewrecording_changelist']();
         fgdUrl = Urls['recording_admin:bcpp_interview_groupdiscussionrecording_changelist']();
@@ -49,7 +48,7 @@
             });
         $('#pill-call-manager').click( function(e) {
             e.preventDefault();
-            window.location.href=Urls['call_manager_admin:call_manager_call_changelist']();
+            window.location.href=Urls['edc_call_manager_admin:call_manager_call_changelist']();
             });
         $('#pill-audio-recordings').click( function(e) {
             e.preventDefault();

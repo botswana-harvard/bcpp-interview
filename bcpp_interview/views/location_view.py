@@ -30,7 +30,7 @@ class LocationView(EdcBaseViewMixin, MapImageView):
                 'admin:bcpp_interview_potentialsubject_changelist') +
             '?q=' + self.kwargs.get('subject_identifier'),
             back_call_url=reverse(
-                'call_manager_admin:call_manager_call_changelist') +
+                'edc_call_manager_admin:call_manager_call_changelist') +
             '?q=' + self.kwargs.get('subject_identifier'),
             add_point_url=reverse('admin:bcpp_interview_subjectlocation_add')
         )
