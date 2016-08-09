@@ -5,7 +5,7 @@ from django.conf import settings
 
 from edc_base.apps import AppConfig as EdcBaseAppConfigParent
 from edc_consent.apps import EdcConsentAppConfig as EdcConsentAppConfigParent
-from edc_map.apps import EdcMapAppConfig as EdcMapAppConfigParent
+from edc_map.apps import AppConfig as EdcMapAppConfigParent
 from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
 from edc_sync.constants import SERVER
 
@@ -25,11 +25,11 @@ class BcppInterviewAppConfig(AppConfig):
     verbose_name = 'BCPP Interview'
 
 
-class BcppMapAppConfig(EdcMapAppConfigParent):
-    name = 'bcpp_map'
+class EdcMapAppConfig(EdcMapAppConfigParent):
     verbose_name = 'BCPP Interview Mappers'
     mapper_model = ('bcpp_interview', 'subjectlocation')
     mapper_survey_model = ('bcpp_interview', 'survey')
+    landmark_model = ('bcpp_map', 'landmark')
     verify_point_on_save = False
     zoom_levels = ['14', '15', '16', '17', '18']
 
@@ -49,5 +49,4 @@ class EdcConsentAppConfig(EdcConsentAppConfigParent):
 
 
 class EdcSyncAppConfig(EdcSyncAppConfigParent):
-    name = 'edc_sync'
     role = edc_sync_role

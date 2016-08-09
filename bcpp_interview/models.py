@@ -9,10 +9,7 @@ from django_crypto_fields.fields import (
 
 from edc_audio_recording.models import RecordingModelMixin, RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
-from edc_call_manager.constants import NO_CONTACT
-from edc_call_manager.managers import CallManager, LogManager, LogEntryManager
 from edc_call_manager.mixins import CallLogLocatorMixin
-from edc_call_manager.models import CallModelMixin, LogModelMixin, LogEntryModelMixin
 from edc_consent.models import BaseConsent, ConsentManager
 from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
@@ -263,6 +260,13 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
 
 class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 
+    subject_identifier = models.CharField(
+        verbose_name="Subject Identifier",
+        max_length=50,
+        editable=False,
+        null=True,
+        unique=True)
+
     potential_subject = models.OneToOneField(PotentialSubject)
 
     history = SyncHistoricalRecords()
@@ -452,9 +456,9 @@ class InterviewRecording(SyncModelMixin, RecordingModelMixin, BaseUuidModel):
         default=NO,
         help_text='Indicate if the subject has agreed that this recording may be used for analysis')
 
-    history = SyncHistoricalRecords()
-
     objects = RecordingManager()
+
+    history = SyncHistoricalRecords()
 
     def natural_key(self):
         return (self.sound_filename, )

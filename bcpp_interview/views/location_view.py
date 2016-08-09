@@ -1,7 +1,6 @@
 import json
 
 from django.apps import apps as django_apps
-from django.conf import settings
 from django.contrib import admin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
@@ -16,15 +15,12 @@ class LocationView(EdcBaseViewMixin, MapImageView):
 
     item_model = SubjectLocation
     item_model_field = 'subject_identifier'
-    app_label = 'bcpp_map'
     filename_field = 'subject_identifier'
-    zoom_levels = django_apps.get_app_config('bcpp_map').zoom_levels
+    zoom_levels = django_apps.get_app_config('edc_map').zoom_levels
 
     def get_context_data(self, **kwargs):
         context = super(LocationView, self).get_context_data(**kwargs)
         context.update(
-            title=settings.PROJECT_TITLE,
-            project_name=settings.PROJECT_TITLE,
             site_header=admin.site.site_header,
             back_subject_url=reverse(
                 'admin:bcpp_interview_potentialsubject_changelist') +

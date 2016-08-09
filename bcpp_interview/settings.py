@@ -50,18 +50,18 @@ INSTALLED_APPS = [
     'crispy_forms',
     'django_revision.apps.AppConfig',
     'django_crypto_fields.apps.AppConfig',
-    'edc_content_type_map.apps.EdcContentTypeAppConfig',
+    'edc_content_type_map.apps.AppConfig',
     'edc_device',
-    'edc_identifier',
-    'edc_map',
+    'edc_identifier.apps.AppConfig',
     'edc_locator.apps.AppConfig',
-    'edc_audio_recording.apps.EdcAudioRecordingAppConfig',
+    'edc_audio_recording.apps.AppConfig',
     'call_manager.apps.AppConfig',
     'call_manager.apps.EdcCallManagerAppConfig',
+    'bcpp_map.apps.AppConfig',
+    'bcpp_interview.apps.EdcMapAppConfig',
     'bcpp_interview.apps.EdcBaseAppConfig',
     'bcpp_interview.apps.EdcSyncAppConfig',
     'bcpp_interview.apps.EdcConsentAppConfig',
-    'bcpp_interview.apps.BcppMapAppConfig',
     'bcpp_interview.apps.BcppInterviewAppConfig',
 ]
 
@@ -196,9 +196,10 @@ LANGUAGES = (
     ('en', 'English'),
 )
 
-PROJECT_TITLE = 'BCPP Interview'
-INSTITUTION = 'Botswana-Harvard AIDS Institute Partnership'
-PROTOCOL_REVISION = '0.1dev'
+# PROJECT_TITLE = 'BCPP Interview'
+# INSTITUTION = 'Botswana-Harvard AIDS Institute Partnership'
+# PROTOCOL_REVISION = '0.1dev'
+
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 DEVICE_ID = '15'
 SERVER_DEVICE_ID_LIST = ['99']

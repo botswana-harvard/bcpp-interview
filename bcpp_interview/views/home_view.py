@@ -5,8 +5,6 @@ from django.views.generic import TemplateView
 
 from edc_base.views import EdcBaseViewMixin
 
-from django.apps import apps as django_apps
-
 
 class HomeView(EdcBaseViewMixin, TemplateView):
     template_name = 'bcpp_interview/home.html'
