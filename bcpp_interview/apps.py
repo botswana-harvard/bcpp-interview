@@ -7,12 +7,7 @@ from edc_base.apps import AppConfig as EdcBaseAppConfigParent
 from edc_consent.apps import EdcConsentAppConfig as EdcConsentAppConfigParent
 from edc_map.apps import AppConfig as EdcMapAppConfigParent
 from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
-from edc_sync.constants import SERVER
-
-try:
-    edc_sync_role = settings.EDC_SYNC_ROLE
-except AttributeError:
-    edc_sync_role = SERVER
+from edc_sync.constants import SERVER, CLIENT
 
 
 class EdcBaseAppConfig(EdcBaseAppConfigParent):
@@ -49,4 +44,4 @@ class EdcConsentAppConfig(EdcConsentAppConfigParent):
 
 
 class EdcSyncAppConfig(EdcSyncAppConfigParent):
-    role = edc_sync_role
+    role = SERVER
