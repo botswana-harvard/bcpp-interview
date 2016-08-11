@@ -130,6 +130,7 @@ class PotentialSubject(BaseUuidModel):
         unique=True)
 
     first_name = FirstnameField(
+        verbose_name="First name",
         null=True,
     )
 
@@ -176,9 +177,17 @@ class PotentialSubject(BaseUuidModel):
     community = models.CharField(
         max_length=25)
 
+    pair = models.IntegerField(
+        null=True)
+
     region = models.CharField(
         max_length=25,
         choices=REGIONS)
+
+    source = models.CharField(
+        max_length=25,
+        null=True,
+        help_text='')
 
     history = SyncHistoricalRecords()
 
@@ -585,10 +594,11 @@ class RawData(BaseUuidModel):
 
     identity = IdentityField(null=True)
 
+    first_name = FirstnameField(null=True)
+
     last_name = LastnameField(null=True)
 
-    pair = models.CharField(
-        max_length=25,
+    pair = models.IntegerField(
         null=True)
 
     community = models.CharField(
@@ -706,6 +716,76 @@ class RawData(BaseUuidModel):
         null=True)
 
     dob = models.CharField(
+        max_length=25,
+        null=True)
+
+    clinic_receiving_from_t1 = models.CharField(
+        max_length=50,
+        null=True)
+
+    on_arv_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    keepme = models.CharField(
+        max_length=25,
+        null=True)
+
+    keepme_bhs = models.CharField(
+        max_length=25,
+        null=True)
+
+    keepme_ahs = models.CharField(
+        max_length=25,
+        null=True)
+
+    pims_reg_date = models.CharField(
+        max_length=25,
+        null=True)
+
+    pims_art_date = models.CharField(
+        max_length=25,
+        null=True)
+
+    currently_pregnant = models.CharField(
+        max_length=25,
+        null=True)
+
+    visit_date_t0 = models.CharField(
+        max_length=25,
+        null=True)
+
+    visit_date_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    ever_taken_arv_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    first_arv_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    post_t1_initiate = models.IntegerField(
+        null=True)
+
+    plot_identifier = models.CharField(
+        max_length=25,
+        null=True)
+
+    post_t0_link = models.IntegerField(
+        null=True)
+
+    category = models.CharField(
+        max_length=25,
+        null=True)
+
+    sub_category = models.CharField(
+        max_length=25,
+        null=True)
+
+    source = models.CharField(
         max_length=25,
         null=True)
 

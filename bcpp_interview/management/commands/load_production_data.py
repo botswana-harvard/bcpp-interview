@@ -41,7 +41,6 @@ def sub_category(row):
         return row['sub_category']
 
 
-
 class Command(BaseCommand):
 
     """Import model data from CSV.
@@ -85,6 +84,7 @@ class Command(BaseCommand):
                 else:
                     try:
                         obj = model.objects.create(**row)
+                        obj.source = 'kathleen'
                         added += 1
                         self.stdout.write(
                             self.style.NOTICE('  adding record {} / {} / {}{}'.format(added, recs, csv_row_count, ' ' * 35)), ending='\r')
@@ -92,13 +92,14 @@ class Command(BaseCommand):
                         obj = model.objects.get(subject_identifier=row.get('subject_identifier'))
                         self.stdout.write(
                             self.style.NOTICE('  processing existing record {} / {} / {}{}'.format(added, recs, csv_row_count, ' ' * 35)), ending='\r')
-                    self.create_handler(obj, row)
+                    # self.create_handler(obj, row)
         self.stdout.write(
             self.style.SUCCESS('Successfully added {} / {} / {} records{}'.format(added, recs, csv_row_count, ' ' * 35)))
 
     def create_handler(self, obj, row):
         try:
             PotentialSubject.objects.create(
+                first_name=obj.first_name,
                 last_name=obj.last_name,
                 subject_identifier=obj.subject_identifier,
                 identity=obj.identity,

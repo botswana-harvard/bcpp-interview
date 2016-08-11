@@ -29,9 +29,8 @@ with open(os.path.join(ETC_DIR, 'secret_key.txt')) as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
+DEBUG = False
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'bcpp-interview.bhp.org.bw', 'www.bcpp-interview.bhp.org.bw']
 # Application definition
 
 INSTALLED_APPS = [
@@ -183,7 +182,7 @@ MEDIA_URL = '/media/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 
