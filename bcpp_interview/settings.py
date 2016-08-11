@@ -12,11 +12,11 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import sys
+import configparser
 from unipath import Path
 from django.utils import timezone
 from bcpp_interview.logging import LOGGING
 
-from bcpp_interview.config import CORS_ORIGIN_WHITELIST, EDC_SYNC_ROLE
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 ETC_DIR = os.path.join(BASE_DIR.ancestor(1), 'etc')
@@ -206,14 +206,20 @@ UPLOAD_FOLDER = os.path.join(MEDIA_ROOT, 'upload')
 CURRENT_SURVEY = 'bcpp-year-1'
 CURRENT_COMMUNITY = None
 
-CORS_ORIGIN_WHITELIST = CORS_ORIGIN_WHITELIST
+try:
+    config = configparser.ConfigParser()
+    config.read(os.path.join(ETC_DIR, 'edc_sync.ini'))
+    CORS_ORIGIN_WHITELIST = tuple(config['corsheaders'].get('cors_origin_whitelist').split(','))
+    CORS_ORIGIN_ALLOW_ALL = config['corsheaders'].getboolean('cors_origin_allow_all', True)
+except KeyError:
+    CORS_ORIGIN_WHITELIST = None
+    CORS_ORIGIN_ALLOW_ALL = True
 REST_FRAMEWORK = {
     'PAGE_SIZE': 1,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
-EDC_SYNC_ROLE = EDC_SYNC_ROLE
 
 # SECURE_CONTENT_TYPE_NOSNIFF = True
 # SECURE_BROWSER_XSS_FILTER = True
