@@ -6,29 +6,26 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django_crypto_fields.fields import (
     EncryptedTextField, IdentityField, FirstnameField, LastnameField, EncryptedCharField)
-from simple_history.models import HistoricalRecords as AuditTrail
 
-from edc_audio_recording.models import RecordingModelMixin
-from edc_audio_recording.manager import RecordingManager
+from edc_audio_recording.models import RecordingModelMixin, RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_call_manager.mixins import CallLogLocatorMixin
-from edc_consent.models import BaseConsent, ConsentManager, ObjectConsentManager
+from edc_consent.models import BaseConsent, ConsentManager
 from edc_consent.models.fields import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
 from edc_consent.models.fields.bw import IdentityFieldsMixin
 from edc_constants.choices import YES_NO, GENDER
-from edc_constants.constants import NO, NOT_APPLICABLE
+from edc_constants.constants import NO, NOT_APPLICABLE, MALE, FEMALE
 from edc_identifier.subject.classes import SubjectIdentifier
 from edc_locator.models import LocatorMixin
 from edc_map.model_mixins import MapperModelMixin
-from edc_sync.models import SyncModelMixin
-
-from registration.models import RegisteredSubject
+from edc_sync.models import SyncModelMixin, SyncHistoricalRecords
 
 from .identifier import GroupIdentifier, InterviewIdentifier
 from .managers import (
     FocusGroupItemManager, InterviewManager, FocusGroupManager,
-    SubjectLossManager, GroupDiscussionLabelManager)
+    SubjectLossManager, GroupDiscussionLabelManager, PotentialSubjectManager,
+    SubjectConsentManager, NurseConsentManager, SubjectLocatorManager, SubjectLocationManager)
 
 
 NOT_LINKED = 'not_linked'
@@ -36,6 +33,7 @@ LINKED_ONLY = 'linked_only'
 INITIATED = 'initiated'
 INITIATED_T1 = 't1_initiated'
 DEFAULTER = 'DEFAULTER'
+
 INITIATED_NATIONAL_GUIDELINES = 'national_guidelines'
 INITIATED_EXPANDED_GUIDELINES = 'expanded_guidelines'
 
@@ -89,7 +87,7 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
     MIN_AGE_OF_CONSENT = 18
     MAX_AGE_OF_CONSENT = 99
     AGE_IS_ADULT = 18
-    GENDER_OF_CONSENT = ['M', 'F']
+    GENDER_OF_CONSENT = [MALE, FEMALE]
     SUBJECT_TYPES = ['nurse']
 
     interviewed = models.BooleanField(default=False, editable=False)
@@ -98,30 +96,28 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
 
     fgd = models.BooleanField(default=False, editable=False)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     consent = ConsentManager()
 
-    objects = ObjectConsentManager()
+    objects = NurseConsentManager()
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name, self.identity, self.subject_identifier)
+
+    def natural_key(self):
+        return (self.subject_identifier, )
 
     def save(self, *args, **kwargs):
         if not self.id:
             self.subject_identifier = SubjectIdentifier(site_code='99').get_identifier()
         super(NurseConsent, self).save(*args, **kwargs)
 
-    class Meta:
+    class Meta(BaseConsent.Meta):
         app_label = 'bcpp_interview'
-        get_latest_by = 'consent_datetime'
-        unique_together = (('first_name', 'dob', 'initials', 'version'), )
-        ordering = ('created', )
 
 
 class PotentialSubject(BaseUuidModel):
-
-    registered_subject = models.ForeignKey(RegisteredSubject, null=True, editable=False)
 
     identity = IdentityField(
         verbose_name="Identity",
@@ -134,6 +130,7 @@ class PotentialSubject(BaseUuidModel):
         unique=True)
 
     first_name = FirstnameField(
+        verbose_name="First name",
         null=True,
     )
 
@@ -180,11 +177,32 @@ class PotentialSubject(BaseUuidModel):
     community = models.CharField(
         max_length=25)
 
+    pair = models.IntegerField(
+        null=True)
+
     region = models.CharField(
         max_length=25,
         choices=REGIONS)
 
-    history = AuditTrail()
+    source = models.CharField(
+        max_length=25,
+        null=True,
+        help_text='')
+
+    history = SyncHistoricalRecords()
+
+    objects = PotentialSubjectManager()
+
+    def natural_key(self):
+        return (self.subject_identifier, )
+
+    @property
+    def subject_consent(self):
+        try:
+            subject_consent = SubjectConsent.objects.get(subject_identifier=self.subject_identifier)
+        except SubjectConsent.DoesNotExist:
+            return None
+        return subject_consent
 
     def __str__(self):
         try:
@@ -211,19 +229,22 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
     MIN_AGE_OF_CONSENT = 18
     MAX_AGE_OF_CONSENT = 64
     AGE_IS_ADULT = 18
-    GENDER_OF_CONSENT = ['M', 'F']
+    GENDER_OF_CONSENT = [MALE, FEMALE]
     SUBJECT_TYPES = ['subject']
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     consent = ConsentManager()
 
-    objects = ObjectConsentManager()
+    objects = SubjectConsentManager()
 
     def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name, self.identity, self.subject_identifier)
+
+    def natural_key(self):
+        return (self.subject_identifier, )
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -242,21 +263,31 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
                 'Potential subject with identity \'{}\' was not found.'.format(identity))
         return potential_subject
 
-    class Meta:
+    class Meta(BaseConsent.Meta):
         app_label = 'bcpp_interview'
-        get_latest_by = 'consent_datetime'
-        unique_together = (('first_name', 'dob', 'initials', 'version'), )
-        ordering = ('created', )
 
 
 class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 
+    subject_identifier = models.CharField(
+        verbose_name="Subject Identifier",
+        max_length=50,
+        editable=False,
+        null=True,
+        unique=True)
+
     potential_subject = models.OneToOneField(PotentialSubject)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
+
+    objects = SubjectLocatorManager()
 
     def __str__(self):
         return self.potential_subject.subject_identifier
+
+    def natural_key(self):
+        return self.potential_subject.natural_key()
+    natural_key.dependencies = ['bcpp_interview.potentialsubject']
 
     def get_call_log_options(self):
         return dict(call__potential_subject=self.potential_subject)
@@ -268,7 +299,7 @@ class SubjectLocator(LocatorMixin, CallLogLocatorMixin, BaseUuidModel):
 class FocusGroup(SyncModelMixin, BaseUuidModel):
 
     reference = models.CharField(
-        max_length=5,
+        max_length=15,
         default=group_identifier,
         unique=True)
 
@@ -284,7 +315,7 @@ class FocusGroup(SyncModelMixin, BaseUuidModel):
         choices=SUB_CATEGORIES,
         help_text='Note: only applicable if subjects are initiated')
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = FocusGroupManager()
 
@@ -292,7 +323,7 @@ class FocusGroup(SyncModelMixin, BaseUuidModel):
         return self.reference
 
     def natural_key(self):
-        return self.reference
+        return (self.reference, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -305,12 +336,16 @@ class FocusGroupItem(SyncModelMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = FocusGroupItemManager()
 
+    def __str__(self):
+        return self.potential_subject.subject_identifier
+
     def natural_key(self):
-        return (self.focus_group, self.potential_subject.subject_identifier)
+        return self.focus_group.natural_key() + self.potential_subject.natural_key()
+    natural_key.dependencies = ['bcpp_interview.focusgroup', 'bcpp_interview.potentialsubject']
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -343,7 +378,7 @@ class BaseInterview(SyncModelMixin, BaseUuidModel):
         super(BaseInterview, self).save(*args, **kwargs)
 
     def natural_key(self):
-        return self.reference
+        return (self.reference, )
 
     class Meta:
         abstract = True
@@ -353,17 +388,21 @@ class Interview(BaseInterview):
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
+    history = SyncHistoricalRecords()
+
+    objects = InterviewManager()
+
     def __str__(self):
         return self.potential_subject.subject_identifier
 
-    history = AuditTrail()
-
-    objects = InterviewManager()
+    def natural_key(self):
+        return (self.reference, )
 
     class Meta:
         app_label = 'bcpp_interview'
         get_latest_by = 'interview_datetime'
         verbose_name = 'In-depth Interview'
+        unique_together = ('reference', 'potential_subject')
 
 
 class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
@@ -372,7 +411,7 @@ class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
         max_length=50,
         unique=True)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = GroupDiscussionLabelManager()
 
@@ -380,7 +419,7 @@ class GroupDiscussionLabel(SyncModelMixin, BaseUuidModel):
         return self.discussion_label
 
     def natural_key(self):
-        return self.discussion_label
+        return (self.discussion_label, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -400,12 +439,15 @@ class GroupDiscussion(BaseInterview):
         blank=True,
         null=True)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = InterviewManager()
 
     def __str__(self):
         return self.focus_group.reference
+
+    def natural_key(self):
+        return (self.reference, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -423,9 +465,12 @@ class InterviewRecording(SyncModelMixin, RecordingModelMixin, BaseUuidModel):
         default=NO,
         help_text='Indicate if the subject has agreed that this recording may be used for analysis')
 
-    history = AuditTrail()
-
     objects = RecordingManager()
+
+    history = SyncHistoricalRecords()
+
+    def natural_key(self):
+        return (self.sound_filename, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -443,9 +488,12 @@ class GroupDiscussionRecording(SyncModelMixin, RecordingModelMixin, BaseUuidMode
         default=NO,
         help_text='Indicate if the group members have agreed that this recording may be used for analysis')
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = RecordingManager()
+
+    def natural_key(self):
+        return (self.sound_filename, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -456,8 +504,6 @@ class GroupDiscussionRecording(SyncModelMixin, RecordingModelMixin, BaseUuidMode
 class SubjectLoss(SyncModelMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
-
-    registered_subject = models.ForeignKey(RegisteredSubject, editable=False)
 
     subject_identifier = models.CharField(
         max_length=25,
@@ -478,7 +524,7 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
         null=True
     )
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = SubjectLossManager()
 
@@ -491,7 +537,7 @@ class SubjectLoss(SyncModelMixin, BaseUuidModel):
         super(SubjectLoss, self).save(*args, **kwargs)
 
     def natural_key(self):
-        return self.subject_identifier
+        return (self.subject_identifier, )
 
     class Meta:
         app_label = 'bcpp_interview'
@@ -507,12 +553,14 @@ class SubjectLocation(MapperModelMixin, BaseUuidModel):
     community = models.CharField(
         max_length=25)
 
+    objects = SubjectLocationManager()
+
     def __str__(self):
         return '{} {} (latitude={}, longitude={})'.format(
             self.subject_identifier, self.community, self.point.latitude, self.point.longitude)
 
     def natural_key(self):
-        return self.subject_identifier
+        return (self.subject_identifier, )
 
     def save(self, *args, **kwargs):
         self.map_area = self.community.replace(' ', '_').lower()
@@ -546,10 +594,11 @@ class RawData(BaseUuidModel):
 
     identity = IdentityField(null=True)
 
+    first_name = FirstnameField(null=True)
+
     last_name = LastnameField(null=True)
 
-    pair = models.CharField(
-        max_length=25,
+    pair = models.IntegerField(
         null=True)
 
     community = models.CharField(
@@ -667,6 +716,76 @@ class RawData(BaseUuidModel):
         null=True)
 
     dob = models.CharField(
+        max_length=25,
+        null=True)
+
+    clinic_receiving_from_t1 = models.CharField(
+        max_length=50,
+        null=True)
+
+    on_arv_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    keepme = models.CharField(
+        max_length=25,
+        null=True)
+
+    keepme_bhs = models.CharField(
+        max_length=25,
+        null=True)
+
+    keepme_ahs = models.CharField(
+        max_length=25,
+        null=True)
+
+    pims_reg_date = models.CharField(
+        max_length=25,
+        null=True)
+
+    pims_art_date = models.CharField(
+        max_length=25,
+        null=True)
+
+    currently_pregnant = models.CharField(
+        max_length=25,
+        null=True)
+
+    visit_date_t0 = models.CharField(
+        max_length=25,
+        null=True)
+
+    visit_date_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    ever_taken_arv_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    first_arv_t1 = models.CharField(
+        max_length=25,
+        null=True)
+
+    post_t1_initiate = models.IntegerField(
+        null=True)
+
+    plot_identifier = models.CharField(
+        max_length=25,
+        null=True)
+
+    post_t0_link = models.IntegerField(
+        null=True)
+
+    category = models.CharField(
+        max_length=25,
+        null=True)
+
+    sub_category = models.CharField(
+        max_length=25,
+        null=True)
+
+    source = models.CharField(
         max_length=25,
         null=True)
 

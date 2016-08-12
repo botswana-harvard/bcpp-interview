@@ -1,21 +1,22 @@
 from django.db import models
-from simple_history.models import HistoricalRecords as AuditTrail
-from edc_call_manager.models import CallModelMixin, LogModelMixin, LogEntryModelMixin
-from edc_call_manager.constants import NO_CONTACT
-from edc_base.model.models.base_uuid_model import BaseUuidModel
-from edc_sync.models.sync_model_mixin import SyncModelMixin
-from edc_call_manager.managers import CallManager, LogManager, LogEntryManager
-
-from bcpp_interview.models import PotentialSubject
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
+from edc_sync.models import SyncHistoricalRecords
+
+from edc_base.model.models.base_uuid_model import BaseUuidModel
+from edc_call_manager.constants import NO_CONTACT
+from edc_call_manager.managers import CallManager, LogManager, LogEntryManager
+from edc_call_manager.model_mixins import CallModelMixin, LogModelMixin, LogEntryModelMixin
+from edc_sync.models.sync_model_mixin import SyncModelMixin
+
+from bcpp_interview.models import PotentialSubject
 
 
 class Call(SyncModelMixin, CallModelMixin, BaseUuidModel):
 
     potential_subject = models.ForeignKey(PotentialSubject)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = CallManager()
 
@@ -34,7 +35,7 @@ class Log(SyncModelMixin, LogModelMixin, BaseUuidModel):
 
     call = models.ForeignKey(Call)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = LogManager()
 
@@ -46,7 +47,7 @@ class LogEntry(SyncModelMixin, LogEntryModelMixin, BaseUuidModel):
 
     log = models.ForeignKey(Log)
 
-    history = AuditTrail()
+    history = SyncHistoricalRecords()
 
     objects = LogEntryManager()
 

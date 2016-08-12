@@ -2,24 +2,26 @@ import asyncio
 import pandas as pd
 import json
 import pytz
+
 from datetime import date, datetime
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
+
+from edc_base.views import EdcBaseViewMixin
 from edc_constants.constants import CLOSED, NO, YES
 from edc_sync.models.outgoing_transaction import OutgoingTransaction
-
-from call_manager.models import Call
 
 from ..models import PotentialSubject, InterviewRecording, GroupDiscussionRecording
 
 tz = pytz.timezone(settings.TIME_ZONE)
 
 
-class StatisticsView(TemplateView):
-    template_name = 'home.html'
+class StatisticsView(EdcBaseViewMixin, TemplateView):
+    template_name = 'bcpp_interview/home.html'
 
     def __init__(self):
         self._response_data = {}
@@ -40,14 +42,6 @@ class StatisticsView(TemplateView):
             'not_interviewed',
             'pending_transactions',
             'potential_subjects']
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(
-            title=settings.PROJECT_TITLE,
-            project_name=settings.PROJECT_TITLE,
-        )
-        return context
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -78,7 +72,8 @@ class StatisticsView(TemplateView):
     @asyncio.coroutine
     def contact_data(self, future):
         response_data = {}
-        calls = Call.objects.filter(call_attempts__gte=1)
+        app_config = django_apps.get_app_config('edc_call_manager')
+        calls = app_config.call_model.objects.filter(call_attempts__gte=1)
         if calls:
             response_data.update(contacted_retry=calls.exclude(call_status=CLOSED).count())
             calls.filter(**self.modified_option)

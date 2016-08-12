@@ -8,7 +8,7 @@ from edc_base.modeladmin.mixins import (
     ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin, ModelAdminModelRedirectMixin)
 from edc_call_manager.admin import (
     ModelAdminCallMixin, ModelAdminLogMixin, ModelAdminLogEntryMixin,
-    ModelAdminLogEntryInlineMixin, call_manager_admin)
+    ModelAdminLogEntryInlineMixin, edc_call_manager_admin)
 
 from .models import Call, Log, LogEntry
 
@@ -23,7 +23,7 @@ class ModelAdminStackedInlineMixin(ModelAdminAuditFieldsMixin, StackedInline):
     pass
 
 
-@admin.register(Call, site=call_manager_admin)
+@admin.register(Call, site=edc_call_manager_admin)
 class CallAdmin(BaseModelAdmin, ModelAdminCallMixin, SimpleHistoryAdmin):
 
     subject_app = 'bcpp_interview'
@@ -46,16 +46,14 @@ class LogEntryInlineAdmin(ModelAdminLogEntryInlineMixin, ModelAdminStackedInline
     model = LogEntry
 
 
-@admin.register(Log, site=call_manager_admin)
+@admin.register(Log, site=edc_call_manager_admin)
 class LogAdmin(BaseModelAdmin, ModelAdminModelRedirectMixin, ModelAdminLogMixin, SimpleHistoryAdmin):
-
-    # inlines = [LogEntryInlineAdmin]
 
     list_filter = ('call__potential_subject__category', 'call__potential_subject__sub_category',
                    'call__potential_subject__community')
 
 
-@admin.register(LogEntry, site=call_manager_admin)
+@admin.register(LogEntry, site=edc_call_manager_admin)
 class LogEntryAdmin(BaseModelAdmin, ModelAdminLogEntryMixin, SimpleHistoryAdmin):
 
     list_filter = ('log__call__potential_subject__category', 'log__call__potential_subject__sub_category',

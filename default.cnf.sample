@@ -1,0 +1,10 @@
+# my.cnf
+# Be sure to create the database with CHARACTER SET = utf8
+# e.g. create database edc CHARACTER SET utf8;
+# place this file in <project>/etc or wherever you specified in settings.py
+[client]
+database = edc
+user = <user>
+password = <password>
+default-character-set = utf8
+init_command = 'SET default_storage_engine=INNODB'

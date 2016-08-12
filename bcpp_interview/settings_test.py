@@ -12,11 +12,11 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import sys
-import configparser
 from unipath import Path
 from django.utils import timezone
 from bcpp_interview.logging import LOGGING
 
+from bcpp_interview.config import CORS_ORIGIN_WHITELIST, EDC_SYNC_ROLE
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 ETC_DIR = os.path.join(BASE_DIR.ancestor(1), 'etc')
@@ -29,8 +29,9 @@ with open(os.path.join(ETC_DIR, 'secret_key.txt')) as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'bcpp-interview.bhp.org.bw', 'www.bcpp-interview.bhp.org.bw']
+DEBUG = True
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_revision',
     'simple_history',
     'rest_framework',
     'rest_framework.authtoken',
@@ -47,20 +49,19 @@ INSTALLED_APPS = [
     'django_js_reverse',
     'corsheaders',
     'crispy_forms',
-    'django_revision.apps.AppConfig',
-    'django_crypto_fields.apps.AppConfig',
-    'edc_content_type_map.apps.AppConfig',
+    'edc_base',
+    'edc_call_manager.apps.EdcCallManagerAppConfig',
+    'edc_content_type_map.apps.EdcContentTypeAppConfig',
     'edc_device',
-    'edc_identifier.apps.AppConfig',
-    'edc_locator.apps.AppConfig',
-    'edc_audio_recording.apps.AppConfig',
-    'call_manager.apps.AppConfig',
-    'call_manager.apps.EdcCallManagerAppConfig',
-    'bcpp_map.apps.AppConfig',
-    'bcpp_interview.apps.EdcMapAppConfig',
-    'bcpp_interview.apps.EdcBaseAppConfig',
+    'edc_identifier',
+    'edc_map',
+    'edc_locator',
+    'call_manager',
+    'edc_audio_recording.apps.EdcAudioRecordingAppConfig',
+    'bcpp_interview.apps.DjangoCryptoFieldsAppConfig',
     'bcpp_interview.apps.EdcSyncAppConfig',
     'bcpp_interview.apps.EdcConsentAppConfig',
+    'bcpp_interview.apps.BcppMapAppConfig',
     'bcpp_interview.apps.BcppInterviewAppConfig',
 ]
 
@@ -102,25 +103,12 @@ WSGI_APPLICATION = 'bcpp_interview.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-if 'test' in sys.argv:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR.ancestor(1), 'db.sqlite3'),
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR.ancestor(1), 'db.sqlite3'),
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'OPTIONS': {
-                'read_default_file': os.path.join(ETC_DIR, 'default.cnf'),
-            },
-            'HOST': '',
-            'PORT': '',
-            'ATOMIC_REQUESTS': True,
-        }
-    }
+}
 
 # ssh -f -N -L 10000:127.0.0.1:5432 bcpp@getresults.bhp.org.bw
 # DATABASES = {
@@ -182,7 +170,7 @@ MEDIA_URL = '/media/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 
@@ -195,31 +183,28 @@ LANGUAGES = (
     ('en', 'English'),
 )
 
-# PROJECT_TITLE = 'BCPP Interview'
-# INSTITUTION = 'Botswana-Harvard AIDS Institute Partnership'
-# PROTOCOL_REVISION = '0.1dev'
-
+PROJECT_TITLE = 'Botswana Combination Prevention Project'
+INSTITUTION = 'Botswana-Harvard AIDS Institute Partnership'
+PROTOCOL_REVISION = '0.1dev'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 DEVICE_ID = '15'
 SERVER_DEVICE_ID_LIST = ['99']
 UPLOAD_FOLDER = os.path.join(MEDIA_ROOT, 'upload')
+PROJECT_IDENTIFIER_PREFIX = '066'
 CURRENT_SURVEY = 'bcpp-year-1'
 CURRENT_COMMUNITY = None
 
-try:
-    config = configparser.ConfigParser()
-    config.read(os.path.join(ETC_DIR, 'edc_sync.ini'))
-    CORS_ORIGIN_WHITELIST = tuple(config['corsheaders'].get('cors_origin_whitelist').split(','))
-    CORS_ORIGIN_ALLOW_ALL = config['corsheaders'].getboolean('cors_origin_allow_all', True)
-except KeyError:
-    CORS_ORIGIN_WHITELIST = None
-    CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = CORS_ORIGIN_WHITELIST
 REST_FRAMEWORK = {
     'PAGE_SIZE': 1,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
+EDC_SYNC_ROLE = EDC_SYNC_ROLE
+
+APP_LABEL = 'bcpp_interview'
+
 
 # SECURE_CONTENT_TYPE_NOSNIFF = True
 # SECURE_BROWSER_XSS_FILTER = True

@@ -5,8 +5,8 @@ from edc_audio_recording.admin import recording_admin, ModelAdminRecordingMixin,
 from edc_base.modeladmin.mixins import (
     ModelAdminModelRedirectMixin, ModelAdminChangelistModelButtonMixin,
     ModelAdminRedirectMixin, ModelAdminFormInstructionsMixin, ModelAdminFormAutoNumberMixin,
-    ModelAdminAuditFieldsMixin, ModelAdminChangelistButtonMixin)
-from edc_consent.admin.mixins import ModelAdminConsentMixin
+    ModelAdminAuditFieldsMixin)
+from edc_consent.admin import ModelAdminConsentMixin
 from edc_locator.admin import ModelAdminLocatorMixin
 from simple_history.admin import SimpleHistoryAdmin
 from .actions import create_focus_group, add_to_focus_group_discussion
@@ -37,8 +37,6 @@ class ModelAdminPotentialSubjectRedirectMixin(ModelAdminModelRedirectMixin):
 
 @admin.register(RawData)
 class RawDataAdmin(admin.ModelAdmin):
-
-    # exclude = ['last_name', 'identity']
 
     readonly_fields = ['subject_identifier'] + sorted([f.name for f in RawData._meta.fields if f.name not in ['last_name', 'identity', 'subject_identifier']])
 
@@ -439,7 +437,7 @@ class PotentialSubjectAdmin(ModelAdminRedirectMixin, ModelAdminChangelistModelBu
         'region': admin.VERTICAL
     }
 
-    search_fields = ['identity', 'subject_identifier', 'registered_subject__identity']
+    search_fields = ['identity', 'subject_identifier', ]
 
     readonly_fields = ['subject_identifier', 'identity', 'category', 'sub_category', 'community', 'region']
 
@@ -556,4 +554,4 @@ class SubjectLossAdmin(BaseModelAdmin):
 
     radio_fields = {'reason': admin.VERTICAL}
 
-    search_fields = ['subject_identifier', 'registered_subject__identity']
+    search_fields = ['subject_identifier', ]

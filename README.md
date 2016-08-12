@@ -18,19 +18,84 @@ Uses the python module `sounddevice` for audio recordings.
 
 On MacOSX:
 
-    brew install pkg-config libffi libsndfile
+    brew update
+    brew install pkg-config libffi libsndfile nginx
 
 On Ubuntu:
 
-    sudo apt-get install libportaudio2 python3-cffi libffi-dev
+    sudo apt-get install libportaudio2 python3-cffi libffi-dev gunicorn nginx
+
+Make a virtualenv (see `virtualenvwrapper`):
+
+    mkvirtualenv venv -p /usr/local/bin/python3 --no-site-packages
+    workon venv
 
 Let say you start in a `source` folder, e.g. `~/source`:
 
-    cd ~/source
-    git clone <this repo>
-    cd ~/bcpp-interview
-    pip install -r requirements.txt
+    workon venv
+    $(venv) cd ~/source
+    $(venv) git clone <this repo>
+    $(venv) cd ~/bcpp-interview
+    $(venv) pip install -r requirements.txt
+
+Or you could `pip install bcpp_interview` into a new project instead of cloning it:
+
+    workon venv
+    $(venv) pip install git+https://github.com/botswana-harvard/bcpp-interview@develop#egg=bcpp_interview
+    $(venv) pip install -r ~/.virtualenv/venv/lib/python3.5/site-packages/bcpp_interview/requirements.txt
+
+... and then set up a new project:
     
+    workon venv
+    $(venv) cd ~/source
+    $(venv) django-admin startproject server
+    $(venv) cd server
+
+... edit the settings file to look like this:
+
+    import os
+    from bcpp_interview.settings import *
+    from bcpp_interview.settings import INSTALLED_APPS
+    
+    BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
+    KEY_PATH = os.path.join(BASE_DIR.ancestor(1), 'crypto_fields')
+    INSTALLED_APPS = INSTALLED_APPS + ['client']
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'OPTIONS': {
+                'read_default_file': os.path.join(BASE_DIR.ancestor(1), 'etc', 'default.cnf'),
+            },
+            'HOST': '',
+            'PORT': '',
+            'ATOMIC_REQUESTS': True,
+        }
+    }
+    STATIC_ROOT = BASE_DIR.child('static')
+    MEDIA_ROOT = BASE_DIR.child('media')
+    UPLOAD_FOLDER = os.path.join(MEDIA_ROOT, 'upload')
+
+... create folders:
+
+    cd ~/source/server
+    mkdir etc
+    mkdir crypto_fields
+    mkdir -p server/media/edc_map
+    mkdir -p server/media/upload
+    touch etc/default.cnf
+
+... a `default.cnf` might look like this:
+
+    [client]
+    database = edc
+    user = <account>
+    password = <password>
+    default-character-set = utf8
+    init_command = 'SET default_storage_engine=INNODB'
+
+... encryption keys belong in folder `crypto_fields` or some other folder. Keys will be created for you if the folder is empty on the first boot.
+
+
 For a test environment:
 
     python manage.py load_test_data
@@ -56,6 +121,83 @@ For the production environment:
     # download images from google maps
 
     python manage.py fetch_map_images bcpp_interview.subjectlocation 25
+
+### gunicorn / nginx
+
+Activate the virtualenv and install `gunicorn`.
+
+    workon bcpp-interview
+    pip install gunicorn
+    deactivate
+    workon bcpp-interview
+
+In settings set DEBUG=False and update ALLOW_HOSTS accordingly:
+
+    DEBUG = False
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+Collect static files and build `js_reverse` js file:
+
+    cd ~/bcpp-interview
+    python manage.py collectstatic
+    python manage.py collectstatic_js_reverse
+
+Edit paths in `gunicorn.conf.py` to reflect your installation.
+
+    cd ~/bcpp-interview
+    nano gunicorn.conf.py
+
+Start `gunicorn` in daemon mode from same folder where `manage.py` resides:
+
+    cd ~/bcpp-interview
+    gunicorn -c gunicorn.conf.py bcpp_interview.wsgi --pid ~/bcpp-interview/logs/gunicorn.pid --daemon
+
+This should return nothing. If you get `connection refused`, check your paths in the conf file.:
+
+    curl http://127.0.0.1:9000
+    
+Now for `nginx`, on macosx, make `sites-available` and `sites-enabled` folders (they should already exist on Ubuntu):
+
+    sudo mkdir /usr/local/etc/nginx/sites-available/
+    sudo mkdir /usr/local/etc/nginx/sites-enabled/
+
+Copy nginx.conf file to `sites-available`. For example:
+
+    cd ~/bcpp-interview
+    sudo cp ~/bcpp-interview/nginx.conf /usr/local/etc/nginx/sites-available/bcpp-interview.conf
+
+ensure `/usr/local/etc/nginx/nginx.conf` reads from `sites-enabled`:
+
+    sudo nano /usr/local/etc/nginx/nginx.conf
+
+in section `http {}` add this line:    
+
+    http{
+
+        include /usr/local/etc/nginx/sites-enabled/*;
+        ...
+        ...
+    }
+
+Edit the paths in the `bcpp-interview.conf` file.
+
+    sudo nano /usr/local/etc/nginx/sites-available/bcpp-interview.conf
+
+Link to `sites-enabled`. (Remove `default` if it is there):
+
+    sudo ln -s /usr/local/etc/nginx/sites-available/bcpp-interview.conf /usr/local/etc/nginx/sites-enabled/bcpp-interview.conf
+    
+Test `nginx`:
+    
+    sudo nginx -t
+    
+If no errors, start `nginx`:
+
+    sudo nginx
+    
+Browse:
+
+    http://localhost
 
 ### Usage
 #### Consent potential subjects

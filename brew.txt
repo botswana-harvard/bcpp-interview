@@ -1,4 +1,6 @@
 # see python soundevice, requires:
 
+brew update
 brew install pkg-config libffi
 brew install libsndfile
+brew install nginx

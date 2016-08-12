@@ -5,9 +5,11 @@ either you are on the bcpp server console or have a bcpp virtualenv and tunnel t
 
 To get locator data from bcpp:
 
-    from bcpp_interview import get_locator_dataframe, identity, decrypt_locator
-    df = get_locator_dataframe()
-    decrypt_locator(df)  # takes a long time
+    from bcpp_interview import get_locator_dataframe, identity, decrypt_locator, get_consent_dataframe, decrypt_consent
+    df_locator = get_locator_dataframe()
+    decrypt_locator(df_locator)  # takes a long time
+    df_consent = get_consent_dataframe()
+    decrypt_consent(df_consent)  # takes a long time
 
 """
 
@@ -20,6 +22,9 @@ from M2Crypto.RSA import RSAError
 
 consent_columns = {
     'subject_identifier': 'subject_identifier',
+    'first_name': 'first_name',
+    'last_name': 'last_name',
+    'identity': 'identity',
     'gender': 'gender',
     'dob': 'dob',
     'household_member__household_structure__household__plot__plot_identifier': 'plot_identifier',
@@ -61,8 +66,10 @@ locator_columns = {
 
 consent_encrypted_columns = {
     'first_name': ['rsa', 'local'],
-    'last_name': ['rsa', 'local'],
+    'last_name': ['rsa', 'restricted'],
     'identity': ['rsa', 'restricted'],
+    'gps_target_lat': ['rsa', 'local'],
+    'gps_target_lon': ['rsa', 'local'],
 }
 
 locator_encrypted_columns = {
