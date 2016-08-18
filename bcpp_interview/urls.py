@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^edc-audio-recording/', include('edc_audio_recording.urls', 'edc-audio-recording')),
     url(r'^edc-consent/', include('edc_consent.urls', 'edc-consent')),
     url(r'^edc-sync/', include('edc_sync.urls', 'edc-sync')),
+    url(r'^edc-sync-files/', include('edc_sync_files.urls', 'edc-sync-files')),
     url(r'^map/$', RedirectView.as_view(pattern_name='home_url')),
     url(r'^map/(?P<map_area>\w+)/(?P<subject_identifier>[0-9\-]{14})/',
         LocationView.as_view(), name='location_url'),

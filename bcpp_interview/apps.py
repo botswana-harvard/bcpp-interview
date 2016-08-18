@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from django.apps import AppConfig
@@ -8,6 +9,7 @@ from edc_consent.apps import EdcConsentAppConfig as EdcConsentAppConfigParent
 from edc_map.apps import AppConfig as EdcMapAppConfigParent
 from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
 from edc_sync.constants import SERVER, CLIENT
+from edc_sync_files.apps import AppConfig as EdcSyncFileAppConfigParent
 
 
 class EdcBaseAppConfig(EdcBaseAppConfigParent):
@@ -44,4 +46,16 @@ class EdcConsentAppConfig(EdcConsentAppConfigParent):
 
 
 class EdcSyncAppConfig(EdcSyncAppConfigParent):
+    role = SERVER
+
+
+class EdcSyncFileAppConfig(EdcSyncFileAppConfigParent):
+
+    # these attrs will be overwritten with values in edc_sync.ini, see ready()
+    config_attrs = {
+        'edc_sync_files': ['user', 'role', 'device_ip', 'source_folder', 'destination_folder'],
+        'corsheaders': [('cors_origin_whitelist', tuple), ('cors_origin_allow_all', bool)]
+    }
+    edc_sync_upload = os.path.join(settings.BASE_DIR, "media", "upload")
+    media_folders = [edc_sync_upload]
     role = SERVER
