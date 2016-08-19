@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.views import static
 from django.conf.urls import url, include
@@ -46,7 +47,7 @@ urlpatterns = [
     url(r'^map/$', RedirectView.as_view(pattern_name='home_url')),
     url(r'^map/(?P<map_area>\w+)/(?P<subject_identifier>[0-9\-]{14})/',
         LocationView.as_view(), name='location_url'),
-    url(r'^edc/', include('edc_base.urls')),
+    url(r'^edc/', include('edc_base.urls', 'edc-base')),
     url(r'^admin/$', RedirectView.as_view(pattern_name='home_url')),
     url(r'^admin/', crypto_fields_admin.urls),
     url(r'^admin/', edc_call_manager_admin.urls),
