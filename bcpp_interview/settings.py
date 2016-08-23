@@ -29,7 +29,7 @@ with open(os.path.join(ETC_DIR, 'secret_key.txt')) as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False 
+DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'bcpp-interview.bhp.org.bw', 'www.bcpp-interview.bhp.org.bw']
 # Application definition
 
@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'django_revision.apps.AppConfig',
     'django_crypto_fields.apps.AppConfig',
     'edc_content_type_map.apps.AppConfig',
-    'edc_device',
     'edc_identifier.apps.AppConfig',
     'edc_locator.apps.AppConfig',
     'edc_audio_recording.apps.AppConfig',
@@ -60,9 +59,10 @@ INSTALLED_APPS = [
     'bcpp_interview.apps.EdcMapAppConfig',
     'bcpp_interview.apps.EdcBaseAppConfig',
     'bcpp_interview.apps.EdcSyncAppConfig',
-    'bcpp_interview.apps.EdcSyncFileAppConfig',
     'bcpp_interview.apps.EdcConsentAppConfig',
     'bcpp_interview.apps.BcppInterviewAppConfig',
+    'bcpp_interview.apps.EdcSyncFilesAppConfig',
+    'bcpp_interview.apps.EdcDeviceAppConfig',
 ]
 
 MIDDLEWARE_CLASSES = [
