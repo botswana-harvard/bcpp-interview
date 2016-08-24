@@ -5,7 +5,7 @@ from django.apps import AppConfig
 from django.conf import settings
 
 from edc_base.apps import AppConfig as EdcBaseAppConfigParent
-from edc_consent.apps import EdcConsentAppConfig as EdcConsentAppConfigParent
+from edc_consent.apps import AppConfig as EdcConsentAppConfigParent
 from edc_map.apps import AppConfig as EdcMapAppConfigParent
 from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
 from edc_sync.constants import SERVER, CLIENT
