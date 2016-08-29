@@ -1,10 +1,11 @@
 from django import forms
 from django.forms import ValidationError
 
-from edc_consent.forms.base_consent_form import BaseConsentForm
+from edc_consent.form_mixins import ConsentFormMixin
 from edc_constants.constants import NOT_APPLICABLE
 
 from .models import NurseConsent, SubjectConsent, PotentialSubject, INITIATED
+from edc_base.form.old_forms.base_model_form import BaseModelForm
 
 
 class PotentialSubjectForm(forms.ModelForm):
@@ -22,7 +23,7 @@ class PotentialSubjectForm(forms.ModelForm):
         fields = '__all__'
 
 
-class SubjectConsentForm(BaseConsentForm):
+class SubjectConsentForm(ConsentFormMixin, BaseModelForm):
 
     def clean(self):
         cleaned_data = super(SubjectConsentForm, self).clean()
@@ -34,7 +35,7 @@ class SubjectConsentForm(BaseConsentForm):
         exclude = ['study_site']
 
 
-class NurseConsentForm(BaseConsentForm):
+class NurseConsentForm(ConsentFormMixin, BaseModelForm):
 
     class Meta:
         model = NurseConsent
