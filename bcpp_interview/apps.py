@@ -10,7 +10,9 @@ from edc_map.apps import AppConfig as EdcMapAppConfigParent
 from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
 from edc_sync.constants import SERVER, CLIENT
 from edc_sync_files.apps import AppConfig as EdcSyncFileAppConfigParent
+
 from edc_device.apps import AppConfig as EdcDeviceAppConfigParent
+from edc_protocol.apps import AppConfig as EdcProtocolAppConfigParent
 
 
 class EdcBaseAppConfig(EdcBaseAppConfigParent):
@@ -66,3 +68,19 @@ class EdcDeviceAppConfig(EdcDeviceAppConfigParent):
     device_id = '99'
     server_id_list = [97, 98, 99]
     middleman_id_list = [95, 96]
+
+
+class EdcProtocolAppConfig(EdcProtocolAppConfigParent):
+    name = 'edc_protocol'
+    verbose_name = 'Edc Protocol'
+
+    # set with example defaults, you will need to change from your project
+    protocol = 'BHP066'
+    protocol_number = '066'
+    protocol_name = 'BCPP Interview'
+    protocol_title = 'BCPP Interview'
+
+    # these attributes are used by the EnrollmentCapMixin
+    subject_types = {'subject': 'Research Subjects'}  # {key: verbose_name}
+    enrollment_caps = {'example.enrollmentmodel': ('subject', -1)}  # {label_lower: (key, count)}
+    # study_open_datetime = timezone.now() - relativedelta(days=25)
