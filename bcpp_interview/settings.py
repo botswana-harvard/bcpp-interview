@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'bcpp_interview.apps.BcppInterviewAppConfig',
     'bcpp_interview.apps.EdcSyncFilesAppConfig',
     'bcpp_interview.apps.EdcDeviceAppConfig',
+    'bcpp_interview.apps.EdcProtocolAppConfig',
 ]
 
 MIDDLEWARE_CLASSES = [

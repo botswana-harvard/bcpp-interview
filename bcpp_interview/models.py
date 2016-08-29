@@ -10,10 +10,10 @@ from django_crypto_fields.fields import (
 from edc_audio_recording.models import RecordingModelMixin, RecordingManager
 from edc_base.model.models.base_uuid_model import BaseUuidModel
 from edc_call_manager.mixins import CallLogLocatorMixin
-from edc_consent.models import BaseConsent, ConsentManager
-from edc_consent.models.fields import (
+from edc_consent.model_mixins import ConsentModelMixin, ConsentManager
+from edc_consent.field_mixins import (
     ReviewFieldsMixin, PersonalFieldsMixin, VulnerabilityFieldsMixin, CitizenFieldsMixin)
-from edc_consent.models.fields.bw import IdentityFieldsMixin
+from edc_consent.field_mixins.bw import IdentityFieldsMixin
 from edc_constants.choices import YES_NO, GENDER
 from edc_constants.constants import NO, NOT_APPLICABLE, MALE, FEMALE
 from edc_identifier.subject.classes import SubjectIdentifier
@@ -81,7 +81,7 @@ def interview_identifier():
     return InterviewIdentifier().identifier
 
 
-class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
+class NurseConsent(SyncModelMixin, ConsentModelMixin, IdentityFieldsMixin, ReviewFieldsMixin,
                    PersonalFieldsMixin, CitizenFieldsMixin, VulnerabilityFieldsMixin, BaseUuidModel):
 
     MIN_AGE_OF_CONSENT = 18
@@ -113,7 +113,7 @@ class NurseConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewField
             self.subject_identifier = SubjectIdentifier(site_code='99').get_identifier()
         super(NurseConsent, self).save(*args, **kwargs)
 
-    class Meta(BaseConsent.Meta):
+    class Meta(ConsentModelMixin.Meta):
         app_label = 'bcpp_interview'
 
 
@@ -223,7 +223,7 @@ class PotentialSubject(BaseUuidModel):
         app_label = 'bcpp_interview'
 
 
-class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFieldsMixin,
+class SubjectConsent(SyncModelMixin, ConsentModelMixin, IdentityFieldsMixin, ReviewFieldsMixin,
                      PersonalFieldsMixin, CitizenFieldsMixin, VulnerabilityFieldsMixin, BaseUuidModel):
 
     MIN_AGE_OF_CONSENT = 18
@@ -263,7 +263,7 @@ class SubjectConsent(SyncModelMixin, BaseConsent, IdentityFieldsMixin, ReviewFie
                 'Potential subject with identity \'{}\' was not found.'.format(identity))
         return potential_subject
 
-    class Meta(BaseConsent.Meta):
+    class Meta(ConsentModelMixin.Meta):
         app_label = 'bcpp_interview'
 
 
