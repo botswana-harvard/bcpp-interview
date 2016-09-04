@@ -49,12 +49,13 @@ class EdcConsentAppConfig(EdcConsentAppConfigParent):
 
 
 class EdcSyncAppConfig(EdcSyncAppConfigParent):
+    edc_sync_files_using = True
     role = SERVER
 
 
 class EdcSyncFilesAppConfig(EdcSyncFileAppConfigParent):
 
-    # these attrs will be overwritten with values in edc_sync.ini, see ready()
+    # these attrs will be overwritten with values in edc_sync.ini, see ready()'
     config_attrs = {
         'edc_sync_files': ['user', 'role', 'device_ip', 'source_folder', 'destination_folder'],
         'corsheaders': [('cors_origin_whitelist', tuple), ('cors_origin_allow_all', bool)]
