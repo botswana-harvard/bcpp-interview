@@ -13,6 +13,7 @@ from edc_sync_files.apps import AppConfig as EdcSyncFileAppConfigParent
 
 from edc_device.apps import AppConfig as EdcDeviceAppConfigParent
 from edc_protocol.apps import AppConfig as EdcProtocolAppConfigParent
+from edc_consent.consent_config import ConsentConfig
 
 
 class EdcBaseAppConfig(EdcBaseAppConfigParent):
@@ -35,17 +36,38 @@ class EdcMapAppConfig(EdcMapAppConfigParent):
 
 
 class EdcConsentAppConfig(EdcConsentAppConfigParent):
-    consent_type_setup = [
-        {'app_label': 'bcpp_interview',
-         'model_name': 'subjectconsent',
-         'start_datetime': datetime(2016, 5, 1, 0, 0, 0),
-         'end_datetime': datetime(2017, 5, 1, 0, 0, 0),
-         'version': '1'},
-        {'app_label': 'bcpp_interview',
-         'model_name': 'nurseconsent',
-         'start_datetime': datetime(2016, 5, 1, 0, 0, 0),
-         'end_datetime': datetime(2017, 5, 1, 0, 0, 0),
-         'version': '1'}]
+
+    consent_configs = [
+        ConsentConfig(
+            'bcpp_interview.subjectconsent',
+            version='1',
+            start=datetime(2016, 5, 1, 0, 0, 0),
+            end=datetime(2016, 12, 1, 0, 0, 0),
+            age_min=16,
+            age_is_adult=18,
+            age_max=64,
+            gender=['M', 'F']),
+        ConsentConfig(
+            'bcpp_interview.nurseconsent',
+            version='2',
+            start=datetime(2017, 1, 1, 0, 0, 0),
+            end=datetime(2017, 5, 1, 0, 0, 0),
+            age_min=16,
+            age_is_adult=18,
+            age_max=64,
+            gender=['M', 'F'])
+    ]
+#     consent_type_setup = [
+#         {'app_label': 'bcpp_interview',
+#          'model_name': 'subjectconsent',
+#          'start_datetime': datetime(2016, 5, 1, 0, 0, 0),
+#          'end_datetime': datetime(2017, 5, 1, 0, 0, 0),
+#          'version': '1'},
+#         {'app_label': 'bcpp_interview',
+#          'model_name': 'nurseconsent',
+#          'start_datetime': datetime(2016, 5, 1, 0, 0, 0),
+#          'end_datetime': datetime(2017, 5, 1, 0, 0, 0),
+#          'version': '1'}]
 
 
 class EdcSyncAppConfig(EdcSyncAppConfigParent):
