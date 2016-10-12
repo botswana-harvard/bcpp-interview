@@ -29,7 +29,7 @@ class CallAdmin(BaseModelAdmin, ModelAdminCallMixin, SimpleHistoryAdmin):
     subject_app = 'bcpp_interview'
     subject_model = 'potentialsubject'
 
-    list_display_pos = ((1, 'map_button'), (7, 'log_entry_appt_date'),)
+    list_display_pos = ((1, 'map_button'), (6, 'log_entry_appt_date'),)
 
     list_filter = ('potential_subject__category', 'potential_subject__sub_category', 'potential_subject__community')
 
