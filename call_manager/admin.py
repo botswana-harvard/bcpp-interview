@@ -29,9 +29,17 @@ class CallAdmin(BaseModelAdmin, ModelAdminCallMixin, SimpleHistoryAdmin):
     subject_app = 'bcpp_interview'
     subject_model = 'potentialsubject'
 
-    list_display_pos = ((1, 'map_button'), )
+    list_display_pos = ((1, 'map_button'), (7, 'log_entry_appt_date'),)
 
     list_filter = ('potential_subject__category', 'potential_subject__sub_category', 'potential_subject__community')
+
+    def log_entry_appt_date(self, obj):
+        log_entry = LogEntry.objects.filter(log__call=obj).order_by('-created').first()
+        if log_entry:
+            return '{}'.format(log_entry.appt_date)
+        else:
+            return ''
+    log_entry_appt_date.short_description = 'APPT_DATE'
 
     def map_button(self, obj):
         return self.button(
