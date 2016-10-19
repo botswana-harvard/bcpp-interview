@@ -12,3 +12,4 @@ errorlog = os.path.join(SOURCE_ROOT, 'bcpp-interview/logs/gunicorn-error.log')  
 accesslog = os.path.join(SOURCE_ROOT, 'bcpp-interview/logs/gunicorn-access.log')
 loglevel = 'debug'
 workers = 1  # the number of recommended workers is '2 * number of CPUs + 1'
+timeout = 300
